@@ -1,13 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Sistema de Assistência Técnica</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+
+        .card p {
+            color: #555;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 18px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .card a:hover {
+            background-color: #1d4ed8;
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <h1>Home</h1>
-    </div>
+
+    <header>
+        <h1>Sistema de Gestão Interna de Assistência Técnica</h1>
+        <p>Controle de ordens de serviço, equipamentos, estoque, usuários e relatórios</p>
+    </header>
+
+    <main>
+        <div class="cards">
+
+            <div class="card">
+                <h2>Ordem de Serviço e Equipamentos</h2>
+                <p>Cadastro e acompanhamento de equipamentos recebidos para manutenção.</p>
+                <a href="/ordem-servico">Acessar</a>
+            </div>
+
+            <div class="card">
+                <h2>Peças e Estoque</h2>
+                <p>Controle de peças disponíveis no sistema.</p>
+                <a href="/estoque">Acessar</a>
+            </div>
+
+            <div class="card">
+                <h2>Usuário e Login</h2>
+                <p>Controle de acesso dos usuários do sistema.</p>
+                <a href="#">Em desenvolvimento</a>
+            </div>
+
+            <div class="card">
+                <h2>Relatórios</h2>
+                <p>Visualização de relatórios internos da assistência técnica.</p>
+                <a href="#">Em desenvolvimento</a>
+            </div>
+
+        </div>
+    </main>
+
 </body>
 </html>
