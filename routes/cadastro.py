@@ -4,23 +4,15 @@ from database import conectar
 
 cadastro_bp = Blueprint("cadastro", __name__)
 
-@cadastro_bp.route("/cadastro")
-def listar_cadastros():
-    return render_template("gerenciar_clientes.html")
 
+# Página adicionar cliente
 @cadastro_bp.route("/clientes/novo")
 def pagina_adicionar_cliente():
     return render_template("adicionar_clientes.html")
 
 
-conexao = sqlite3.connect("database/sistema.db")
 
-cursor = conexao.cursor()
-
-#CRUD
-
-#CREATE
-
+# CREATE
 @cadastro_bp.route("/clientes/cadastrar", methods=["POST"])
 def cadastrar_cliente():
 
@@ -34,7 +26,9 @@ def cadastrar_cliente():
     cursor = conexao.cursor()
 
     cursor.execute("""
-        INSERT INTO clientes (nome, cpf, telefone, email, endereco)
+        INSERT INTO clientes
+        (nome, cpf, telefone, email, endereco)
+
         VALUES (?, ?, ?, ?, ?)
     """, (nome, cpf, telefone, email, endereco))
 
@@ -43,35 +37,71 @@ def cadastrar_cliente():
 
     return redirect("/cadastro")
 
+@cadastro_bp.route("/cadastro")
+def listar_cadastros():
 
+    conexao = conectar()
+    conexao.row_factory = sqlite3.Row
+    cursor = conexao.cursor()
 
-#READ
-def listar_clientes():
-    comando = f'SELECT * FROM clientes'
-    cursor.execute(comando)
-    resultados = cursor.fetchall()
+    cursor.execute("SELECT * FROM clientes")
+    clientes = cursor.fetchall()
 
-    for linha in resultados:
-        print(linha)
-
-    cursor.close()
     conexao.close()
 
-#UPDATE
+    return render_template(
+        "gerenciar_clientes.html",
+        clientes=clientes
+    )
 
-def atualizar_cliente():
-    nome = input("Digite o nome do cliente que deseja atualizar: ")
-    telefone = input("Digite o novo telefone do cliente: ")
-    endereco = input("Digite o novo endereço do cliente: ")
 
-    comando = f'UPDATE clientes SET telefone = "{telefone}", endereco = "{endereco}" WHERE nome = "{nome}"'
-    cursor.execute(comando)
+# Página editar cliente
+@cadastro_bp.route("/clientes/atualizar/<int:id>", methods=["GET"])
+def pagina_atualizar_cliente(id):
+    conexao = conectar()
+    conexao.row_factory = sqlite3.Row
+    cursor = conexao.cursor()
+
+    cursor.execute("SELECT * FROM clientes WHERE id = ?", (id,))
+    cliente = cursor.fetchone()
+
+    conexao.close()
+
+    return render_template("editar_clientes.html", cliente=cliente)
+
+
+# UPDATE
+@cadastro_bp.route("/clientes/atualizar/<int:id>", methods=["POST"])
+def atualizar_cliente(id):
+    nome = request.form["nome"]
+    cpf = request.form["cpf"]
+    telefone = request.form["telefone"]
+    email = request.form["email"]
+    endereco = request.form["endereco"]
+
+    conexao = conectar()
+    cursor = conexao.cursor()
+
+    cursor.execute("""
+        UPDATE clientes
+        SET nome = ?, cpf = ?, telefone = ?, email = ?, endereco = ?
+        WHERE id = ?
+    """, (nome, cpf, telefone, email, endereco, id))
+
     conexao.commit()
+    conexao.close()
 
-#DELETE
+    return redirect("/cadastro")
 
-def deletar_cliente():
-    nome = input("Digite o nome do cliente que deseja deletar: ") 
-    comando = f'DELETE FROM clientes WHERE nome = "{nome}"'
-    cursor.execute(comando)
+# DELETE
+@cadastro_bp.route("/clientes/excluir/<int:id>")
+def deletar_cliente(id):
+    conexao = conectar()
+    cursor = conexao.cursor()
+
+    cursor.execute("DELETE FROM clientes WHERE id = ?", (id,))
+
     conexao.commit()
+    conexao.close()
+
+    return redirect("/cadastro")

@@ -15,6 +15,7 @@ app.register_blueprint(ordem_servico_bp)
 # Registra o módulo cadastro
 app.register_blueprint(cadastro_bp)
 
+
 # Página inicial
 @app.route("/")
 def home():
