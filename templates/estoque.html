@@ -1,1 +1,32 @@
-<h1>Controle de Peças e Estoque</h1>
+<h1>Estoque de Peças</h1>
+
+<form action="/estoque/cadastrar  "
+<table border="1">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Quantidade</th>
+            <th>Estoque mínimo</th>
+            <th>Preço unitário</th>
+            <th>Fornecedor</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for peca in pecas %}
+        <tr>
+            <td>{{ peca['nome'] }}</td>
+            <td>{{ peca['descricao'] }}</td>
+            <td>{{ peca['quantidade'] }}</td>
+            <td>{{ peca['estoque_minimo'] }}</td>
+            <td>R$ {{ peca['preco_unitario'] }}</td>
+            <td>{{ peca['fornecedor'] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">Nenhuma peça cadastrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
