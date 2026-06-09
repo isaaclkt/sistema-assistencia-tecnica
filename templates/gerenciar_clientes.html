@@ -65,31 +65,45 @@
             padding: 12px;
             border-bottom: 1px solid #ddd;
             text-align: center;
+            vertical-align: middle;
         }
 
         tr:hover {
             background-color: #f9fafb;
         }
 
-        .editar {
-            background-color: #f59e0b;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-right: 6px;
+        /* Coluna de ações */
+        td:last-child {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            min-height: 60px;
         }
 
+        .editar,
         .excluir {
-            background-color: #dc2626;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 36px;
             color: white;
-            padding: 8px 12px;
             border-radius: 5px;
             text-decoration: none;
+            font-weight: bold;
+        }
+
+        .editar {
+            background-color: #f59e0b;
         }
 
         .editar:hover {
             background-color: #d97706;
+        }
+
+        .excluir {
+            background-color: #dc2626;
         }
 
         .excluir:hover {
@@ -102,7 +116,7 @@
 
         .btn-home:hover {
             background-color: #4b5563;
-    }
+        }
     </style>
 </head>
 
@@ -140,6 +154,7 @@
                     <th>Telefone</th>
                     <th>Email</th>
                     <th>Endereço</th>
+                    <th>Produto</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -153,6 +168,7 @@
                     <td>{{ cliente['telefone'] }}</td>
                     <td>{{ cliente['email'] }}</td>
                     <td>{{ cliente['endereco'] }}</td>
+                    <td>{{ cliente['produto'] }}</td>
 
                     <td>
                         <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">
