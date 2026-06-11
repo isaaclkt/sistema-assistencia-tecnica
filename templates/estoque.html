@@ -1,57 +1,239 @@
-<h1>Estoque de Peças</h1>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Estoque de Peças</title>
 
-<h2>Cadastrar nova peça</h2>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
 
-<form action="/estoque/cadastrar" method="POST">
-    <label>Nome:</label><br>
-    <input type="text" name="nome" required><br><br>
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
 
-    <label>Descrição:</label><br>
-    <input type="text" name="descricao"><br><br>
+        main {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
 
-    <label>Quantidade:</label><br>
-    <input type="number" name="quantidade" required><br><br>
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
-    <label>Estoque mínimo:</label><br>
-    <input type="number" name="estoque_minimo"><br><br>
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
 
-    <label>Preço unitário:</label><br>
-    <input type="number" step="0.01" name="preco_unitario"><br><br>
+        h2 {
+            color: #1f2937;
+            margin-top: 0;
+        }
 
-    <label>Fornecedor:</label><br>
-    <input type="text" name="fornecedor"><br><br>
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
 
-    <button type="submit">Cadastrar peça</button>
-</form>
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
 
-<hr>
+        .btn-home {
+            background-color: #6b7280;
+        }
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Quantidade</th>
-            <th>Estoque mínimo</th>
-            <th>Preço unitário</th>
-            <th>Fornecedor</th>
-        </tr>
-    </thead>
+        .btn-home:hover {
+            background-color: #4b5563;
+        }
 
-    <tbody>
-        {% for peca in pecas %}
-        <tr>
-            <td>{{ peca['nome'] }}</td>
-            <td>{{ peca['descricao'] }}</td>
-            <td>{{ peca['quantidade'] }}</td>
-            <td>{{ peca['estoque_minimo'] }}</td>
-            <td>R$ {{ peca['preco_unitario'] }}</td>
-            <td>{{ peca['fornecedor'] }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="6">Nenhuma peça cadastrada.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        form {
+            margin-bottom: 35px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #1f2937;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-botao {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background-color: #1f2937;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .mensagem-vazia {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Estoque de Peças</h1>
+    <p>Cadastro e controle das peças disponíveis na assistência técnica</p>
+</header>
+
+<main>
+
+    <div class="container">
+
+        <div class="topo">
+            <h2>Cadastrar nova peça</h2>
+
+            <a href="/" class="btn btn-home">
+                Voltar para Home
+            </a>
+        </div>
+
+        <form action="/estoque/cadastrar" method="POST">
+
+            <div class="form-grid">
+
+                <div class="campo">
+                    <label>Nome:</label>
+                    <input type="text" name="nome" required>
+                </div>
+
+                <div class="campo">
+                    <label>Descrição:</label>
+                    <input type="text" name="descricao">
+                </div>
+
+                <div class="campo">
+                    <label>Quantidade:</label>
+                    <input type="number" name="quantidade" required>
+                </div>
+
+                <div class="campo">
+                    <label>Estoque mínimo:</label>
+                    <input type="number" name="estoque_minimo">
+                </div>
+
+                <div class="campo">
+                    <label>Preço unitário:</label>
+                    <input type="number" step="0.01" name="preco_unitario">
+                </div>
+
+                <div class="campo">
+                    <label>Fornecedor:</label>
+                    <input type="text" name="fornecedor">
+                </div>
+
+            </div>
+
+            <div class="form-botao">
+                <button type="submit" class="btn">
+                    Cadastrar peça
+                </button>
+            </div>
+
+        </form>
+
+        <h2>Peças cadastradas</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
+                    <th>Estoque mínimo</th>
+                    <th>Preço unitário</th>
+                    <th>Fornecedor</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for peca in pecas %}
+                <tr>
+                    <td>{{ peca['nome'] }}</td>
+                    <td>{{ peca['descricao'] }}</td>
+                    <td>{{ peca['quantidade'] }}</td>
+                    <td>{{ peca['estoque_minimo'] }}</td>
+                    <td>R$ {{ peca['preco_unitario'] }}</td>
+                    <td>{{ peca['fornecedor'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="mensagem-vazia">
+                        Nenhuma peça cadastrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</main>
+
+</body>
+</html>
