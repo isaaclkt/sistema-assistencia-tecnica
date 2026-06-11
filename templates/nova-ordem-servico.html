@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova ordem de serviço</title>
+</head>
+
+<body>
+    <h1>Nova ordem de serviço</h1>
+
+    <form action="/ordem-servico/cadastrar" method="POST">
+        <label for="equipamento_id">Equipamento</label>
+
+        <select
+            id="equipamento_id"
+            name="equipamento_id"
+            required
+        >
+            <option value="">Selecione um equipamento</option>
+
+            {% for equipamento in equipamentos %}
+                <option value="{{ equipamento['id'] }}">
+                    {{ equipamento["cliente_nome"] }} -
+                    {{ equipamento["tipo"] }}
+                    {{ equipamento["marca"] or "" }}
+                    {{ equipamento["modelo"] or "" }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label for="defeito_relatado">Defeito relatado</label>
+
+        <textarea
+            id="defeito_relatado"
+            name="defeito_relatado"
+            required
+        ></textarea>
+
+        <br><br>
+
+        <button type="submit">Criar ordem</button>
+        <a href="/ordem-servico">Voltar</a>
+    </form>
+</body>
+</html>
