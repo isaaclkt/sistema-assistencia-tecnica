@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from routes.estoque import estoque_bp
 from routes.ordem_servico import ordem_servico_bp
 from routes.cadastro import cadastro_bp
+from routes.orcamento import orcamento_bp
 
 # Cria a aplicação Flask
 app = Flask(__name__)
@@ -14,6 +15,9 @@ app.register_blueprint(ordem_servico_bp)
 
 # Registra o módulo cadastro
 app.register_blueprint(cadastro_bp)
+
+# Registra o módulo orçamento
+app.register_blueprint(orcamento_bp)
 
 
 # Página inicial
