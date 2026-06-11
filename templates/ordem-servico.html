@@ -111,6 +111,26 @@
     <p></p>
 </header>
 <body>
-    
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Defeito relatado</th>
+            <th>Status</th>
+            <th>Data de abertura</th>
+        </tr>
+
+        {% for ordem in ordens %}
+        <tr>
+            <td>{{ ordem["id"] }}</td>
+            <td>{{ ordem["defeito_relatado"] }}</td>
+            <td>{{ ordem["status"] }}</td>
+            <td>{{ ordem["data_abertura"] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4">Nenhuma ordem cadastrada.</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Cliente</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .botoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background-color: #d97706;
+        }
+
+        .voltar {
+            background-color: #6b7280;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+
+        .voltar:hover {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Atualizar Cliente</h1>
+    <p>Atualize as informações do cliente selecionado</p>
+</header>
+
+<main>
+
+    <div class="card">
+
+        <h2>Dados do Cliente</h2>
+
+        <form action="/clientes/atualizar/{{ cliente['id'] }}" method="POST">
+
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" name="nome" value="{{ cliente['nome'] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>CPF</label>
+                <input type="text" name="cpf" value="{{ cliente['cpf'] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" name="telefone" value="{{ cliente['telefone'] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ cliente['email'] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Endereço</label>
+                <textarea name="endereco" required>{{ cliente['endereco'] }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Produto</label>
+                <textarea name="produto" required>{{ cliente['produto'] }}</textarea>
+            </div>
+
+            <div class="botoes">
+                <button type="submit">Salvar Alterações</button>
+                <a href="/cadastro" class="voltar">Voltar</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+</body>
+</html>
