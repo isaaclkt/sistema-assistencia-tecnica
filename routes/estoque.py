@@ -39,3 +39,18 @@ def cadastrar_peca():
     db.close()
 
     return redirect('/estoque')
+
+    
+@estoque_bp.route('/estoque/excluir/<int:id>', methods=['POST'])
+def excluir_peca(id):
+    db = conectar()
+
+    db.execute("""
+        DELETE FROM pecas
+        WHERE id = ?
+    """, (id,))
+
+    db.commit()
+    db.close()
+
+    return redirect('/estoque')
