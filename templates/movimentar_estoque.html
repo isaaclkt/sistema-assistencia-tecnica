@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimentar Estoque</title>
+</head>
+<body>
+
+<h1>Movimentação de Estoque</h1>
+
+<h3>{{ peca['nome'] }}</h3>
+
+<p>
+    Quantidade atual:
+    <strong>{{ peca['quantidade'] }}</strong>
+</p>
+
+<form method="POST">
+
+    <label>Tipo:</label><br>
+
+    <select name="tipo">
+        <option value="Entrada">Entrada</option>
+        <option value="Saída">Saída</option>
+    </select>
+
+    <br><br>
+
+    <label>Quantidade:</label><br>
+    <input type="number"
+           name="quantidade"
+           min="1"
+           required>
+
+    <br><br>
+
+    <label>Observação:</label><br>
+    <input type="text"
+           name="observacao">
+
+    <br><br>
+
+    <button type="submit">
+        Salvar Movimentação
+    </button>
+
+</form>
+
+<br>
+
+<a href="/estoque">
+    Voltar
+</a>
+
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Movimentações</title>
+</head>
+<body>
+
+<h1>Histórico de Movimentações</h1>
+
+<a href="/estoque">
+    Voltar ao Estoque
+</a>
+
+<br><br>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Peça</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Observação</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for mov in movimentacoes %}
+        <tr>
+            <td>{{ mov['data_movimentacao'] }}</td>
+            <td>{{ mov['nome_peca'] }}</td>
+            <td>{{ mov['tipo'] }}</td>
+            <td>{{ mov['quantidade'] }}</td>
+            <td>{{ mov['observacao'] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">
+                Nenhuma movimentação registrada.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
