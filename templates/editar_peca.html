@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Peça</title>
+</head>
+<body>
+
+<h1>Editar Peça</h1>
+
+<form action="/estoque/atualizar/{{ peca['id'] }}" method="POST">
+
+    <label>Nome:</label><br>
+    <input type="text" name="nome" value="{{ peca['nome'] }}" required><br><br>
+
+    <label>Descrição:</label><br>
+    <input type="text" name="descricao" value="{{ peca['descricao'] }}"><br><br>
+
+    <label>Quantidade:</label><br>
+    <input type="number" name="quantidade" value="{{ peca['quantidade'] }}" required><br><br>
+
+    <label>Estoque mínimo:</label><br>
+    <input type="number" name="estoque_minimo" value="{{ peca['estoque_minimo'] }}"><br><br>
+
+    <label>Preço unitário:</label><br>
+    <input type="number" step="0.01" name="preco_unitario" value="{{ peca['preco_unitario'] }}"><br><br>
+
+    <label>Fornecedor:</label><br>
+    <input type="text" name="fornecedor" value="{{ peca['fornecedor'] }}"><br><br>
+
+    <button type="submit">
+        Salvar Alterações
+    </button>
+
+</form>
+
+<br>
+
+<a href="/estoque">
+    <button type="button">
+        Voltar
+    </button>
+</a>
+
+</body>
+</html>
