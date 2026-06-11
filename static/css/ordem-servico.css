@@ -1,0 +1,52 @@
+main {
+    max-width: 1100px;
+}
+
+.topo {
+    margin-bottom: 20px;
+}
+
+.btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.btn:hover {
+    background-color: #1d4ed8;
+}
+
+.editar {
+    background-color: #f59e0b;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-right: 6px;
+}
+
+.excluir {
+    background-color: #dc2626;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.editar:hover {
+    background-color: #d97706;
+}
+
+.excluir:hover {
+    background-color: #b91c1c;
+}
+
+.btn-home {
+    background-color: #6b7280;
+}
+
+.btn-home:hover {
+    background-color: #4b5563;
+}

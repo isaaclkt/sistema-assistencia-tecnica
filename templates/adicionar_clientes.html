@@ -4,85 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Clientes</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #1f2937;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            color: #374151;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-        }
-
-        button {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #1d4ed8;
-        }
-
-        .voltar {
-            background-color: #6b7280;
-            text-decoration: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 6px;
-        }
-
-        .botoes {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adicionar_clientes.css') }}">
 </head>
 
 <body>

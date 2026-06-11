@@ -1,0 +1,67 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #1f2937;
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+main {
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.container,
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.container {
+    padding: 25px;
+}
+
+.card {
+    padding: 30px;
+}
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #1f2937;
+    color: white;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: #f9fafb;
+}
+
+.mensagem-vazia {
+    text-align: center;
+    color: #555;
+    font-style: italic;
+}
