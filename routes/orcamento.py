@@ -8,7 +8,7 @@ orcamento_bp = Blueprint("orcamento", __name__)
 def pagina_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
-    cursor.execute("SELECT id, nome, produto FROM clientes")
+    cursor.execute("SELECT id, nome FROM clientes")
     clientes = cursor.fetchall()
 
     # Buscar ordens de serviço
@@ -23,7 +23,6 @@ def pagina_orcamento():
     cursor.execute("""SELECT 
             orcamentos.id,
             clientes.nome AS nome_cliente,
-            clientes.produto AS produto_cliente,
             ordens_servico.defeito_relatado AS problema_informado,
             pecas.nome AS peca_necessaria,
             orcamentos.quantidade,

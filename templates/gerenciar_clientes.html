@@ -42,7 +42,6 @@
                     <th>Telefone</th>
                     <th>Email</th>
                     <th>Endereco</th>
-                    <th>Produto</th>
                     <th>Acoes</th>
                 </tr>
             </thead>
@@ -56,8 +55,6 @@
                     <td>{{ cliente['telefone'] }}</td>
                     <td>{{ cliente['email'] }}</td>
                     <td>{{ cliente['endereco'] }}</td>
-                    <td>{{ cliente['produto'] }}</td>
-
                     <td>
                         <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
                         <a href="/clientes/excluir/{{ cliente['id'] }}"
@@ -69,7 +66,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>

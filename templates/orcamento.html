@@ -39,7 +39,7 @@
 
                         {% for cliente in clientes %}
                         <option value="{{ cliente['id'] }}">
-                            {{ cliente['nome'] }} - {{ cliente['produto'] }}
+                            {{ cliente['nome'] }}
                         </option>
                         {% endfor %}
                     </select>
@@ -103,7 +103,6 @@
                 <tr>
                     <th>ID</th>
                     <th>Cliente</th>
-                    <th>Produto</th>
                     <th>Problema</th>
                     <th>Peca</th>
                     <th>Qtd.</th>
@@ -119,7 +118,6 @@
                 <tr>
                     <td>{{ orcamento['id'] }}</td>
                     <td>{{ orcamento['nome_cliente'] }}</td>
-                    <td>{{ orcamento['produto_cliente'] }}</td>
                     <td>{{ orcamento['problema_informado'] }}</td>
                     <td>{{ orcamento['peca_necessaria'] }}</td>
                     <td>{{ orcamento['quantidade'] }}</td>
@@ -139,7 +137,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="10" class="mensagem-vazia">Nenhum orcamento cadastrado.</td>
+                    <td colspan="9" class="mensagem-vazia">Nenhum orcamento cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>
