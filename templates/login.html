@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>Login de Funcionarios</h1>
+    <p>Acesse o sistema de gestao interna</p>
+</header>
+
+<main>
+    <section class="container">
+        <h2>Entrar</h2>
+
+        {% if erro %}
+            <p class="mensagem-vazia">{{ erro }}</p>
+        {% endif %}
+
+        <form action="/login" method="POST">
+            <div class="campo">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+
+        <p>
+            <a href="/funcionarios/cadastrar">Cadastrar funcionario</a>
+        </p>
+    </section>
+</main>
+
+</body>
+</html>

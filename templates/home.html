@@ -31,7 +31,7 @@
             <div class="card">
                 <h2>Usuário e Login</h2>
                 <p>Controle de acesso dos usuários do sistema.</p>
-                <a href="#">Em desenvolvimento</a>
+                <a href="/login">Acessar</a>
             </div>
 
             <div class="card">
@@ -46,6 +46,12 @@
                 <a href="/orcamento">Acessar</a>
             </div>
 
+        </div>
+
+        <div>
+            {% if session.get("funcionario_id") %}
+            <p>Funcionário logado: {{ session["funcionario_nome"] }}</p>
+            {% endif %}
         </div>
     </main>
 

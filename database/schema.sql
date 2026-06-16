@@ -76,3 +76,11 @@ CREATE TABLE ordem_pecas (
     FOREIGN KEY (ordem_id) REFERENCES ordens_servico(id),
     FOREIGN KEY (peca_id) REFERENCES pecas(id)
 );
+
+CREATE TABLE funcionarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    senha TEXT NOT NULL,
+    cargo TEXT
+);

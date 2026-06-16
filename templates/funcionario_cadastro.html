@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Funcionario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>Cadastro de Funcionario</h1>
+    <p>Crie um acesso para utilizar o sistema</p>
+</header>
+
+<main>
+    <section class="container">
+        <h2>Novo funcionario</h2>
+
+        {% if erro %}
+            <p class="mensagem-vazia">{{ erro }}</p>
+        {% endif %}
+
+        <form action="/funcionarios/cadastrar" method="POST">
+            <div class="campo">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div class="campo">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+
+            <div class="campo">
+                <label for="cargo">Cargo</label>
+                <input type="text" id="cargo" name="cargo">
+            </div>
+
+            <button type="submit" class="btn">Cadastrar</button>
+        </form>
+
+        <p>
+            <a href="/login">Voltar para login</a>
+        </p>
+    </section>
+</main>
+
+</body>
+</html>
