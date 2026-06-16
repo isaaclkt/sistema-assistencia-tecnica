@@ -8,8 +8,6 @@ orcamento_bp = Blueprint("orcamento", __name__)
 def pagina_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
-
-    # Buscar clientes para aparecer no select
     cursor.execute("SELECT id, nome, produto FROM clientes")
     clientes = cursor.fetchall()
 
@@ -25,8 +23,7 @@ def pagina_orcamento():
     pecas = cursor.fetchall()
 
     # Buscar orçamentos cadastrados
-    cursor.execute("""
-        SELECT 
+    cursor.execute("""SELECT 
             orcamentos.id,
             clientes.nome AS nome_cliente,
             clientes.produto AS produto_cliente,
@@ -43,8 +40,7 @@ def pagina_orcamento():
         JOIN ordens_servico 
             ON orcamentos.ordem_servico_id = ordens_servico.id
         JOIN pecas 
-            ON orcamentos.peca_id = pecas.id
-    """)
+            ON orcamentos.peca_id = pecas.id""")
     orcamentos = cursor.fetchall()
 
     conexao.close()
@@ -70,27 +66,14 @@ def criar_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
 
-    # Buscar o preço da peça direto do estoque
+    # Buscar o preço da peça
     cursor.execute("SELECT preco_unitario FROM pecas WHERE id = ?", (peca_id,))
     peca = cursor.fetchone()
 
     valor_unitario = float(peca["preco_unitario"])
     valor_total = (valor_unitario * quantidade) + valor_mao_obra
 
-    cursor.execute("""
-        INSERT INTO orcamentos 
-        (cliente_id, ordem_servico_id, peca_id, quantidade, valor_unitario, valor_mao_obra, valor_total, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        cliente_id,
-        ordem_servico_id,
-        peca_id,
-        quantidade,
-        valor_unitario,
-        valor_mao_obra,
-        valor_total,
-        status
-    ))
+    cursor.execute("""INSERT INTO orcamentos (cliente_id, ordem_servico_id, peca_id, quantidade, valor_unitario, valor_mao_obra, valor_total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (cliente_id, ordem_servico_id, peca_id, quantidade, valor_unitario, valor_mao_obra, valor_total, status))
 
     conexao.commit()
     conexao.close()
