@@ -1,1 +1,3 @@
-
+main {
+    width: min(900px, calc(100% - 32px));
+}

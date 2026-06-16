@@ -11,57 +11,60 @@
 <body>
 
 <header>
-    <h1>Atualizar Cliente</h1>
-    <p>Atualize as informações do cliente selecionado</p>
+    <div>
+        <h1>Atualizar Cliente</h1>
+        <p>Atualize as informacoes do cliente selecionado</p>
+    </div>
+
+    <div class="header-user">
+        <span class="user-icon" aria-hidden="true"></span>
+        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+    </div>
 </header>
 
 <main>
-
     <div class="card">
-
         <h2>Dados do Cliente</h2>
 
         <form action="/clientes/atualizar/{{ cliente['id'] }}" method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" name="nome" value="{{ cliente['nome'] }}" required>
+                </div>
 
-            <div class="form-group">
-                <label>Nome</label>
-                <input type="text" name="nome" value="{{ cliente['nome'] }}" required>
-            </div>
+                <div class="form-group">
+                    <label>CPF</label>
+                    <input type="text" name="cpf" value="{{ cliente['cpf'] }}" required>
+                </div>
 
-            <div class="form-group">
-                <label>CPF</label>
-                <input type="text" name="cpf" value="{{ cliente['cpf'] }}" required>
-            </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" name="telefone" value="{{ cliente['telefone'] }}" required>
+                </div>
 
-            <div class="form-group">
-                <label>Telefone</label>
-                <input type="text" name="telefone" value="{{ cliente['telefone'] }}" required>
-            </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ cliente['email'] }}" required>
+                </div>
 
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" value="{{ cliente['email'] }}" required>
-            </div>
+                <div class="form-group">
+                    <label>Endereco</label>
+                    <textarea name="endereco" required>{{ cliente['endereco'] }}</textarea>
+                </div>
 
-            <div class="form-group">
-                <label>Endereço</label>
-                <textarea name="endereco" required>{{ cliente['endereco'] }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Produto</label>
-                <textarea name="produto" required>{{ cliente['produto'] }}</textarea>
+                <div class="form-group">
+                    <label>Produto</label>
+                    <textarea name="produto" required>{{ cliente['produto'] }}</textarea>
+                </div>
             </div>
 
             <div class="botoes">
-                <button type="submit">Salvar Alterações</button>
+                <button type="submit">Salvar Alteracoes</button>
                 <a href="/cadastro" class="voltar">Voltar</a>
             </div>
-
         </form>
-
     </div>
-
 </main>
 
 </body>
