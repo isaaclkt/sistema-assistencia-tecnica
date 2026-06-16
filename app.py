@@ -4,6 +4,7 @@ from routes.ordem_servico import ordem_servico_bp
 from routes.cadastro import cadastro_bp
 from routes.orcamento import orcamento_bp
 from routes.funcionarios import funcionarios_bp, criar_tabela_funcionarios
+from routes.home import home_bp
 
 # Cria a aplicação Flask
 app = Flask(__name__)
@@ -25,6 +26,9 @@ app.register_blueprint(orcamento_bp)
 
 #Registra o modulo de usuario e login
 app.register_blueprint(funcionarios_bp)
+
+# Registra a página home
+app.register_blueprint(home_bp)
 
 
 # Página inicial
@@ -57,10 +61,5 @@ def proteger_rotas():
     return None
 
 
-@app.route("/")
-def home():
-    return render_template("home.html")
-
-# Executa o servidor
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

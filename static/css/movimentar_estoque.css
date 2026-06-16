@@ -1,1 +1,13 @@
+main {
+    width: min(720px, calc(100% - 32px));
+}
 
+.summary-pill {
+    display: inline-flex;
+    gap: 6px;
+    padding: 10px 14px;
+    color: var(--azul-900);
+    background: var(--azul-100);
+    border-radius: 999px;
+    font-weight: 600;
+}

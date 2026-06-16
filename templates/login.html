@@ -2,18 +2,26 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 </head>
 <body>
 
 <header>
-    <h1>Login de Funcionarios</h1>
-    <p>Acesse o sistema de gestao interna</p>
+    <div>
+        <h1>Login de Funcionarios</h1>
+        <p>Acesse o sistema de gestao interna</p>
+    </div>
+
+    <div class="header-user">
+        <span class="user-icon" aria-hidden="true"></span>
+        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+    </div>
 </header>
 
 <main>
-    <section class="container">
+    <section class="container auth-card">
         <h2>Entrar</h2>
 
         {% if erro %}
@@ -34,7 +42,7 @@
             <button type="submit" class="btn">Entrar</button>
         </form>
 
-        <p>
+        <p class="auth-link">
             <a href="/funcionarios/cadastrar">Cadastrar funcionario</a>
         </p>
     </section>

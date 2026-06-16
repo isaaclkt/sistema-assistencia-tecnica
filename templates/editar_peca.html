@@ -2,46 +2,69 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Editar Peça</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Peca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/editar_peca.css') }}">
 </head>
 <body>
 
-<h1>Editar Peça</h1>
+<header>
+    <div>
+        <h1>Editar Peca</h1>
+        <p>Atualize as informacoes do item selecionado</p>
+    </div>
 
-<form action="/estoque/atualizar/{{ peca['id'] }}" method="POST">
+    <div class="header-user">
+        <span class="user-icon" aria-hidden="true"></span>
+        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+    </div>
+</header>
 
-    <label>Nome:</label><br>
-    <input type="text" name="nome" value="{{ peca['nome'] }}" required><br><br>
+<main>
+    <section class="card">
+        <h2>Dados da peca</h2>
 
-    <label>Descrição:</label><br>
-    <input type="text" name="descricao" value="{{ peca['descricao'] }}"><br><br>
+        <form action="/estoque/atualizar/{{ peca['id'] }}" method="POST">
+            <div class="form-grid">
+                <div class="campo">
+                    <label>Nome:</label>
+                    <input type="text" name="nome" value="{{ peca['nome'] }}" required>
+                </div>
 
-    <label>Quantidade:</label><br>
-    <input type="number" name="quantidade" value="{{ peca['quantidade'] }}" required><br><br>
+                <div class="campo">
+                    <label>Descricao:</label>
+                    <input type="text" name="descricao" value="{{ peca['descricao'] }}">
+                </div>
 
-    <label>Estoque mínimo:</label><br>
-    <input type="number" name="estoque_minimo" value="{{ peca['estoque_minimo'] }}"><br><br>
+                <div class="campo">
+                    <label>Quantidade:</label>
+                    <input type="number" name="quantidade" value="{{ peca['quantidade'] }}" required>
+                </div>
 
-    <label>Preço unitário:</label><br>
-    <input type="number" step="0.01" name="preco_unitario" value="{{ peca['preco_unitario'] }}"><br><br>
+                <div class="campo">
+                    <label>Estoque minimo:</label>
+                    <input type="number" name="estoque_minimo" value="{{ peca['estoque_minimo'] }}">
+                </div>
 
-    <label>Fornecedor:</label><br>
-    <input type="text" name="fornecedor" value="{{ peca['fornecedor'] }}"><br><br>
+                <div class="campo">
+                    <label>Preco unitario:</label>
+                    <input type="number" step="0.01" name="preco_unitario" value="{{ peca['preco_unitario'] }}">
+                </div>
 
-    <button type="submit">
-        Salvar Alterações
-    </button>
+                <div class="campo">
+                    <label>Fornecedor:</label>
+                    <input type="text" name="fornecedor" value="{{ peca['fornecedor'] }}">
+                </div>
+            </div>
 
-</form>
-
-<br>
-
-<a href="/estoque">
-    <button type="button">
-        Voltar
-    </button>
-</a>
+            <div class="botoes">
+                <button type="submit">Salvar Alteracoes</button>
+                <a href="/estoque" class="btn btn-home">Voltar</a>
+            </div>
+        </form>
+    </section>
+</main>
 
 </body>
 </html>
