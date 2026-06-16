@@ -11,14 +11,11 @@ def pagina_orcamento():
     cursor.execute("SELECT id, nome, produto FROM clientes")
     clientes = cursor.fetchall()
 
-    # Buscar ordens de serviço para aparecer no select
-    cursor.execute("""
-        SELECT id, defeito_relatado AS problema
-        FROM ordens_servico
-    """)
+    # Buscar ordens de serviço
+    cursor.execute("""SELECT id, defeito_relatado AS problema FROM ordens_servico""")
     ordens_servico = cursor.fetchall()
 
-    # Buscar peças para aparecer no select
+    # Buscar peças
     cursor.execute("SELECT id, nome, preco_unitario FROM pecas")
     pecas = cursor.fetchall()
 
