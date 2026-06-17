@@ -12,13 +12,13 @@
 
 <header>
     <div>
-        <h1>Gestao de Clientes</h1>
+        <h1>Gestão de Clientes</h1>
         <p>Cadastro de novos clientes</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -49,14 +49,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Endereco</label>
+                    <label>Endereço</label>
                     <textarea name="endereco"></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label>Produto</label>
-                    <textarea name="produto"></textarea>
-                </div>
             </div>
 
             <div class="botoes">

@@ -10,13 +10,13 @@
 
 <header>
     <div>
-        <h1>Login de Funcionarios</h1>
+        <h1>Login de Funcionários</h1>
         <p>Acesse o sistema de gestao interna</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -43,7 +43,7 @@
         </form>
 
         <p class="auth-link">
-            <a href="/funcionarios/cadastrar">Cadastrar funcionario</a>
+            <a href="/funcionarios/cadastrar">Cadastrar funcionário</a>
         </p>
     </section>
 </main>

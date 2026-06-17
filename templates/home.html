@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Assistencia Tecnica</title>
+    <title>Sistema de Assistência Técnica</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 </head>
@@ -11,13 +11,13 @@
 
     <header>
         <div>
-            <h1>Sistema de Gestao Interna de Assistencia Tecnica</h1>
-            <p>Controle de ordens de servico, equipamentos, estoque, clientes e orcamentos</p>
+            <h1>Sistema de Gestão Interna de Assistência Técnica</h1>
+            <p>Controle de ordens de serviço, equipamentos, estoque, clientes e orçamentos</p>
         </div>
 
         <div class="header-user">
             <span class="user-icon" aria-hidden="true"></span>
-            <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+            <span>{{ session.get("funcionario_nome", "") }}</span>
         </div>
     </header>
 
@@ -25,26 +25,26 @@
         <div class="cards">
 
             <div class="card">
-                <h2>Ordem de Servico e Equipamentos</h2>
-                <p>Cadastro e acompanhamento de equipamentos recebidos para manutencao.</p>
+                <h2>Ordem de Serviço e Equipamentos</h2>
+                <p>Cadastro e acompanhamento de equipamentos recebidos para manutenção.</p>
                 <a href="/ordem-servico" class="btn">Acessar</a>
             </div>
 
             <div class="card">
-                <h2>Pecas e Estoque</h2>
-                <p>Controle de pecas disponiveis no sistema.</p>
+                <h2>Peças e Estoque</h2>
+                <p>Controle de peças disponíveis no sistema.</p>
                 <a href="/estoque" class="btn">Acessar</a>
             </div>
 
             <div class="card">
-                <h2>Gestao de clientes</h2>
-                <p>Controle e gerenciamento de informacoes dos clientes.</p>
+                <h2>Gestão de clientes</h2>
+                <p>Controle e gerenciamento de informações dos clientes.</p>
                 <a href="/cadastro" class="btn">Acessar</a>
             </div>
 
             <div class="card">
-                <h2>Orcamentos</h2>
-                <p>Criacao e acompanhamento de orcamentos para os servicos da assistencia tecnica.</p>
+                <h2>Orçamentos</h2>
+                <p>Criação e acompanhamento de orçamentos para os serviços da assistência técnica.</p>
                 <a href="/orcamento" class="btn">Acessar</a>
             </div>
 

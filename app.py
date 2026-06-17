@@ -54,8 +54,8 @@ def proteger_rotas():
         "/relatorios",
     )
 
-    # Bloqueia os modulos internos quando nao ha funcionario autenticado.
-    if request.path.startswith(rotas_protegidas) and "funcionario_id" not in session:
+    # Bloqueia a home e os modulos internos quando nao ha funcionario autenticado.
+    if (request.path == "/" or request.path.startswith(rotas_protegidas)) and "funcionario_id" not in session:
         return redirect("/login")
 
     return None

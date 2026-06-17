@@ -13,12 +13,12 @@
 <header>
     <div>
         <h1>Atualizar Cliente</h1>
-        <p>Atualize as informacoes do cliente selecionado</p>
+        <p>Atualize as informações do cliente selecionado</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -49,18 +49,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Endereco</label>
+                    <label>Endereço</label>
                     <textarea name="endereco" required>{{ cliente['endereco'] }}</textarea>
                 </div>
 
-                <div class="form-group">
-                    <label>Produto</label>
-                    <textarea name="produto" required>{{ cliente['produto'] }}</textarea>
-                </div>
             </div>
 
             <div class="botoes">
-                <button type="submit">Salvar Alteracoes</button>
+                <button type="submit">Salvar Alterações</button>
                 <a href="/cadastro" class="voltar">Voltar</a>
             </div>
         </form>

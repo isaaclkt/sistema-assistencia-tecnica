@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ordens de servico</title>
+    <title>Ordens de serviço</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
 </head>
@@ -12,13 +12,13 @@
 
 <header>
     <div>
-        <h1>Ordens de servico</h1>
-        <p>Acompanhamento das ordens abertas na assistencia tecnica</p>
+        <h1>Ordens de serviço</h1>
+        <p>Acompanhamento das ordens abertas na assistência técnica</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -37,23 +37,25 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Defeito relatado</th>
+                    <th>Cliente</th>
+                    <th>Equipamento</th>
+                    <th>Problema relatado</th>
                     <th>Status</th>
-                    <th>Data de abertura</th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for ordem in ordens %}
                 <tr>
-                    <td>{{ ordem["id"] }}</td>
-                    <td>{{ ordem["defeito_relatado"] }}</td>
+                    <td>{{ ordem["ordem_id"] }}</td>
+                    <td>{{ ordem["cliente_nome"] }}</td>
+                    <td>{{ ordem["equipamento"] }}</td>
+                    <td>{{ ordem["problema_relatado"] }}</td>
                     <td>{{ ordem["status"] }}</td>
-                    <td>{{ ordem["data_abertura"] }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
+                    <td colspan="5" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
                 </tr>
                 {% endfor %}
             </tbody>

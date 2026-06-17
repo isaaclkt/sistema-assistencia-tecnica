@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Funcionario</title>
+    <title>Cadastro de Funcionário</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 </head>
 <body>
 
 <header>
     <div>
-        <h1>Cadastro de Funcionario</h1>
+        <h1>Cadastro de Funcionário</h1>
         <p>Crie um acesso para utilizar o sistema</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
 <main>
     <section class="container auth-card">
-        <h2>Novo funcionario</h2>
+        <h2>Novo funcionário</h2>
 
         {% if erro %}
             <p class="mensagem-vazia">{{ erro }}</p>

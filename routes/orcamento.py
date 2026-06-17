@@ -8,69 +8,76 @@ orcamento_bp = Blueprint("orcamento", __name__)
 def pagina_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
-    cursor.execute("SELECT id, nome, produto FROM clientes")
-    clientes = cursor.fetchall()
 
-    # Buscar ordens de serviço
-    cursor.execute("""SELECT id, defeito_relatado AS problema FROM ordens_servico""")
+    cursor.execute("""
+        SELECT
+            ordens_servico.ordem_id,
+            ordens_servico.cliente_id,
+            ordens_servico.equipamento,
+            ordens_servico.problema_relatado,
+            clientes.nome AS cliente_nome
+        FROM ordens_servico
+        JOIN clientes
+            ON clientes.id = ordens_servico.cliente_id
+        ORDER BY ordens_servico.ordem_id DESC
+    """)
     ordens_servico = cursor.fetchall()
 
-    # Buscar peças
-    cursor.execute("SELECT id, nome, preco_unitario FROM pecas")
-    pecas = cursor.fetchall()
-
-    # Buscar orçamentos cadastrados
-    cursor.execute("""SELECT 
+    cursor.execute("""
+        SELECT
             orcamentos.id,
+            orcamentos.ordem_id,
+            orcamentos.equipamento,
+            orcamentos.valor_orcamento,
             clientes.nome AS nome_cliente,
-            clientes.produto AS produto_cliente,
-            ordens_servico.defeito_relatado AS problema_informado,
-            pecas.nome AS peca_necessaria,
-            orcamentos.quantidade,
-            orcamentos.valor_unitario,
-            orcamentos.valor_mao_obra,
-            orcamentos.valor_total,
-            orcamentos.status
+            ordens_servico.problema_relatado
         FROM orcamentos
-        JOIN clientes 
-            ON orcamentos.cliente_id = clientes.id
-        JOIN ordens_servico 
-            ON orcamentos.ordem_servico_id = ordens_servico.id
-        JOIN pecas 
-            ON orcamentos.peca_id = pecas.id""")
+        JOIN clientes
+            ON clientes.id = orcamentos.cliente_id
+        JOIN ordens_servico
+            ON ordens_servico.ordem_id = orcamentos.ordem_id
+        ORDER BY orcamentos.id DESC
+    """)
     orcamentos = cursor.fetchall()
 
     conexao.close()
 
     return render_template(
         "orcamento.html",
-        clientes=clientes,
         ordens_servico=ordens_servico,
-        pecas=pecas,
         orcamentos=orcamentos
     )
 
 
 @orcamento_bp.route("/orcamentos/cadastrar", methods=["POST"])
 def criar_orcamento():
-    cliente_id = request.form["cliente_id"]
-    ordem_servico_id = request.form["ordem_servico_id"]
-    peca_id = request.form["peca_id"]
-    quantidade = int(request.form["quantidade"])
-    valor_mao_obra = float(request.form["valor_mao_obra"])
-    status = request.form["status"]
+    ordem_id = request.form["ordem_id"]
+    valor_orcamento = request.form["valor_orcamento"]
 
     conexao = conectar()
     cursor = conexao.cursor()
 
-    # Buscar o preço da peça
-    cursor.execute("SELECT preco_unitario FROM pecas WHERE id = ?", (peca_id,))
-    peca = cursor.fetchone()
+    cursor.execute("""
+        SELECT cliente_id, equipamento
+        FROM ordens_servico
+        WHERE ordem_id = ?
+    """, (ordem_id,))
+    ordem = cursor.fetchone()
 
-    valor_unitario = float(peca["preco_unitario"])
-    valor_total = (valor_unitario * quantidade) + valor_mao_obra
+    if ordem is None:
+        conexao.close()
+        return "Ordem de serviço não encontrada"
 
-    cursor.execute("""INSERT INTO orcamentos (cliente_id, ordem_servico_id, peca_id, quantidade, valor_unitario, valor_mao_obra, valor_total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (cliente_id, ordem_servico_id, peca_id, quantidade, valor_unitario, valor_mao_obra, valor_total, status))
+    cursor.execute("""
+        INSERT INTO orcamentos
+        (ordem_id, cliente_id, equipamento, valor_orcamento)
+        VALUES (?, ?, ?, ?)
+    """, (
+        ordem_id,
+        ordem["cliente_id"],
+        ordem["equipamento"],
+        valor_orcamento
+    ))
 
     conexao.commit()
     conexao.close()

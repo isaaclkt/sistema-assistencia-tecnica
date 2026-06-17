@@ -12,13 +12,13 @@
 
 <header>
     <div>
-        <h1>Gestao de Clientes</h1>
-        <p>Visualizacao e gerenciamento dos clientes cadastrados</p>
+        <h1>Gestão de Clientes</h1>
+        <p>Visualização e gerenciamento dos clientes cadastrados</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -41,9 +41,8 @@
                     <th>CPF</th>
                     <th>Telefone</th>
                     <th>Email</th>
-                    <th>Endereco</th>
-                    <th>Produto</th>
-                    <th>Acoes</th>
+                    <th>Endereço</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -56,7 +55,6 @@
                     <td>{{ cliente['telefone'] }}</td>
                     <td>{{ cliente['email'] }}</td>
                     <td>{{ cliente['endereco'] }}</td>
-                    <td>{{ cliente['produto'] }}</td>
 
                     <td>
                         <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
@@ -69,7 +67,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>

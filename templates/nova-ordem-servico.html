@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova ordem de servico</title>
+    <title>Nova ordem de serviço</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
 </head>
@@ -12,13 +12,13 @@
 
 <header>
     <div>
-        <h1>Nova ordem de servico</h1>
-        <p>Registre uma nova solicitacao de atendimento</p>
+        <h1>Nova ordem de serviço</h1>
+        <p>Registre uma nova solicitação de atendimento</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -28,24 +28,36 @@
 
         <form action="/ordem-servico/cadastrar" method="POST">
             <div class="campo">
-                <label for="equipamento_id">Equipamento</label>
-                <select id="equipamento_id" name="equipamento_id" required>
-                    <option value="">Selecione um equipamento</option>
+                <label for="cliente_id">Cliente</label>
+                <select id="cliente_id" name="cliente_id" required>
+                    <option value="">Selecione um cliente</option>
 
-                    {% for equipamento in equipamentos %}
-                    <option value="{{ equipamento['id'] }}">
-                        {{ equipamento["cliente_nome"] }} -
-                        {{ equipamento["tipo"] }}
-                        {{ equipamento["marca"] or "" }}
-                        {{ equipamento["modelo"] or "" }}
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente['id'] }}">
+                        {{ cliente["nome"] }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="campo">
-                <label for="defeito_relatado">Defeito relatado</label>
-                <textarea id="defeito_relatado" name="defeito_relatado" required></textarea>
+                <label for="equipamento">Equipamento</label>
+                <input type="text" id="equipamento" name="equipamento" required>
+            </div>
+
+            <div class="campo">
+                <label for="problema_relatado">Problema relatado</label>
+                <textarea id="problema_relatado" name="problema_relatado" required></textarea>
+            </div>
+
+            <div class="campo">
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    <option value="Aberto">Aberto</option>
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
             </div>
 
             <div class="botoes">

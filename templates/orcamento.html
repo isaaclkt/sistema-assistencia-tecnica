@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orcamentos</title>
+    <title>Orçamentos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/orcamento.css') }}">
 </head>
@@ -12,20 +12,20 @@
 
 <header>
     <div>
-        <h1>Orcamentos</h1>
-        <p>Cadastro e acompanhamento dos orcamentos da assistencia tecnica</p>
+        <h1>Orçamentos</h1>
+        <p>Cadastro e acompanhamento dos orçamentos da assistência técnica</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
 <main>
     <div class="container">
         <div class="topo">
-            <h2>Cadastrar novo orcamento</h2>
+            <h2>Cadastrar novo orçamento</h2>
 
             <a href="/" class="btn btn-home">Voltar para Home</a>
         </div>
@@ -33,84 +33,42 @@
         <form action="/orcamentos/cadastrar" method="POST">
             <div class="form-grid">
                 <div class="campo">
-                    <label>Cliente:</label>
-                    <select name="cliente_id" required>
-                        <option value="">Selecione um cliente</option>
-
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente['id'] }}">
-                            {{ cliente['nome'] }} - {{ cliente['produto'] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label>Ordem de servico:</label>
-                    <select name="ordem_servico_id" required>
+                    <label for="ordem_id">Ordem de serviço</label>
+                    <select id="ordem_id" name="ordem_id" required>
                         <option value="">Selecione uma ordem</option>
 
                         {% for ordem in ordens_servico %}
-                        <option value="{{ ordem['id'] }}">
-                            Ordem #{{ ordem['id'] }} - {{ ordem['problema'] }}
+                        <option value="{{ ordem['ordem_id'] }}">
+                            Ordem #{{ ordem['ordem_id'] }} -
+                            {{ ordem['cliente_nome'] }} -
+                            {{ ordem['equipamento'] }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="campo">
-                    <label>Peca necessaria:</label>
-                    <select name="peca_id" required>
-                        <option value="">Selecione uma peca</option>
-
-                        {% for peca in pecas %}
-                        <option value="{{ peca['id'] }}">
-                            {{ peca['nome'] }} - R$ {{ peca['preco_unitario'] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label>Quantidade:</label>
-                    <input type="number" name="quantidade" min="1" required>
-                </div>
-
-                <div class="campo">
-                    <label>Valor da mao de obra:</label>
-                    <input type="number" step="0.01" name="valor_mao_obra" required>
-                </div>
-
-                <div class="campo">
-                    <label>Status:</label>
-                    <select name="status" required>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Aprovado">Aprovado</option>
-                        <option value="Recusado">Recusado</option>
-                    </select>
+                    <label for="valor_orcamento">Valor do orçamento</label>
+                    <input type="number" id="valor_orcamento" name="valor_orcamento" step="0.01" min="0" required>
                 </div>
             </div>
 
             <div class="form-botao">
-                <button type="submit" class="btn">Cadastrar orcamento</button>
+                <button type="submit" class="btn">Cadastrar orçamento</button>
             </div>
         </form>
 
-        <h2>Orcamentos cadastrados</h2>
+        <h2>Orçamentos cadastrados</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Ordem</th>
                     <th>Cliente</th>
-                    <th>Produto</th>
+                    <th>Equipamento</th>
                     <th>Problema</th>
-                    <th>Peca</th>
-                    <th>Qtd.</th>
-                    <th>Valor peca</th>
-                    <th>Mao de obra</th>
-                    <th>Total</th>
-                    <th>Status</th>
+                    <th>Valor</th>
                 </tr>
             </thead>
 
@@ -118,28 +76,15 @@
                 {% for orcamento in orcamentos %}
                 <tr>
                     <td>{{ orcamento['id'] }}</td>
+                    <td>#{{ orcamento['ordem_id'] }}</td>
                     <td>{{ orcamento['nome_cliente'] }}</td>
-                    <td>{{ orcamento['produto_cliente'] }}</td>
-                    <td>{{ orcamento['problema_informado'] }}</td>
-                    <td>{{ orcamento['peca_necessaria'] }}</td>
-                    <td>{{ orcamento['quantidade'] }}</td>
-                    <td>R$ {{ orcamento['valor_unitario'] }}</td>
-                    <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
-                    <td>R$ {{ orcamento['valor_total'] }}</td>
-
-                    <td>
-                        {% if orcamento['status'] == 'Aprovado' %}
-                            <span class="status aprovado">Aprovado</span>
-                        {% elif orcamento['status'] == 'Recusado' %}
-                            <span class="status recusado">Recusado</span>
-                        {% else %}
-                            <span class="status pendente">Pendente</span>
-                        {% endif %}
-                    </td>
+                    <td>{{ orcamento['equipamento'] }}</td>
+                    <td>{{ orcamento['problema_relatado'] }}</td>
+                    <td>R$ {{ orcamento['valor_orcamento'] }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="10" class="mensagem-vazia">Nenhum orcamento cadastrado.</td>
+                    <td colspan="6" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>

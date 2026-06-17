@@ -12,12 +12,12 @@
 <header>
     <div>
         <h1>Historico de Movimentacoes</h1>
-        <p>Consulta das entradas e saidas registradas no estoque</p>
+        <p>Consulta das entradas e saídas registradas no estoque</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
@@ -32,7 +32,7 @@
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Peca</th>
+                    <th>Peça</th>
                     <th>Tipo</th>
                     <th>Quantidade</th>
                     <th>Observacao</th>

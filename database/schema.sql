@@ -29,20 +29,24 @@ CREATE TABLE equipamentos (
 );
 
 CREATE TABLE ordens_servico (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ordem_id INTEGER PRIMARY KEY AUTOINCREMENT,
     cliente_id INTEGER NOT NULL,
-    equipamento_id INTEGER NOT NULL,
-    usuario_id INTEGER,
-    defeito_relatado TEXT NOT NULL,
-    diagnostico TEXT,
-    status TEXT NOT NULL DEFAULT 'Aberta',
-    valor_servico REAL DEFAULT 0,
-    data_abertura TEXT NOT NULL,
-    data_finalizacao TEXT,
+    equipamento TEXT NOT NULL,
+    problema_relatado TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Aberto',
 
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-    FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+CREATE TABLE orcamentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ordem_id INTEGER NOT NULL,
+    cliente_id INTEGER NOT NULL,
+    equipamento TEXT NOT NULL,
+    valor_orcamento REAL NOT NULL,
+
+    FOREIGN KEY (ordem_id) REFERENCES ordens_servico(ordem_id),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
 CREATE TABLE pecas (
@@ -73,7 +77,7 @@ CREATE TABLE ordem_pecas (
     quantidade INTEGER NOT NULL,
     valor_unitario REAL DEFAULT 0,
 
-    FOREIGN KEY (ordem_id) REFERENCES ordens_servico(id),
+    FOREIGN KEY (ordem_id) REFERENCES ordens_servico(ordem_id),
     FOREIGN KEY (peca_id) REFERENCES pecas(id)
 );
 

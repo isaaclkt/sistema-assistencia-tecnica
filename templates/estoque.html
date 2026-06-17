@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estoque de Pecas</title>
+    <title>Estoque de Peças</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estoque.css') }}">
 </head>
@@ -12,20 +12,20 @@
 
 <header>
     <div>
-        <h1>Estoque de Pecas</h1>
-        <p>Cadastro e controle das pecas disponiveis na assistencia tecnica</p>
+        <h1>Estoque de Peças</h1>
+        <p>Cadastro e controle das peças disponíveis na assistência técnica</p>
     </div>
 
     <div class="header-user">
         <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "Visitante") }}</span>
+        <span>{{ session.get("funcionario_nome", "") }}</span>
     </div>
 </header>
 
 <main>
     <div class="container">
         <div class="topo">
-            <h2>Cadastrar nova peca</h2>
+            <h2>Cadastrar nova peça</h2>
 
             <div class="acoes-topo">
                 <a href="/estoque/historico" class="btn">Historico</a>
@@ -67,11 +67,11 @@
             </div>
 
             <div class="form-botao">
-                <button type="submit" class="btn">Cadastrar peca</button>
+                <button type="submit" class="btn">Cadastrar peça</button>
             </div>
         </form>
 
-        <h2>Pecas cadastradas</h2>
+        <h2>Peças cadastradas</h2>
 
         <table>
             <thead>
@@ -82,7 +82,7 @@
                     <th>Estoque minimo</th>
                     <th>Preco unitario</th>
                     <th>Fornecedor</th>
-                    <th>Acoes</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -107,7 +107,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" class="mensagem-vazia">Nenhuma peca cadastrada.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhuma peça cadastrada.</td>
                 </tr>
                 {% endfor %}
             </tbody>
