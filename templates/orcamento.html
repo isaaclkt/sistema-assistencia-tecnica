@@ -33,8 +33,26 @@
         <form action="/orcamentos/cadastrar" method="POST">
             <div class="form-grid">
                 <div class="campo">
+<<<<<<< HEAD
                     <label for="ordem_id">Ordem de serviço</label>
                     <select id="ordem_id" name="ordem_id" required>
+=======
+                    <label>Cliente:</label>
+                    <select name="cliente_id" required>
+                        <option value="">Selecione um cliente</option>
+
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente['id'] }}">
+                            {{ cliente['nome'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Ordem de servico:</label>
+                    <select name="ordem_servico_id" required>
+>>>>>>> 808bbc70007ed59da307e4f9d07aaecddb6301e2
                         <option value="">Selecione uma ordem</option>
 
                         {% for ordem in ordens_servico %}
@@ -66,7 +84,10 @@
                     <th>ID</th>
                     <th>Ordem</th>
                     <th>Cliente</th>
+<<<<<<< HEAD
                     <th>Equipamento</th>
+=======
+>>>>>>> 808bbc70007ed59da307e4f9d07aaecddb6301e2
                     <th>Problema</th>
                     <th>Valor</th>
                 </tr>
@@ -78,6 +99,7 @@
                     <td>{{ orcamento['id'] }}</td>
                     <td>#{{ orcamento['ordem_id'] }}</td>
                     <td>{{ orcamento['nome_cliente'] }}</td>
+<<<<<<< HEAD
                     <td>{{ orcamento['equipamento'] }}</td>
                     <td>{{ orcamento['problema_relatado'] }}</td>
                     <td>R$ {{ orcamento['valor_orcamento'] }}</td>
@@ -85,6 +107,28 @@
                 {% else %}
                 <tr>
                     <td colspan="6" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+=======
+                    <td>{{ orcamento['problema_informado'] }}</td>
+                    <td>{{ orcamento['peca_necessaria'] }}</td>
+                    <td>{{ orcamento['quantidade'] }}</td>
+                    <td>R$ {{ orcamento['valor_unitario'] }}</td>
+                    <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
+                    <td>R$ {{ orcamento['valor_total'] }}</td>
+
+                    <td>
+                        {% if orcamento['status'] == 'Aprovado' %}
+                            <span class="status aprovado">Aprovado</span>
+                        {% elif orcamento['status'] == 'Recusado' %}
+                            <span class="status recusado">Recusado</span>
+                        {% else %}
+                            <span class="status pendente">Pendente</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="mensagem-vazia">Nenhum orcamento cadastrado.</td>
+>>>>>>> 808bbc70007ed59da307e4f9d07aaecddb6301e2
                 </tr>
                 {% endfor %}
             </tbody>

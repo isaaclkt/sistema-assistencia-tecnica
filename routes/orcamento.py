@@ -8,6 +8,11 @@ orcamento_bp = Blueprint("orcamento", __name__)
 def pagina_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
+<<<<<<< HEAD
+=======
+    cursor.execute("SELECT id, nome FROM clientes")
+    clientes = cursor.fetchall()
+>>>>>>> 808bbc70007ed59da307e4f9d07aaecddb6301e2
 
     cursor.execute("""
         SELECT
@@ -30,7 +35,17 @@ def pagina_orcamento():
             orcamentos.equipamento,
             orcamentos.valor_orcamento,
             clientes.nome AS nome_cliente,
+<<<<<<< HEAD
             ordens_servico.problema_relatado
+=======
+            ordens_servico.defeito_relatado AS problema_informado,
+            pecas.nome AS peca_necessaria,
+            orcamentos.quantidade,
+            orcamentos.valor_unitario,
+            orcamentos.valor_mao_obra,
+            orcamentos.valor_total,
+            orcamentos.status
+>>>>>>> 808bbc70007ed59da307e4f9d07aaecddb6301e2
         FROM orcamentos
         JOIN clientes
             ON clientes.id = orcamentos.cliente_id
