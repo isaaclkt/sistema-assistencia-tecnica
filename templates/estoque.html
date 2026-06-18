@@ -24,6 +24,26 @@
 
 <main>
     <div class="container">
+        
+        <div class="dashboard-cards">
+
+    <div class="card-indicador">
+        <h3>📦 Peças</h3>
+        <p>{{ total_pecas }}</p>
+    </div>
+
+    <div class="card-indicador alerta">
+        <h3>⚠️ Estoque Baixo</h3>
+        <p>{{ estoque_baixo }}</p>
+    </div>
+
+    <div class="card-indicador">
+        <h3>📈 Movimentações</h3>
+        <p>{{ total_movimentacoes }}</p>
+    </div>
+
+</div>
+
         <div class="topo">
             <h2>Cadastrar nova peça</h2>
 
@@ -47,17 +67,17 @@
 
                 <div class="campo">
                     <label>Quantidade:</label>
-                    <input type="number" name="quantidade" required>
+                    <input type="number" name="quantidade" min="0" required>
                 </div>
 
                 <div class="campo">
                     <label>Estoque minimo:</label>
-                    <input type="number" name="estoque_minimo">
+                    <input type="number" name="estoque_minimo" min="0">
                 </div>
 
                 <div class="campo">
                     <label>Preco unitario:</label>
-                    <input type="number" step="0.01" name="preco_unitario">
+                    <input type="number" step="0.01" min="0" name="preco_unitario">
                 </div>
 
                 <div class="campo">
@@ -71,46 +91,72 @@
             </div>
         </form>
 
+        <div class="busca-container">
+    <form action="/estoque" method="GET" class="form-busca">
+        <input
+            type="text"
+            name="busca"
+            placeholder="Buscar por nome, descrição ou fornecedor"
+            value="{{ busca }}"
+        >
+
+        <button type="submit" class="btn">
+            Pesquisar
+        </button>
+    </form>
+</div>
+
         <h2>Peças cadastradas</h2>
 
         <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Descricao</th>
-                    <th>Quantidade</th>
-                    <th>Estoque minimo</th>
-                    <th>Preco unitario</th>
-                    <th>Fornecedor</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descricao</th>
+            <th>Quantidade</th>
+            <th>Estoque minimo</th>
+            <th>Preco unitario</th>
+            <th>Fornecedor</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
 
-            <tbody>
-                {% for peca in pecas %}
-                <tr>
-                    <td>{{ peca['nome'] }}</td>
-                    <td>{{ peca['descricao'] }}</td>
-                    <td>{{ peca['quantidade'] }}</td>
-                    <td>{{ peca['estoque_minimo'] }}</td>
-                    <td>R$ {{ peca['preco_unitario'] }}</td>
-                    <td>{{ peca['fornecedor'] }}</td>
+    <tbody>
+        {% for peca in pecas %}
+        <tr class="{% if peca['quantidade'] <= peca['estoque_minimo'] %}estoque-baixo{% endif %}">
+            <td>{{ peca['nome'] }}</td>
+            <td>{{ peca['descricao'] }}</td>
+            <td>{{ peca['quantidade'] }}</td>
+            <td>{{ peca['estoque_minimo'] }}</td>
+            <td>R$ {{ peca['preco_unitario'] }}</td>
+            <td>{{ peca['fornecedor'] }}</td>
 
-                    <td>
-                        <a href="/estoque/editar/{{ peca['id'] }}" class="btn">Editar</a>
-                        <a href="/estoque/movimentar/{{ peca['id'] }}" class="btn">Movimentar</a>
-
-                        <form action="/estoque/excluir/{{ peca['id'] }}" method="POST" class="acoes-form">
-                            <button type="submit" class="btn btn-danger">Excluir</button>
-                        </form>
-                    </td>
-                </tr>
+            <td>
+                {% if peca['quantidade'] <= peca['estoque_minimo'] %}
+                    <span class="status-baixo">⚠️ Baixo estoque</span>
                 {% else %}
-                <tr>
-                    <td colspan="7" class="mensagem-vazia">Nenhuma peça cadastrada.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                    <span class="status-normal"> Normal</span>
+                {% endif %}
+            </td>
+
+            <td>
+                <a href="/estoque/editar/{{ peca['id'] }}" class="btn">Editar</a>
+                <a href="/estoque/movimentar/{{ peca['id'] }}" class="btn">Movimentar</a>
+
+                <form action="/estoque/excluir/{{ peca['id'] }}" method="POST" class="acoes-form">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8" class="mensagem-vazia">
+                Nenhuma peça cadastrada.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
         </table>
     </div>
 </main>

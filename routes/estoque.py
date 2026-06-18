@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 from datetime import datetime
 
@@ -8,25 +8,66 @@ estoque_bp = Blueprint('estoque', __name__)
 def listar_estoque():
     db = conectar()
 
+    busca = request.args.get('busca', '')
+
     pecas = db.execute("""
         SELECT *
         FROM pecas
+        WHERE nome LIKE ?
+           OR descricao LIKE ?
+           OR fornecedor LIKE ?
         ORDER BY nome
-    """).fetchall()
+    """, (
+        f'%{busca}%',
+        f'%{busca}%',
+        f'%{busca}%'
+    )).fetchall()
+
+    total_pecas = db.execute("""
+        SELECT COUNT(*) as total
+        FROM pecas
+    """).fetchone()['total']
+
+    estoque_baixo = db.execute("""
+        SELECT COUNT(*) as total
+        FROM pecas
+        WHERE quantidade <= estoque_minimo
+    """).fetchone()['total']
+
+    total_movimentacoes = db.execute("""
+        SELECT COUNT(*) as total
+        FROM movimentacoes_estoque
+    """).fetchone()['total']
 
     db.close()
 
-    return render_template('estoque.html', pecas=pecas)
+    return render_template(
+        'estoque.html',
+        pecas=pecas,
+        busca=busca,
+        total_pecas=total_pecas,
+        estoque_baixo=estoque_baixo,
+        total_movimentacoes=total_movimentacoes
+    )
 
 
 @estoque_bp.route('/estoque/cadastrar', methods=['POST'])
 def cadastrar_peca():
     nome = request.form['nome']
     descricao = request.form['descricao']
-    quantidade = request.form['quantidade']
-    estoque_minimo = request.form['estoque_minimo']
-    preco_unitario = request.form['preco_unitario']
+    quantidade = int(request.form['quantidade'])
+    estoque_minimo = int(request.form['estoque_minimo'] or 0)
+    preco_unitario = float(request.form['preco_unitario'] or 0)
     fornecedor = request.form['fornecedor']
+
+    if quantidade < 0:
+        return "Quantidade não pode ser negativa"
+    
+    if estoque_minimo < 0:
+        return "Estoque mínimo não pode ser negativo"
+    
+    if preco_unitario < 0:
+        return "Preço unitário não pode ser negativo"
 
     db = conectar()
 
@@ -108,6 +149,7 @@ def atualizar_peca(id):
 
 @estoque_bp.route('/estoque/movimentar/<int:id>')
 def movimentar_peca(id):
+    
     db = conectar()
 
     peca = db.execute("""
@@ -125,6 +167,12 @@ def salvar_movimentacao(id):
     tipo = request.form['tipo']
     quantidade = int(request.form['quantidade'])
     observacao = request.form['observacao']
+
+    if quantidade <= 0:
+        return "Quantidade deve ser maior que zero"
+    
+    if tipo == 'saida' and quantidade > peca['quantidade']:
+        return flash("Estoque insuficiente")
 
     db = conectar()
 
