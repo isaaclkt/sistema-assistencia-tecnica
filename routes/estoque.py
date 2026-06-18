@@ -1,6 +1,10 @@
-from flask import Blueprint, flash, render_template, request, redirect
+from flask import Blueprint, flash, render_template, request, redirect, send_file
 from database import conectar
 from datetime import datetime
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import tempfile
+
 
 estoque_bp = Blueprint('estoque', __name__)
 
@@ -243,3 +247,142 @@ def historico_movimentacoes():
     db.close()
 
     return render_template('historico_movimentacoes.html', movimentacoes=movimentacoes)
+
+@estoque_bp.route('/estoque/relatorio/pdf')
+def gerar_relatorio_pdf():
+    from flask import send_file
+    from reportlab.platypus import (
+        SimpleDocTemplate,
+        Paragraph,
+        Spacer,
+        Table,
+        TableStyle
+    )
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet
+
+    import tempfile
+    from datetime import datetime
+
+    db = conectar()
+
+    pecas = db.execute("""
+        SELECT *
+        FROM pecas
+        ORDER BY nome
+    """).fetchall()
+
+    total_pecas = len(pecas)
+
+    estoque_baixo = sum(
+        1 for peca in pecas
+        if peca['quantidade'] <= peca['estoque_minimo']
+    )
+
+    db.close()
+
+    arquivo_temp = tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    )
+
+    pdf = SimpleDocTemplate(arquivo_temp.name)
+
+    estilos = getSampleStyleSheet()
+
+    elementos = []
+
+    elementos.append(
+        Paragraph(
+            "SISTEMA DE ASSISTÊNCIA TÉCNICA",
+            estilos['Title']
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            "Relatório de Estoque",
+            estilos['Heading2']
+        )
+    )
+
+    data_emissao = datetime.now().strftime(
+        "%d/%m/%Y %H:%M:%S"
+    )
+
+    elementos.append(
+        Paragraph(
+            f"Data de emissão: {data_emissao}",
+            estilos['Normal']
+        )
+    )
+
+    elementos.append(Spacer(1, 20))
+
+    elementos.append(
+        Paragraph(
+            f"Total de peças cadastradas: {total_pecas}",
+            estilos['Normal']
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            f"Itens com estoque baixo: {estoque_baixo}",
+            estilos['Normal']
+        )
+    )
+
+    elementos.append(Spacer(1, 20))
+
+    dados = [
+        [
+            "Nome",
+            "Quantidade",
+            "Est. Mínimo",
+            "Preço",
+            "Status"
+        ]
+    ]
+
+    for peca in pecas:
+
+        status = (
+            "Baixo Estoque"
+            if peca['quantidade'] <= peca['estoque_minimo']
+            else "OK"
+        )
+
+        dados.append([
+            peca['nome'],
+            str(peca['quantidade']),
+            str(peca['estoque_minimo']),
+            f"R$ {peca['preco_unitario']}",
+            status
+        ])
+
+    tabela = Table(dados)
+
+    tabela.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+
+        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke)
+    ]))
+
+    elementos.append(tabela)
+
+    pdf.build(elementos)
+
+    return send_file(
+        arquivo_temp.name,
+        as_attachment=True,
+        download_name="relatorio_estoque.pdf"
+    )
+
