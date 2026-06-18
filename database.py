@@ -9,6 +9,7 @@ def _coluna_existe(conexao, tabela, coluna):
 def _garantir_schema(conexao):
     colunas_orcamento = {
         "peca_id": "ALTER TABLE orcamentos ADD COLUMN peca_id INTEGER",
+        "problema_analisado": "ALTER TABLE orcamentos ADD COLUMN problema_analisado TEXT NOT NULL DEFAULT ''",
         "valor_peca": "ALTER TABLE orcamentos ADD COLUMN valor_peca REAL NOT NULL DEFAULT 0",
         "valor_mao_obra": "ALTER TABLE orcamentos ADD COLUMN valor_mao_obra REAL NOT NULL DEFAULT 0",
         "valor_total": "ALTER TABLE orcamentos ADD COLUMN valor_total REAL NOT NULL DEFAULT 0",

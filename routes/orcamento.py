@@ -35,6 +35,7 @@ def pagina_orcamento():
             orcamentos.id,
             orcamentos.ordem_id,
             orcamentos.equipamento,
+            orcamentos.problema_analisado,
             orcamentos.valor_peca,
             orcamentos.valor_mao_obra,
             orcamentos.valor_total,
@@ -64,6 +65,7 @@ def pagina_orcamento():
 @orcamento_bp.route("/orcamentos/cadastrar", methods=["POST"])
 def criar_orcamento():
     ordem_id = request.form["ordem_id"]
+    problema_analisado = request.form["problema_analisado"]
     valor_mao_obra = float(request.form["valor_mao_obra"] or 0)
 
     conexao = conectar()
@@ -102,17 +104,19 @@ def criar_orcamento():
             cliente_id,
             peca_id,
             equipamento,
+            problema_analisado,
             valor_orcamento,
             valor_peca,
             valor_mao_obra,
             valor_total
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         ordem_id,
         ordem["cliente_id"],
         ordem["peca_id"],
         ordem["equipamento"],
+        problema_analisado,
         valor_total,
         valor_peca,
         valor_mao_obra,

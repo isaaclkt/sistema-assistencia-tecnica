@@ -44,6 +44,7 @@ CREATE TABLE orcamentos (
     cliente_id INTEGER NOT NULL,
     peca_id INTEGER,
     equipamento TEXT NOT NULL,
+    problema_analisado TEXT NOT NULL DEFAULT '',
     valor_orcamento REAL NOT NULL,
     valor_peca REAL NOT NULL DEFAULT 0,
     valor_mao_obra REAL NOT NULL DEFAULT 0,
