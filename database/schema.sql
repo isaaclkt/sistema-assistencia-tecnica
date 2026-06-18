@@ -42,11 +42,16 @@ CREATE TABLE orcamentos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ordem_id INTEGER NOT NULL,
     cliente_id INTEGER NOT NULL,
+    peca_id INTEGER,
     equipamento TEXT NOT NULL,
     valor_orcamento REAL NOT NULL,
+    valor_peca REAL NOT NULL DEFAULT 0,
+    valor_mao_obra REAL NOT NULL DEFAULT 0,
+    valor_total REAL NOT NULL DEFAULT 0,
 
     FOREIGN KEY (ordem_id) REFERENCES ordens_servico(ordem_id),
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (peca_id) REFERENCES pecas(id)
 );
 
 CREATE TABLE pecas (

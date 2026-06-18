@@ -1,7 +1,35 @@
 import sqlite3
 
+
+def _coluna_existe(conexao, tabela, coluna):
+    colunas = conexao.execute(f"PRAGMA table_info({tabela})").fetchall()
+    return any(item["name"] == coluna for item in colunas)
+
+
+def _garantir_schema(conexao):
+    colunas_orcamento = {
+        "peca_id": "ALTER TABLE orcamentos ADD COLUMN peca_id INTEGER",
+        "valor_peca": "ALTER TABLE orcamentos ADD COLUMN valor_peca REAL NOT NULL DEFAULT 0",
+        "valor_mao_obra": "ALTER TABLE orcamentos ADD COLUMN valor_mao_obra REAL NOT NULL DEFAULT 0",
+        "valor_total": "ALTER TABLE orcamentos ADD COLUMN valor_total REAL NOT NULL DEFAULT 0",
+    }
+
+    for coluna, comando in colunas_orcamento.items():
+        if not _coluna_existe(conexao, "orcamentos", coluna):
+            conexao.execute(comando)
+
+    conexao.execute("""
+        UPDATE orcamentos
+        SET valor_total = valor_orcamento
+        WHERE valor_total = 0
+          AND valor_orcamento IS NOT NULL
+    """)
+    conexao.commit()
+
+
 def conectar():
     conexao = sqlite3.connect("database/sistema.db")
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
+    _garantir_schema(conexao)
     return conexao
