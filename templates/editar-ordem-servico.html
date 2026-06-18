@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova ordem de serviço</title>
+    <title>Editar ordem de serviço</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
 </head>
@@ -12,8 +12,8 @@
 
 <header>
     <div>
-        <h1>Nova ordem de serviço</h1>
-        <p>Registre uma nova solicitação de atendimento</p>
+        <h1>Editar ordem de serviço</h1>
+        <p>Atualize os dados da solicitação de atendimento</p>
     </div>
 
     <div class="header-user">
@@ -26,14 +26,14 @@
     <section class="card">
         <h2>Dados da ordem</h2>
 
-        <form action="/ordem-servico/cadastrar" method="POST">
+        <form action="/ordem-servico/atualizar/{{ ordem['ordem_id'] }}" method="POST">
             <div class="campo">
                 <label for="cliente_id">Cliente</label>
                 <select id="cliente_id" name="cliente_id" required>
                     <option value="">Selecione um cliente</option>
 
                     {% for cliente in clientes %}
-                    <option value="{{ cliente['id'] }}">
+                    <option value="{{ cliente['id'] }}" {% if cliente['id'] == ordem['cliente_id'] %}selected{% endif %}>
                         {{ cliente["nome"] }}
                     </option>
                     {% endfor %}
@@ -42,12 +42,12 @@
 
             <div class="campo">
                 <label for="equipamento">Equipamento</label>
-                <input type="text" id="equipamento" name="equipamento" required>
+                <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required>
             </div>
 
             <div class="campo">
                 <label for="problema_relatado">Problema relatado</label>
-                <textarea id="problema_relatado" name="problema_relatado" required></textarea>
+                <textarea id="problema_relatado" name="problema_relatado" required>{{ ordem['problema_relatado'] }}</textarea>
             </div>
 
             <div class="campo">
@@ -56,7 +56,7 @@
                     <option value="">Selecione uma peça</option>
 
                     {% for peca in pecas %}
-                    <option value="{{ peca['id'] }}">
+                    <option value="{{ peca['id'] }}" {% if peca['id'] == ordem['peca_id'] %}selected{% endif %}>
                         {{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}
                     </option>
                     {% endfor %}
@@ -66,15 +66,15 @@
             <div class="campo">
                 <label for="status">Status</label>
                 <select id="status" name="status" required>
-                    <option value="Aberto">Aberto</option>
-                    <option value="Em andamento">Em andamento</option>
-                    <option value="Finalizado">Finalizado</option>
-                    <option value="Cancelado">Cancelado</option>
+                    <option value="Aberto" {% if ordem['status'] == 'Aberto' %}selected{% endif %}>Aberto</option>
+                    <option value="Em andamento" {% if ordem['status'] == 'Em andamento' %}selected{% endif %}>Em andamento</option>
+                    <option value="Finalizado" {% if ordem['status'] == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                    <option value="Cancelado" {% if ordem['status'] == 'Cancelado' %}selected{% endif %}>Cancelado</option>
                 </select>
             </div>
 
             <div class="botoes">
-                <button type="submit">Criar ordem</button>
+                <button type="submit">Salvar ordem</button>
                 <a href="/ordem-servico" class="btn btn-home">Voltar</a>
             </div>
         </form>

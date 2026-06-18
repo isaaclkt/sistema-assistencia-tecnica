@@ -38,7 +38,10 @@
                         <option value="">Selecione uma ordem</option>
 
                         {% for ordem in ordens_servico %}
-                        <option value="{{ ordem['ordem_id'] }}">
+                        <option
+                            value="{{ ordem['ordem_id'] }}"
+                            data-peca="{{ ordem['peca_nome'] or '' }}"
+                            data-valor-peca="{{ ordem['valor_peca'] or 0 }}">
                             Ordem #{{ ordem['ordem_id'] }} -
                             {{ ordem['cliente_nome'] }} -
                             {{ ordem['equipamento'] }}
@@ -48,8 +51,23 @@
                 </div>
 
                 <div class="campo">
-                    <label for="valor_orcamento">Valor do orçamento</label>
-                    <input type="number" id="valor_orcamento" name="valor_orcamento" step="0.01" min="0" required>
+                    <label for="peca_nome">Peça vinculada</label>
+                    <input type="text" id="peca_nome" readonly>
+                </div>
+
+                <div class="campo">
+                    <label for="valor_peca">Valor da peça</label>
+                    <input type="number" id="valor_peca" step="0.01" min="0" readonly>
+                </div>
+
+                <div class="campo">
+                    <label for="valor_mao_obra">Valor da mão de obra</label>
+                    <input type="number" id="valor_mao_obra" name="valor_mao_obra" step="0.01" min="0" required>
+                </div>
+
+                <div class="campo">
+                    <label for="valor_total">Valor total</label>
+                    <input type="number" id="valor_total" step="0.01" min="0" readonly>
                 </div>
             </div>
 
@@ -66,9 +84,10 @@
                     <th>ID</th>
                     <th>Ordem</th>
                     <th>Cliente</th>
-                    <th>Equipamento</th>
-                    <th>Problema</th>
-                    <th>Valor</th>
+                    <th>Peça</th>
+                    <th>Valor peça</th>
+                    <th>Mão de obra</th>
+                    <th>Total</th>
                 </tr>
             </thead>
 
@@ -78,19 +97,41 @@
                     <td>{{ orcamento['id'] }}</td>
                     <td>#{{ orcamento['ordem_id'] }}</td>
                     <td>{{ orcamento['nome_cliente'] }}</td>
-                    <td>{{ orcamento['equipamento'] }}</td>
-                    <td>{{ orcamento['problema_relatado'] }}</td>
-                    <td>R$ {{ orcamento['valor_orcamento'] }}</td>
+                    <td>{{ orcamento['peca_nome'] or "-" }}</td>
+                    <td>R$ {{ orcamento['valor_peca'] }}</td>
+                    <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
+                    <td>R$ {{ orcamento['valor_total'] }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </main>
+
+<script>
+    const ordemSelect = document.getElementById("ordem_id");
+    const pecaNome = document.getElementById("peca_nome");
+    const valorPeca = document.getElementById("valor_peca");
+    const valorMaoObra = document.getElementById("valor_mao_obra");
+    const valorTotal = document.getElementById("valor_total");
+
+    function atualizarValores() {
+        const option = ordemSelect.options[ordemSelect.selectedIndex];
+        const preco = Number(option.dataset.valorPeca || 0);
+        const maoObra = Number(valorMaoObra.value || 0);
+
+        pecaNome.value = option.dataset.peca || "";
+        valorPeca.value = preco.toFixed(2);
+        valorTotal.value = (preco + maoObra).toFixed(2);
+    }
+
+    ordemSelect.addEventListener("change", atualizarValores);
+    valorMaoObra.addEventListener("input", atualizarValores);
+</script>
 
 </body>
 </html>

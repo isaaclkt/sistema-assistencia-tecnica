@@ -39,8 +39,10 @@
                     <th>ID</th>
                     <th>Cliente</th>
                     <th>Equipamento</th>
+                    <th>Peça</th>
                     <th>Problema relatado</th>
                     <th>Status</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -50,12 +52,21 @@
                     <td>{{ ordem["ordem_id"] }}</td>
                     <td>{{ ordem["cliente_nome"] }}</td>
                     <td>{{ ordem["equipamento"] }}</td>
+                    <td>{{ ordem["peca_nome"] or "-" }}</td>
                     <td>{{ ordem["problema_relatado"] }}</td>
                     <td>{{ ordem["status"] }}</td>
+                    <td>
+                        <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="btn">Editar</a>
+                        <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
+                            <button type="submit" onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
+                                Excluir
+                            </button>
+                        </form>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
                 </tr>
                 {% endfor %}
             </tbody>
