@@ -1,85 +1,65 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova ordem de serviço</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Nova Ordem de Serviço{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
-</head>
+{% endblock %}
 
-<body>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Nova Ordem de Serviço</h1>
+    <p>Registre uma nova solicitação de atendimento</p>
+</div>
 
-<header>
-    <div>
-        <h1>Nova ordem de serviço</h1>
-        <p>Registre uma nova solicitação de atendimento</p>
-    </div>
+<section class="card">
+    <h2>Dados da ordem</h2>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+    <form action="/ordem-servico/cadastrar" method="POST">
+        <div class="campo">
+            <label for="cliente_id">Cliente <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <select id="cliente_id" name="cliente_id" required>
+                <option value="">Selecione um cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente['id'] }}">{{ cliente["nome"] }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-<main>
-    <section class="card">
-        <h2>Dados da ordem</h2>
+        <div class="campo">
+            <label for="equipamento">Equipamento <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <input type="text" id="equipamento" name="equipamento" placeholder="Ex.: Notebook Dell Inspiron" required>
+        </div>
 
-        <form action="/ordem-servico/cadastrar" method="POST">
-            <div class="campo">
-                <label for="cliente_id">Cliente</label>
-                <select id="cliente_id" name="cliente_id" required>
-                    <option value="">Selecione um cliente</option>
+        <div class="campo">
+            <label for="problema_relatado">Problema relatado <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <textarea id="problema_relatado" name="problema_relatado" placeholder="Descreva o problema informado pelo cliente" required></textarea>
+        </div>
 
-                    {% for cliente in clientes %}
-                    <option value="{{ cliente['id'] }}">
-                        {{ cliente["nome"] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="campo">
+            <label for="peca_id">Peça utilizada <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <select id="peca_id" name="peca_id" required>
+                <option value="">Selecione uma peça</option>
+                {% for peca in pecas %}
+                <option value="{{ peca['id'] }}">{{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="campo">
-                <label for="equipamento">Equipamento</label>
-                <input type="text" id="equipamento" name="equipamento" required>
-            </div>
+        <div class="campo">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="Aberto">Aberto</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Finalizado">Finalizado</option>
+                <option value="Cancelado">Cancelado</option>
+            </select>
+        </div>
 
-            <div class="campo">
-                <label for="problema_relatado">Problema relatado</label>
-                <textarea id="problema_relatado" name="problema_relatado" required></textarea>
-            </div>
-
-            <div class="campo">
-                <label for="peca_id">Peça utilizada</label>
-                <select id="peca_id" name="peca_id" required>
-                    <option value="">Selecione uma peça</option>
-
-                    {% for peca in pecas %}
-                    <option value="{{ peca['id'] }}">
-                        {{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo">
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    <option value="Aberto">Aberto</option>
-                    <option value="Em andamento">Em andamento</option>
-                    <option value="Finalizado">Finalizado</option>
-                    <option value="Cancelado">Cancelado</option>
-                </select>
-            </div>
-
-            <div class="botoes">
-                <button type="submit">Criar ordem</button>
-                <a href="/ordem-servico" class="btn btn-home">Voltar</a>
-            </div>
-        </form>
-    </section>
-</main>
-
-</body>
-</html>
+        <div class="botoes">
+            <button type="submit">Criar ordem</button>
+            <a href="/ordem-servico" class="btn btn-home">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

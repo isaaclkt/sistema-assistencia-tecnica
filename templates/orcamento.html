@@ -1,136 +1,118 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orçamentos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Orçamentos{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/orcamento.css') }}">
-</head>
+{% endblock %}
 
-<body>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Orçamentos</h1>
+    <p>Cadastro e acompanhamento dos orçamentos da assistência técnica</p>
+</div>
 
-<header>
-    <div>
-        <h1>Orçamentos</h1>
-        <p>Cadastro e acompanhamento dos orçamentos da assistência técnica</p>
-    </div>
+<div class="container">
+    <h2>Cadastrar novo orçamento</h2>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+    <form action="/orcamentos/cadastrar" method="POST">
+        <div class="form-grid">
+            <div class="campo">
+                <label for="ordem_id">Ordem de serviço <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+                <select id="ordem_id" name="ordem_id" required>
+                    <option value="">Selecione uma ordem</option>
+                    {% for ordem in ordens_servico %}
+                    <option
+                        value="{{ ordem['ordem_id'] }}"
+                        data-peca="{{ ordem['peca_nome'] or '' }}"
+                        data-valor-peca="{{ ordem['valor_peca'] or 0 }}">
+                        Ordem #{{ ordem['ordem_id'] }} -
+                        {{ ordem['cliente_nome'] }} -
+                        {{ ordem['equipamento'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-<main>
-    <div class="container">
-        <div class="topo">
-            <h2>Cadastrar novo orçamento</h2>
+            <div class="campo">
+                <label for="peca_nome">Peça vinculada</label>
+                <input type="text" id="peca_nome" readonly>
+            </div>
 
-            <a href="/" class="btn btn-home">Voltar para Home</a>
+            <div class="campo">
+                <label for="problema_analisado">Problema analisado pelo técnico <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+                <textarea id="problema_analisado" name="problema_analisado" required></textarea>
+            </div>
+
+            <div class="campo">
+                <label for="valor_peca">Valor da peça</label>
+                <input type="number" id="valor_peca" step="0.01" min="0" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="valor_mao_obra">Valor da mão de obra <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+                <input type="number" id="valor_mao_obra" name="valor_mao_obra" step="0.01" min="0" required>
+            </div>
+
+            <div class="campo">
+                <label for="valor_total">Valor total</label>
+                <input type="number" id="valor_total" step="0.01" min="0" readonly>
+            </div>
         </div>
 
-        {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
-            <p class="mensagem-{{ categoria }}">{{ mensagem }}</p>
-        {% endfor %}
+        <div class="form-botao">
+            <button type="submit" class="btn">Cadastrar orçamento</button>
+        </div>
+    </form>
 
-        <form action="/orcamentos/cadastrar" method="POST">
-            <div class="form-grid">
-                <div class="campo">
-                    <label for="ordem_id">Ordem de serviço</label>
-                    <select id="ordem_id" name="ordem_id" required>
-                        <option value="">Selecione uma ordem</option>
+    <h2>Orçamentos cadastrados</h2>
 
-                        {% for ordem in ordens_servico %}
-                        <option
-                            value="{{ ordem['ordem_id'] }}"
-                            data-peca="{{ ordem['peca_nome'] or '' }}"
-                            data-valor-peca="{{ ordem['valor_peca'] or 0 }}">
-                            Ordem #{{ ordem['ordem_id'] }} -
-                            {{ ordem['cliente_nome'] }} -
-                            {{ ordem['equipamento'] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ordem</th>
+                <th>Cliente</th>
+                <th>Análise técnica</th>
+                <th>Peça</th>
+                <th>Valor peça</th>
+                <th>Mão de obra</th>
+                <th>Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
 
-                <div class="campo">
-                    <label for="peca_nome">Peça vinculada</label>
-                    <input type="text" id="peca_nome" readonly>
-                </div>
+        <tbody>
+            {% for orcamento in orcamentos %}
+            <tr>
+                <td>{{ orcamento['id'] }}</td>
+                <td>#{{ orcamento['ordem_id'] }}</td>
+                <td>{{ orcamento['nome_cliente'] }}</td>
+                <td>{{ orcamento['problema_analisado'] }}</td>
+                <td>{{ orcamento['peca_nome'] or "-" }}</td>
+                <td>R$ {{ orcamento['valor_peca'] }}</td>
+                <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
+                <td>R$ {{ orcamento['valor_total'] }}</td>
+                <td>
+                    <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
+                        <button type="submit" class="btn-danger"
+                                onclick="return confirm('Deseja realmente excluir este orçamento?')">
+                            Excluir
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
 
-                <div class="campo">
-                    <label for="problema_analisado">Problema analisado pelo técnico</label>
-                    <textarea id="problema_analisado" name="problema_analisado" required></textarea>
-                </div>
-
-                <div class="campo">
-                    <label for="valor_peca">Valor da peça</label>
-                    <input type="number" id="valor_peca" step="0.01" min="0" readonly>
-                </div>
-
-                <div class="campo">
-                    <label for="valor_mao_obra">Valor da mão de obra</label>
-                    <input type="number" id="valor_mao_obra" name="valor_mao_obra" step="0.01" min="0" required>
-                </div>
-
-                <div class="campo">
-                    <label for="valor_total">Valor total</label>
-                    <input type="number" id="valor_total" step="0.01" min="0" readonly>
-                </div>
-            </div>
-
-            <div class="form-botao">
-                <button type="submit" class="btn">Cadastrar orçamento</button>
-            </div>
-        </form>
-
-        <h2>Orçamentos cadastrados</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Ordem</th>
-                    <th>Cliente</th>
-                    <th>Análise técnica</th>
-                    <th>Peça</th>
-                    <th>Valor peça</th>
-                    <th>Mão de obra</th>
-                    <th>Total</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for orcamento in orcamentos %}
-                <tr>
-                    <td>{{ orcamento['id'] }}</td>
-                    <td>#{{ orcamento['ordem_id'] }}</td>
-                    <td>{{ orcamento['nome_cliente'] }}</td>
-                    <td>{{ orcamento['problema_analisado'] }}</td>
-                    <td>{{ orcamento['peca_nome'] or "-" }}</td>
-                    <td>R$ {{ orcamento['valor_peca'] }}</td>
-                    <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
-                    <td>R$ {{ orcamento['valor_total'] }}</td>
-                    <td>
-                        <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
-                            <button type="submit" class="btn-danger" onclick="return confirm('Deseja realmente excluir este orçamento?')">
-                                Excluir
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="9" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</main>
-
+{% block scripts %}
 <script>
     const ordemSelect = document.getElementById("ordem_id");
     const pecaNome = document.getElementById("peca_nome");
@@ -151,6 +133,4 @@
     ordemSelect.addEventListener("change", atualizarValores);
     valorMaoObra.addEventListener("input", atualizarValores);
 </script>
-
-</body>
-</html>
+{% endblock %}

@@ -106,11 +106,17 @@ def criar_orcamento():
 
     if ordem is None:
         conexao.close()
-        return "Ordem de serviço nao encontrada"
+        flash("Ordem de serviço não encontrada.", "erro")
+        return redirect("/orcamento")
 
     if ordem["peca_id"] is None:
         conexao.close()
-        return "Ordem de serviço sem peça vinculada"
+        flash(
+            "Esta ordem de serviço não possui peça vinculada. "
+            "Edite a ordem e selecione uma peça antes de gerar o orçamento.",
+            "erro",
+        )
+        return redirect("/orcamento")
 
     valor_peca = float(ordem["valor_peca"] or 0)
     valor_total = valor_peca + valor_mao_obra
@@ -142,6 +148,7 @@ def criar_orcamento():
             valor_total
         ))
         conexao.commit()
+        flash("Orçamento cadastrado com sucesso.", "sucesso")
     except sqlite3.IntegrityError:
         conexao.rollback()
         flash("Esta ordem de serviço já possui um orçamento.", "erro")
@@ -161,4 +168,5 @@ def excluir_orcamento(orcamento_id):
     conexao.commit()
     conexao.close()
 
+    flash("Orçamento excluído com sucesso.", "sucesso")
     return redirect("/orcamento")

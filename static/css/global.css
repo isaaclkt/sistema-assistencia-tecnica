@@ -352,6 +352,33 @@ td:last-child {
     color: var(--vermelho-700);
 }
 
+/* Badges de status de ordens de serviço (disponíveis em todas as telas) */
+.status.status-aberto {
+    background: var(--azul-100);
+    color: var(--azul-700);
+}
+
+.status.status-em-andamento {
+    background: var(--amarelo-100);
+    color: var(--amarelo-700);
+}
+
+.status.status-finalizado {
+    background: var(--verde-100);
+    color: var(--verde-700);
+}
+
+.status.status-cancelado {
+    background: var(--vermelho-100);
+    color: var(--vermelho-700);
+}
+
+/* Marcador de campo obrigatório (prevenção de erros — Nielsen #5) */
+.obrigatorio {
+    color: #dc2626;
+    font-weight: 700;
+}
+
 @media (max-width: 760px) {
     header {
         grid-template-columns: 1fr;

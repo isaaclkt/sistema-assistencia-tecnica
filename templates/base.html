@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Sistema de Assistência Técnica{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    {% block css %}{% endblock %}
+</head>
+<body>
+
+<div class="app-shell">
+    {% include 'partials/_sidebar.html' %}
+
+    <div class="app-main">
+        {% include 'partials/_navbar.html' %}
+
+        <main>
+            {% include 'partials/_flash.html' %}
+            {% block conteudo %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,15 @@
+{# Mensagens de feedback padronizadas (sucesso / erro / aviso) #}
+{% set mensagens = get_flashed_messages(with_categories=true) %}
+{% if mensagens %}
+<div class="flash-area">
+    {% for categoria, mensagem in mensagens %}
+        {% set tipo = categoria if categoria in ['sucesso', 'erro', 'aviso'] else 'sucesso' %}
+        <div class="flash flash--{{ tipo }}" role="alert">
+            <span class="flash-icone" aria-hidden="true">
+                {%- if tipo == 'sucesso' -%}✓{%- elif tipo == 'erro' -%}⚠{%- else -%}ℹ{%- endif -%}
+            </span>
+            <span>{{ mensagem }}</span>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

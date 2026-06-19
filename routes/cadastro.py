@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect
+import sqlite3
+
+from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 
 cadastro_bp = Blueprint("cadastro", __name__)
@@ -24,9 +26,17 @@ def cadastrar_cliente():
     conexao = conectar()
     cursor = conexao.cursor()
 
-    cursor.execute("""INSERT INTO clientes (nome, cpf, telefone, email, endereco) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, telefone, email, endereco))
+    try:
+        cursor.execute(
+            """INSERT INTO clientes (nome, cpf, telefone, email, endereco) VALUES (?, ?, ?, ?, ?)""",
+            (nome, cpf, telefone, email, endereco),
+        )
+        conexao.commit()
+        flash(f'Cliente "{nome}" cadastrado com sucesso.', "sucesso")
+    except sqlite3.IntegrityError:
+        conexao.rollback()
+        flash("Não foi possível cadastrar: este CPF já está em uso.", "erro")
 
-    conexao.commit()
     conexao.close()
 
     return redirect("/cadastro")
@@ -110,15 +120,23 @@ def atualizar_cliente(id):
     conexao = conectar()
     cursor = conexao.cursor()
 
-    cursor.execute("""UPDATE clientes SET nome = ?, cpf = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?""", (nome, cpf, telefone, email, endereco, id))
+    try:
+        cursor.execute(
+            """UPDATE clientes SET nome = ?, cpf = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?""",
+            (nome, cpf, telefone, email, endereco, id),
+        )
+        conexao.commit()
+        flash("Cliente atualizado com sucesso.", "sucesso")
+    except sqlite3.IntegrityError:
+        conexao.rollback()
+        flash("Não foi possível atualizar: este CPF já está em uso.", "erro")
 
-    conexao.commit()
     conexao.close()
 
     return redirect("/cadastro")
 
 # DELETE
-@cadastro_bp.route("/clientes/excluir/<int:id>")
+@cadastro_bp.route("/clientes/excluir/<int:id>", methods=["POST"])
 def deletar_cliente(id):
     conexao = conectar()
     cursor = conexao.cursor()
@@ -128,4 +146,5 @@ def deletar_cliente(id):
     conexao.commit()
     conexao.close()
 
+    flash("Cliente excluído com sucesso.", "sucesso")
     return redirect("/cadastro")

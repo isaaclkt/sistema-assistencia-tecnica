@@ -1,60 +1,47 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movimentar Estoque</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Movimentar Estoque{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movimentar_estoque.css') }}">
-</head>
-<body>
+{% endblock %}
 
-<header>
-    <div>
-        <h1>Movimentacao de Estoque</h1>
-        <p>Registre entradas e saídas de peças</p>
-    </div>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Movimentação de Estoque</h1>
+    <p>Registre entradas e saídas de peças</p>
+</div>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+<section class="card">
+    <h2>{{ peca['nome'] }}</h2>
 
-<main>
-    <section class="card">
-        <h2>{{ peca['nome'] }}</h2>
+    <p class="summary-pill">
+        Quantidade atual: <strong>{{ peca['quantidade'] }}</strong>
+    </p>
 
-        <p class="summary-pill">
-            Quantidade atual: <strong>{{ peca['quantidade'] }}</strong>
-        </p>
+    <form method="POST">
+        <div class="campo">
+            <label for="tipo">Tipo de movimentação</label>
+            <select id="tipo" name="tipo">
+                <option value="Entrada">Entrada (adicionar ao estoque)</option>
+                <option value="Saida">Saída (retirar do estoque)</option>
+            </select>
+        </div>
 
-        <form method="POST">
-            <div class="campo">
-                <label>Tipo:</label>
-                <select name="tipo">
-                    <option value="Entrada">Entrada</option>
-                    <option value="Saida">Saida</option>
-                </select>
-            </div>
+        <div class="campo">
+            <label for="quantidade">Quantidade <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <input type="number" id="quantidade" name="quantidade" min="1" required>
+        </div>
 
-            <div class="campo">
-                <label>Quantidade:</label>
-                <input type="number" name="quantidade" min="1" required>
-            </div>
+        <div class="campo">
+            <label for="observacao">Observação</label>
+            <input type="text" id="observacao" name="observacao" placeholder="Ex.: compra do fornecedor, uso em ordem #12">
+        </div>
 
-            <div class="campo">
-                <label>Observacao:</label>
-                <input type="text" name="observacao">
-            </div>
-
-            <div class="botoes">
-                <button type="submit">Salvar Movimentacao</button>
-                <a href="/estoque" class="btn btn-home">Voltar</a>
-            </div>
-        </form>
-    </section>
-</main>
-
-</body>
-</html>
+        <div class="botoes">
+            <button type="submit">Salvar Movimentação</button>
+            <a href="/estoque" class="btn btn-home">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

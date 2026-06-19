@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, flash, render_template, request, redirect, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from database import conectar
 
@@ -83,8 +83,30 @@ def login():
     return render_template("login.html")
 
 
+@funcionarios_bp.route("/configuracoes")
+def configuracoes():
+    conexao = conectar()
+    funcionario = conexao.execute("""
+        SELECT id, nome, email, cargo
+        FROM funcionarios
+        WHERE id = ?
+    """, (session.get("funcionario_id"),)).fetchone()
+
+    total_funcionarios = conexao.execute(
+        "SELECT COUNT(*) AS total FROM funcionarios"
+    ).fetchone()["total"]
+    conexao.close()
+
+    return render_template(
+        "configuracoes.html",
+        funcionario=funcionario,
+        total_funcionarios=total_funcionarios,
+    )
+
+
 @funcionarios_bp.route("/logout")
 def logout():
     session.clear()
 
+    flash("Sessão encerrada com sucesso.", "sucesso")
     return redirect("/login")

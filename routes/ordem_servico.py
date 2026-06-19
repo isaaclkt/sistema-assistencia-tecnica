@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 
 ordem_servico_bp = Blueprint("ordem_servico", __name__)
@@ -90,6 +90,7 @@ def cadastrar_ordem():
     db.commit()
     db.close()
 
+    flash("Ordem de serviço criada com sucesso.", "sucesso")
     return redirect("/ordem-servico")
 
 
@@ -176,6 +177,7 @@ def atualizar_ordem(ordem_id):
     db.commit()
     db.close()
 
+    flash("Ordem de serviço atualizada com sucesso.", "sucesso")
     return redirect("/ordem-servico")
 
 
@@ -190,4 +192,5 @@ def excluir_ordem(ordem_id):
     db.commit()
     db.close()
 
+    flash("Ordem de serviço excluída com sucesso.", "sucesso")
     return redirect("/ordem-servico")

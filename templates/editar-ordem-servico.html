@@ -1,85 +1,69 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar ordem de serviço</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Editar Ordem de Serviço{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
-</head>
+{% endblock %}
 
-<body>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Editar Ordem de Serviço</h1>
+    <p>Atualize os dados da solicitação de atendimento</p>
+</div>
 
-<header>
-    <div>
-        <h1>Editar ordem de serviço</h1>
-        <p>Atualize os dados da solicitação de atendimento</p>
-    </div>
+<section class="card">
+    <h2>Dados da ordem</h2>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+    <form action="/ordem-servico/atualizar/{{ ordem['ordem_id'] }}" method="POST">
+        <div class="campo">
+            <label for="cliente_id">Cliente <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <select id="cliente_id" name="cliente_id" required>
+                <option value="">Selecione um cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente['id'] }}" {% if cliente['id'] == ordem['cliente_id'] %}selected{% endif %}>
+                    {{ cliente["nome"] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
 
-<main>
-    <section class="card">
-        <h2>Dados da ordem</h2>
+        <div class="campo">
+            <label for="equipamento">Equipamento <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required>
+        </div>
 
-        <form action="/ordem-servico/atualizar/{{ ordem['ordem_id'] }}" method="POST">
-            <div class="campo">
-                <label for="cliente_id">Cliente</label>
-                <select id="cliente_id" name="cliente_id" required>
-                    <option value="">Selecione um cliente</option>
+        <div class="campo">
+            <label for="problema_relatado">Problema relatado <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <textarea id="problema_relatado" name="problema_relatado" required>{{ ordem['problema_relatado'] }}</textarea>
+        </div>
 
-                    {% for cliente in clientes %}
-                    <option value="{{ cliente['id'] }}" {% if cliente['id'] == ordem['cliente_id'] %}selected{% endif %}>
-                        {{ cliente["nome"] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="campo">
+            <label for="peca_id">Peça utilizada <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <select id="peca_id" name="peca_id" required>
+                <option value="">Selecione uma peça</option>
+                {% for peca in pecas %}
+                <option value="{{ peca['id'] }}" {% if peca['id'] == ordem['peca_id'] %}selected{% endif %}>
+                    {{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="campo">
-                <label for="equipamento">Equipamento</label>
-                <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required>
-            </div>
+        <div class="campo">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="Aberto" {% if ordem['status'] == 'Aberto' %}selected{% endif %}>Aberto</option>
+                <option value="Em andamento" {% if ordem['status'] == 'Em andamento' %}selected{% endif %}>Em andamento</option>
+                <option value="Finalizado" {% if ordem['status'] == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                <option value="Cancelado" {% if ordem['status'] == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+            </select>
+        </div>
 
-            <div class="campo">
-                <label for="problema_relatado">Problema relatado</label>
-                <textarea id="problema_relatado" name="problema_relatado" required>{{ ordem['problema_relatado'] }}</textarea>
-            </div>
-
-            <div class="campo">
-                <label for="peca_id">Peça utilizada</label>
-                <select id="peca_id" name="peca_id" required>
-                    <option value="">Selecione uma peça</option>
-
-                    {% for peca in pecas %}
-                    <option value="{{ peca['id'] }}" {% if peca['id'] == ordem['peca_id'] %}selected{% endif %}>
-                        {{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo">
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    <option value="Aberto" {% if ordem['status'] == 'Aberto' %}selected{% endif %}>Aberto</option>
-                    <option value="Em andamento" {% if ordem['status'] == 'Em andamento' %}selected{% endif %}>Em andamento</option>
-                    <option value="Finalizado" {% if ordem['status'] == 'Finalizado' %}selected{% endif %}>Finalizado</option>
-                    <option value="Cancelado" {% if ordem['status'] == 'Cancelado' %}selected{% endif %}>Cancelado</option>
-                </select>
-            </div>
-
-            <div class="botoes">
-                <button type="submit">Salvar ordem</button>
-                <a href="/ordem-servico" class="btn btn-home">Voltar</a>
-            </div>
-        </form>
-    </section>
-</main>
-
-</body>
-</html>
+        <div class="botoes">
+            <button type="submit">Salvar ordem</button>
+            <a href="/ordem-servico" class="btn btn-home">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
