@@ -1,59 +1,184 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Assistência Técnica</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Painel — Sistema de Assistência Técnica{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-</head>
-<body>
+{% endblock %}
 
-    <header>
-        <div>
-            <h1>Sistema de Gestão Interna de Assistência Técnica</h1>
-            <p>Controle de ordens de serviço, equipamentos, estoque, clientes e orçamentos</p>
-        </div>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Painel de Controle</h1>
+    <p>Visão geral da operação da assistência técnica</p>
+</div>
 
-        <div class="header-user">
-            <span class="user-icon" aria-hidden="true"></span>
-            <span>{{ session.get("funcionario_nome", "") }}</span>
-        </div>
-    </header>
+{# ---- Alertas operacionais (só aparecem quando há algo a tratar) ---- #}
+{% if indicadores.estoque_baixo > 0 or indicadores.ordens_abertas > 0 %}
+<div class="alertas">
+    {% if indicadores.estoque_baixo > 0 %}
+    <a href="/estoque" class="alerta alerta--critico">
+        <span class="alerta-icone" aria-hidden="true">🔴</span>
+        <span><strong>{{ indicadores.estoque_baixo }}</strong> peça(s) com estoque baixo — repor com prioridade</span>
+    </a>
+    {% endif %}
+    {% if indicadores.ordens_abertas > 0 %}
+    <a href="/ordem-servico" class="alerta alerta--aviso">
+        <span class="alerta-icone" aria-hidden="true">🟡</span>
+        <span><strong>{{ indicadores.ordens_abertas }}</strong> ordem(ns) de serviço em aberto</span>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
 
-    <main>
-        <div class="cards">
+{# ---- Cards de indicadores (KPIs) ---- #}
+<section class="kpi-grid">
+    <a href="/cadastro" class="kpi-card">
+        <span class="kpi-icone" aria-hidden="true">👥</span>
+        <span class="kpi-valor">{{ indicadores.clientes }}</span>
+        <span class="kpi-rotulo">Clientes</span>
+    </a>
+    <a href="/ordem-servico" class="kpi-card">
+        <span class="kpi-icone" aria-hidden="true">🛠️</span>
+        <span class="kpi-valor">{{ indicadores.ordens_abertas }}</span>
+        <span class="kpi-rotulo">Ordens em aberto</span>
+    </a>
+    <a href="/ordem-servico" class="kpi-card">
+        <span class="kpi-icone" aria-hidden="true">✅</span>
+        <span class="kpi-valor">{{ indicadores.ordens_finalizadas }}</span>
+        <span class="kpi-rotulo">Ordens finalizadas</span>
+    </a>
+    <a href="/orcamento" class="kpi-card">
+        <span class="kpi-icone" aria-hidden="true">📄</span>
+        <span class="kpi-valor">{{ indicadores.orcamentos }}</span>
+        <span class="kpi-rotulo">Orçamentos</span>
+    </a>
+    <a href="/estoque" class="kpi-card">
+        <span class="kpi-icone" aria-hidden="true">📦</span>
+        <span class="kpi-valor">{{ indicadores.pecas }}</span>
+        <span class="kpi-rotulo">Peças cadastradas</span>
+    </a>
+    <a href="/estoque" class="kpi-card {{ 'kpi-card--alerta' if indicadores.estoque_baixo > 0 else '' }}">
+        <span class="kpi-icone" aria-hidden="true">⚠️</span>
+        <span class="kpi-valor">{{ indicadores.estoque_baixo }}</span>
+        <span class="kpi-rotulo">Estoque baixo</span>
+    </a>
+</section>
 
-            <div class="card">
-                <h2>Ordem de Serviço e Equipamentos</h2>
-                <p>Cadastro e acompanhamento de equipamentos recebidos para manutenção.</p>
-                <a href="/ordem-servico" class="btn">Acessar</a>
+{# ---- Gráficos (barras em HTML/CSS, alimentadas pelo Flask) ---- #}
+<section class="graficos-grid">
+    <div class="container grafico-box">
+        <h2>Ordens por status</h2>
+        {% if ordens_por_status %}
+            {% for item in ordens_por_status %}
+            <div class="barra-linha">
+                <span class="barra-rotulo">{{ item.rotulo }}</span>
+                <span class="barra-trilho">
+                    <span class="barra-preenchida status-{{ item.rotulo|lower|replace(' ', '-') }}"
+                          style="width: {{ item.porcentagem }}%;"></span>
+                </span>
+                <span class="barra-valor">{{ item.total }}</span>
             </div>
+            {% endfor %}
+        {% else %}
+            <p class="mensagem-vazia">Nenhuma ordem de serviço cadastrada.</p>
+        {% endif %}
+    </div>
 
-            <div class="card">
-                <h2>Peças e Estoque</h2>
-                <p>Controle de peças disponíveis no sistema.</p>
-                <a href="/estoque" class="btn">Acessar</a>
+    <div class="container grafico-box">
+        <h2>Top 5 peças mais movimentadas</h2>
+        {% if top_pecas %}
+            {% for item in top_pecas %}
+            <div class="barra-linha">
+                <span class="barra-rotulo" title="{{ item.nome }}">{{ item.nome }}</span>
+                <span class="barra-trilho">
+                    <span class="barra-preenchida barra-azul" style="width: {{ item.porcentagem }}%;"></span>
+                </span>
+                <span class="barra-valor">{{ item.total }}</span>
             </div>
+            {% endfor %}
+        {% else %}
+            <p class="mensagem-vazia">Nenhuma movimentação registrada.</p>
+        {% endif %}
+    </div>
+</section>
 
-            <div class="card">
-                <h2>Gestão de clientes</h2>
-                <p>Controle e gerenciamento de informações dos clientes.</p>
-                <a href="/cadastro" class="btn">Acessar</a>
-            </div>
-
-            <div class="card">
-                <h2>Orçamentos</h2>
-                <p>Criação e acompanhamento de orçamentos para os serviços da assistência técnica.</p>
-                <a href="/orcamento" class="btn">Acessar</a>
-            </div>
-
+<section class="container grafico-box grafico-largo">
+    <h2>Movimentações de estoque — últimos 14 dias</h2>
+    {% if movimentacoes_periodo %}
+        <div class="legenda">
+            <span><span class="ponto ponto-entrada"></span> Entradas</span>
+            <span><span class="ponto ponto-saida"></span> Saídas</span>
         </div>
-
-        <div class="home-actions">
-            <a href="/logout" class="btn btn-danger">Logout</a>
+        {% for item in movimentacoes_periodo %}
+        <div class="mov-dia">
+            <span class="mov-data">{{ item.dia }}</span>
+            <span class="mov-barras">
+                <span class="barra-trilho">
+                    <span class="barra-preenchida barra-entrada" style="width: {{ item.pct_entradas }}%;"></span>
+                </span>
+                <span class="barra-trilho">
+                    <span class="barra-preenchida barra-saida" style="width: {{ item.pct_saidas }}%;"></span>
+                </span>
+            </span>
+            <span class="mov-valores">+{{ item.entradas }} / -{{ item.saidas }}</span>
         </div>
-    </main>
+        {% endfor %}
+    {% else %}
+        <p class="mensagem-vazia">Nenhuma movimentação nos últimos 14 dias.</p>
+    {% endif %}
+</section>
 
-</body>
-</html>
+{# ---- Atividade recente ---- #}
+<section class="recentes-grid">
+    <div class="container">
+        <h2>Últimas ordens de serviço</h2>
+        {% if ultimas_ordens %}
+        <ul class="lista-recente">
+            {% for ordem in ultimas_ordens %}
+            <li>
+                <div class="lista-info">
+                    <strong>#{{ ordem.ordem_id }} — {{ ordem.cliente_nome }}</strong>
+                    <small>{{ ordem.equipamento }}</small>
+                </div>
+                <span class="status status-{{ ordem.status|lower|replace(' ', '-') }}">{{ ordem.status }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="mensagem-vazia">Nenhuma ordem registrada.</p>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <h2>Últimas movimentações</h2>
+        {% if ultimas_movimentacoes %}
+        <ul class="lista-recente">
+            {% for mov in ultimas_movimentacoes %}
+            <li>
+                <div class="lista-info">
+                    <strong>{{ mov.nome_peca }}</strong>
+                    <small>{{ mov.data_movimentacao }}</small>
+                </div>
+                <span class="status {{ 'mov-tag-entrada' if mov.tipo == 'Entrada' else 'mov-tag-saida' }}">
+                    {{ mov.tipo }} {{ mov.quantidade }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="mensagem-vazia">Nenhuma movimentação registrada.</p>
+        {% endif %}
+    </div>
+</section>
+
+{# ---- Acesso rápido aos módulos (preserva a navegação anterior) ---- #}
+<section class="acesso-rapido">
+    <h2>Acesso rápido</h2>
+    <div class="atalhos">
+        <a href="/ordem-servico" class="atalho"><span aria-hidden="true">🛠️</span> Ordens de Serviço</a>
+        <a href="/estoque" class="atalho"><span aria-hidden="true">📦</span> Estoque</a>
+        <a href="/cadastro" class="atalho"><span aria-hidden="true">👥</span> Clientes</a>
+        <a href="/orcamento" class="atalho"><span aria-hidden="true">📄</span> Orçamentos</a>
+    </div>
+</section>
+{% endblock %}

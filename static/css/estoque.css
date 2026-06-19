@@ -66,3 +66,27 @@ td:last-child {
 .alerta p {
     color: #dc2626;
 }
+
+.paginacao {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    margin-top: 24px;
+}
+
+.paginacao a {
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--azul-700);
+    background: var(--azul-100);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.paginacao a:hover,
+.paginacao a.ativa {
+    color: var(--branco);
+    background: var(--azul-700);
+}

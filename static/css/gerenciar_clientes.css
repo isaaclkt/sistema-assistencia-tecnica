@@ -2,9 +2,116 @@ main {
     width: min(1240px, calc(100% - 32px));
 }
 
-td:last-child {
+.busca-container {
+    margin: 20px 0;
+}
+
+.form-busca {
     display: flex;
-    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 0;
+}
+
+.form-busca input {
+    flex: 1;
+}
+
+.tabela-clientes-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-clientes {
+    width: 100%;
+    min-width: 1050px;
+    table-layout: fixed;
+}
+
+.tabela-clientes .col-id {
+    width: 5%;
+}
+
+.tabela-clientes .col-nome {
+    width: 14%;
+}
+
+.tabela-clientes .col-cpf,
+.tabela-clientes .col-telefone {
+    width: 12%;
+}
+
+.tabela-clientes .col-email {
+    width: 18%;
+}
+
+.tabela-clientes .col-endereco {
+    width: 21%;
+}
+
+.tabela-clientes .col-acoes {
+    width: 18%;
+}
+
+.tabela-clientes th,
+.tabela-clientes td {
+    height: 64px;
+    padding: 12px 14px;
+}
+
+.tabela-clientes tbody td:not(.celula-acoes) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.acoes-clientes {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 8px;
     align-items: center;
+}
+
+.acoes-clientes .editar,
+.acoes-clientes .excluir {
+    width: 72px;
+    min-width: 72px;
+    min-height: 38px;
+    padding: 8px 10px;
+    white-space: nowrap;
+}
+
+.paginacao {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    margin-top: 24px;
+}
+
+.paginacao a {
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--azul-700);
+    background: var(--azul-100);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.paginacao a:hover,
+.paginacao a.ativa {
+    color: var(--branco);
+    background: var(--azul-700);
+}
+
+@media (max-width: 760px) {
+    .form-busca {
+        flex-direction: column;
+    }
+
+    .tabela-clientes {
+        display: table;
+        overflow: visible;
+        white-space: normal;
+    }
 }

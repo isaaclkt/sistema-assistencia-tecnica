@@ -1,52 +1,34 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
-</head>
-<body>
+{% extends "base_auth.html" %}
 
-<header>
-    <div>
-        <h1>Login de Funcionários</h1>
-        <p>Acesse o sistema de gestao interna</p>
-    </div>
+{% block titulo %}Login — Sistema de Assistência Técnica{% endblock %}
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+{% block conteudo %}
+<section class="container auth-card">
+    <h2>Entrar</h2>
 
-<main>
-    <section class="container auth-card">
-        <h2>Entrar</h2>
+    {% if erro %}
+        <div class="flash flash--erro" role="alert">
+            <span class="flash-icone" aria-hidden="true">⚠</span>
+            <span>{{ erro }}</span>
+        </div>
+    {% endif %}
 
-        {% if erro %}
-            <p class="mensagem-vazia">{{ erro }}</p>
-        {% endif %}
+    <form action="/login" method="POST">
+        <div class="campo">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autofocus>
+        </div>
 
-        <form action="/login" method="POST">
-            <div class="campo">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required>
+        </div>
 
-            <div class="campo">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required>
-            </div>
+        <button type="submit" class="btn">Entrar</button>
+    </form>
 
-            <button type="submit" class="btn">Entrar</button>
-        </form>
-
-        <p class="auth-link">
-            <a href="/funcionarios/cadastrar">Cadastrar funcionário</a>
-        </p>
-    </section>
-</main>
-
-</body>
-</html>
+    <p class="auth-link">
+        <a href="/funcionarios/cadastrar">Cadastrar funcionário</a>
+    </p>
+</section>
+{% endblock %}

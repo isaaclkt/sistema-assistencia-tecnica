@@ -1,0 +1,33 @@
+{# Menu lateral de navegação principal — presente em todas as telas internas #}
+<aside class="sidebar">
+    <div class="sidebar-topo">
+        <a href="/" class="marca">
+            Assistência Técnica
+            <small>Gestão Interna</small>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegação principal">
+        <a href="/" class="{{ 'ativo' if request.path == '/' else '' }}">
+            <span class="item-icone" aria-hidden="true">🏠</span> Home
+        </a>
+        <a href="/cadastro" class="{{ 'ativo' if request.path.startswith('/cadastro') or request.path.startswith('/clientes') else '' }}">
+            <span class="item-icone" aria-hidden="true">👥</span> Clientes
+        </a>
+        <a href="/ordem-servico" class="{{ 'ativo' if request.path.startswith('/ordem-servico') else '' }}">
+            <span class="item-icone" aria-hidden="true">🛠️</span> Ordens de Serviço
+        </a>
+        <a href="/orcamento" class="{{ 'ativo' if request.path.startswith('/orcamento') else '' }}">
+            <span class="item-icone" aria-hidden="true">📄</span> Orçamentos
+        </a>
+        <a href="/estoque" class="{{ 'ativo' if request.path.startswith('/estoque') else '' }}">
+            <span class="item-icone" aria-hidden="true">📦</span> Estoque
+        </a>
+        <a href="/estoque/relatorio/pdf">
+            <span class="item-icone" aria-hidden="true">📊</span> Relatórios
+        </a>
+        <a href="/configuracoes" class="{{ 'ativo' if request.path.startswith('/configuracoes') else '' }}">
+            <span class="item-icone" aria-hidden="true">⚙️</span> Configurações
+        </a>
+    </nav>
+</aside>

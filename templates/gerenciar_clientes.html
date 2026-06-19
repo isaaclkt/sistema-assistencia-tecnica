@@ -1,78 +1,112 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Clientes{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/gerenciar_clientes.css') }}">
-</head>
+{% endblock %}
 
-<body>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Gestão de Clientes</h1>
+    <p>Visualização e gerenciamento dos clientes cadastrados</p>
+</div>
 
-<header>
-    <div>
-        <h1>Gestão de Clientes</h1>
-        <p>Visualização e gerenciamento dos clientes cadastrados</p>
-    </div>
+<div class="container">
+    <div class="topo">
+        <h2>Clientes Cadastrados</h2>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
-
-<main>
-    <div class="container">
-        <div class="topo">
-            <h2>Clientes Cadastrados</h2>
-
-            <div class="acoes-topo">
-                <a href="/" class="btn btn-home">Voltar para Home</a>
-                <a href="/clientes/novo" class="btn">Novo Cliente</a>
-            </div>
+        <div class="acoes-topo">
+            <a href="/clientes/novo" class="btn">Novo Cliente</a>
         </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>CPF</th>
-                    <th>Telefone</th>
-                    <th>Email</th>
-                    <th>Endereço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for cliente in clientes %}
-                <tr>
-                    <td>{{ cliente['id'] }}</td>
-                    <td>{{ cliente['nome'] }}</td>
-                    <td>{{ cliente['cpf'] }}</td>
-                    <td>{{ cliente['telefone'] }}</td>
-                    <td>{{ cliente['email'] }}</td>
-                    <td>{{ cliente['endereco'] }}</td>
-                    <td>
-                        <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
-                        <a href="/clientes/excluir/{{ cliente['id'] }}"
-                           class="excluir"
-                           onclick="return confirm('Deseja realmente excluir este cliente?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
-</main>
 
-</body>
-</html>
+    <div class="busca-container">
+        <form action="/cadastro" method="GET" class="form-busca">
+            <input
+                type="text"
+                name="busca"
+                placeholder="Buscar por nome, CPF, telefone, email ou endereço"
+                value="{{ busca }}"
+            >
+            <button type="submit" class="btn">Pesquisar</button>
+            {% if busca %}
+                <a href="/cadastro" class="btn btn-home">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="tabela-clientes-wrapper">
+    <table class="tabela-clientes">
+        <colgroup>
+            <col class="col-id">
+            <col class="col-nome">
+            <col class="col-cpf">
+            <col class="col-telefone">
+            <col class="col-email">
+            <col class="col-endereco">
+            <col class="col-acoes">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Endereço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente['id'] }}</td>
+                <td title="{{ cliente['nome'] }}">{{ cliente['nome'] }}</td>
+                <td title="{{ cliente['cpf'] }}">{{ cliente['cpf'] }}</td>
+                <td title="{{ cliente['telefone'] }}">{{ cliente['telefone'] }}</td>
+                <td title="{{ cliente['email'] }}">{{ cliente['email'] }}</td>
+                <td title="{{ cliente['endereco'] }}">{{ cliente['endereco'] }}</td>
+                <td class="celula-acoes">
+                    <div class="acoes-clientes">
+                        <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
+                        <form action="/clientes/excluir/{{ cliente['id'] }}" method="POST" class="acoes-form">
+                            <button type="submit" class="excluir"
+                                    onclick="return confirm('Deseja realmente excluir o cliente {{ cliente['nome'] }}?')">
+                                Excluir
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="mensagem-vazia">
+                    {% if busca %}Nenhum cliente encontrado.{% else %}Nenhum cliente cadastrado.{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    {% if total_paginas > 1 %}
+    <nav class="paginacao" aria-label="Paginação de clientes">
+        {% if pagina > 1 %}
+            <a href="?busca={{ busca|urlencode }}&pagina={{ pagina - 1 }}">Anterior</a>
+        {% endif %}
+
+        {% for numero in range(1, total_paginas + 1) %}
+            <a href="?busca={{ busca|urlencode }}&pagina={{ numero }}" {% if numero == pagina %}class="ativa" aria-current="page"{% endif %}>
+                {{ numero }}
+            </a>
+        {% endfor %}
+
+        {% if pagina < total_paginas %}
+            <a href="?busca={{ busca|urlencode }}&pagina={{ pagina + 1 }}">Próxima</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

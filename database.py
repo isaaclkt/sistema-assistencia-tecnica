@@ -25,6 +25,10 @@ def _garantir_schema(conexao):
         WHERE valor_total = 0
           AND valor_orcamento IS NOT NULL
     """)
+    conexao.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_orcamentos_ordem_id
+        ON orcamentos (ordem_id)
+    """)
     conexao.commit()
 
 

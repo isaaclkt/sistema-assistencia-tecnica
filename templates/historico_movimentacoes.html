@@ -1,62 +1,53 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historico de Movimentacoes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Histórico de Movimentações{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/historico_movimentacoes.css') }}">
-</head>
-<body>
+{% endblock %}
 
-<header>
-    <div>
-        <h1>Historico de Movimentacoes</h1>
-        <p>Consulta das entradas e saídas registradas no estoque</p>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Histórico de Movimentações</h1>
+    <p>Consulta das entradas e saídas registradas no estoque</p>
+</div>
+
+<div class="container">
+    <div class="topo">
+        <h2>Movimentações registradas</h2>
+        <a href="/estoque" class="btn btn-home">Voltar ao Estoque</a>
     </div>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Peça</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Observação</th>
+            </tr>
+        </thead>
 
-<main>
-    <div class="container">
-        <div class="topo">
-            <h2>Movimentacoes registradas</h2>
-            <a href="/estoque" class="btn btn-home">Voltar ao Estoque</a>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Peça</th>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Observacao</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for mov in movimentacoes %}
-                <tr>
-                    <td>{{ mov['data_movimentacao'] }}</td>
-                    <td>{{ mov['nome_peca'] }}</td>
-                    <td>{{ mov['tipo'] }}</td>
-                    <td>{{ mov['quantidade'] }}</td>
-                    <td>{{ mov['observacao'] }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="mensagem-vazia">Nenhuma movimentacao registrada.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</main>
-
-</body>
-</html>
+        <tbody>
+            {% for mov in movimentacoes %}
+            <tr>
+                <td>{{ mov['data_movimentacao'] }}</td>
+                <td>{{ mov['nome_peca'] }}</td>
+                <td>
+                    <span class="status {{ 'aprovado' if mov['tipo'] == 'Entrada' else 'recusado' }}">
+                        {{ mov['tipo'] }}
+                    </span>
+                </td>
+                <td>{{ mov['quantidade'] }}</td>
+                <td>{{ mov['observacao'] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="mensagem-vazia">Nenhuma movimentação registrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

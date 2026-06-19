@@ -1,15 +1,20 @@
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 
 ordem_servico_bp = Blueprint("ordem_servico", __name__)
 
 
 def salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades):
+    itens = {}
+
     for peca_id, quantidade_texto in zip(pecas_ids, quantidades):
         if not peca_id:
             continue
 
         quantidade = max(int(quantidade_texto or 1), 1)
+        itens[peca_id] = itens.get(peca_id, 0) + quantidade
+
+    for peca_id, quantidade in itens.items():
         peca = db.execute("""
             SELECT preco_unitario
             FROM pecas
@@ -27,6 +32,31 @@ def salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades):
                 quantidade,
                 peca["preco_unitario"]
             ))
+
+
+def atualizar_valores_orcamento(db, ordem_id):
+    resumo = db.execute("""
+        SELECT
+            MIN(peca_id) AS peca_id,
+            COALESCE(SUM(quantidade * valor_unitario), 0) AS valor_pecas
+        FROM ordem_pecas
+        WHERE ordem_id = ?
+    """, (ordem_id,)).fetchone()
+
+    db.execute("""
+        UPDATE orcamentos
+        SET peca_id = ?,
+            valor_peca = ?,
+            valor_orcamento = ? + valor_mao_obra,
+            valor_total = ? + valor_mao_obra
+        WHERE ordem_id = ?
+    """, (
+        resumo["peca_id"],
+        resumo["valor_pecas"],
+        resumo["valor_pecas"],
+        resumo["valor_pecas"],
+        ordem_id,
+    ))
 
 
 @ordem_servico_bp.route("/ordem-servico")
@@ -117,6 +147,7 @@ def cadastrar_ordem():
     db.commit()
     db.close()
 
+    flash("Ordem de serviço criada com sucesso.", "sucesso")
     return redirect("/ordem-servico")
 
 
@@ -199,10 +230,12 @@ def atualizar_ordem(ordem_id):
         pecas_ids,
         quantidades
     )
+    atualizar_valores_orcamento(db, ordem_id)
 
     db.commit()
     db.close()
 
+    flash("Ordem de serviço atualizada com sucesso.", "sucesso")
     return redirect("/ordem-servico")
 
 
@@ -217,4 +250,5 @@ def excluir_ordem(ordem_id):
     db.commit()
     db.close()
 
+    flash("Ordem de serviço excluída com sucesso.", "sucesso")
     return redirect("/ordem-servico")

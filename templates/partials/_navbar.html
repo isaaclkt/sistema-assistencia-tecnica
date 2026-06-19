@@ -1,0 +1,28 @@
+{# Navbar superior com o nome do sistema e o menu do usuário (dropdown CSS) #}
+<nav class="navbar">
+    <h2 class="navbar-titulo">Sistema de Assistência Técnica</h2>
+
+    <details class="user-menu">
+        <summary>
+            <span class="user-icon" aria-hidden="true"></span>
+            <span>{{ session.get("funcionario_nome", "Usuário") }}</span>
+            <span class="seta" aria-hidden="true">▾</span>
+        </summary>
+
+        <span class="clique-fora" aria-hidden="true"></span>
+
+        <div class="user-dropdown">
+            <div class="user-info">
+                <strong>{{ session.get("funcionario_nome", "Usuário") }}</strong>
+                <small>{{ session.get("funcionario_cargo") or "Funcionário" }}</small>
+            </div>
+
+            <a href="/configuracoes" class="dropdown-link">
+                <span aria-hidden="true">⚙️</span> Configurações
+            </a>
+            <a href="/logout" class="dropdown-link sair">
+                <span aria-hidden="true">🚪</span> Sair
+            </a>
+        </div>
+    </details>
+</nav>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Acesso — Sistema de Assistência Técnica{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-body">
+
+<main class="auth-wrapper">
+    <div class="auth-brand">
+        <span class="auth-logo" aria-hidden="true">🛠️</span>
+        <h1>Sistema de Assistência Técnica</h1>
+        <p>Gestão interna de ordens, estoque, clientes e orçamentos</p>
+    </div>
+
+    {% include 'partials/_flash.html' %}
+
+    {% block conteudo %}{% endblock %}
+</main>
+
+</body>
+</html>

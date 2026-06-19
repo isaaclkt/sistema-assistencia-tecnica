@@ -52,6 +52,7 @@ def proteger_rotas():
         "/orcamento",
         "/orcamentos",
         "/relatorios",
+        "/configuracoes",
     )
 
     # Bloqueia a home e os modulos internos quando nao ha funcionario autenticado.

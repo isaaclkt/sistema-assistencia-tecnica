@@ -1,78 +1,68 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ordens de serviço</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block titulo %}Ordens de Serviço{% endblock %}
+
+{% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ordem-servico.css') }}">
-</head>
+{% endblock %}
 
-<body>
+{% block conteudo %}
+<div class="page-head">
+    <h1>Ordens de Serviço</h1>
+    <p>Acompanhamento das ordens abertas na assistência técnica</p>
+</div>
 
-<header>
-    <div>
-        <h1>Ordens de serviço</h1>
-        <p>Acompanhamento das ordens abertas na assistência técnica</p>
-    </div>
+<div class="container">
+    <div class="topo">
+        <h2>Ordens cadastradas</h2>
 
-    <div class="header-user">
-        <span class="user-icon" aria-hidden="true"></span>
-        <span>{{ session.get("funcionario_nome", "") }}</span>
-    </div>
-</header>
-
-<main>
-    <div class="container">
-        <div class="topo">
-            <h2>Ordens cadastradas</h2>
-
-            <div class="acoes-topo">
-                <a href="/ordem-servico/nova" class="btn">Nova ordem</a>
-                <a href="/" class="btn btn-home">Voltar para Home</a>
-            </div>
+        <div class="acoes-topo">
+            <a href="/ordem-servico/nova" class="btn">Nova ordem</a>
         </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cliente</th>
-                    <th>Equipamento</th>
-                    <th>Peças</th>
-                    <th>Problema relatado</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for ordem in ordens %}
-                <tr>
-                    <td>{{ ordem["ordem_id"] }}</td>
-                    <td>{{ ordem["cliente_nome"] }}</td>
-                    <td>{{ ordem["equipamento"] }}</td>
-                    <td>{{ ordem["pecas_nomes"] or "-" }}</td>
-                    <td>{{ ordem["problema_relatado"] }}</td>
-                    <td>{{ ordem["status"] }}</td>
-                    <td>
-                        <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="btn">Editar</a>
-                        <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
-                            <button type="submit" onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
-                                Excluir
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
-</main>
 
-</body>
-</html>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Equipamento</th>
+                <th>Peças</th>
+                <th>Problema relatado</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for ordem in ordens %}
+            <tr>
+                <td>{{ ordem["ordem_id"] }}</td>
+                <td>{{ ordem["cliente_nome"] }}</td>
+                <td>{{ ordem["equipamento"] }}</td>
+                <td>{{ ordem["pecas_nomes"] or "-" }}</td>
+                <td>{{ ordem["problema_relatado"] }}</td>
+                <td>
+                    <span class="status status-{{ ordem['status']|lower|replace(' ', '-') }}">
+                        {{ ordem["status"] }}
+                    </span>
+                </td>
+                <td>
+                    <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="btn">Editar</a>
+                    <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
+                            Excluir
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

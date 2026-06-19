@@ -1,9 +1,11 @@
-from flask import Blueprint, flash, render_template, request, redirect, send_file
-from database import conectar
+import sqlite3
+import tempfile
 from datetime import datetime
+
+from flask import Blueprint, flash, redirect, render_template, request, send_file
+from database import conectar
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-import tempfile
 
 
 estoque_bp = Blueprint('estoque', __name__)
@@ -13,6 +15,29 @@ def listar_estoque():
     db = conectar()
 
     busca = request.args.get('busca', '')
+    pagina = request.args.get('pagina', 1, type=int)
+    por_pagina = 5
+
+    if pagina < 1:
+        pagina = 1
+
+    termo_busca = f'%{busca}%'
+    parametros_busca = (termo_busca,) * 3
+
+    total_filtrado = db.execute("""
+        SELECT COUNT(*) AS total
+        FROM pecas
+        WHERE nome LIKE ?
+           OR descricao LIKE ?
+           OR fornecedor LIKE ?
+    """, parametros_busca).fetchone()['total']
+
+    total_paginas = max(1, (total_filtrado + por_pagina - 1) // por_pagina)
+
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    offset = (pagina - 1) * por_pagina
 
     pecas = db.execute("""
         SELECT *
@@ -21,11 +46,8 @@ def listar_estoque():
            OR descricao LIKE ?
            OR fornecedor LIKE ?
         ORDER BY nome
-    """, (
-        f'%{busca}%',
-        f'%{busca}%',
-        f'%{busca}%'
-    )).fetchall()
+        LIMIT ? OFFSET ?
+    """, parametros_busca + (por_pagina, offset)).fetchall()
 
     total_pecas = db.execute("""
         SELECT COUNT(*) as total
@@ -49,6 +71,8 @@ def listar_estoque():
         'estoque.html',
         pecas=pecas,
         busca=busca,
+        pagina=pagina,
+        total_paginas=total_paginas,
         total_pecas=total_pecas,
         estoque_baixo=estoque_baixo,
         total_movimentacoes=total_movimentacoes
@@ -59,24 +83,27 @@ def listar_estoque():
 def cadastrar_peca():
     nome = request.form['nome']
     descricao = request.form['descricao']
-    quantidade = int(request.form['quantidade'])
+    quantidade = int(request.form['quantidade'] or 0)
     estoque_minimo = int(request.form['estoque_minimo'] or 0)
     preco_unitario = float(request.form['preco_unitario'] or 0)
     fornecedor = request.form['fornecedor']
 
     if quantidade < 0:
-        return "Quantidade não pode ser negativa"
-    
+        flash("A quantidade não pode ser negativa.", "erro")
+        return redirect('/estoque')
+
     if estoque_minimo < 0:
-        return "Estoque mínimo não pode ser negativo"
-    
+        flash("O estoque mínimo não pode ser negativo.", "erro")
+        return redirect('/estoque')
+
     if preco_unitario < 0:
-        return "Preço unitário não pode ser negativo"
+        flash("O preço unitário não pode ser negativo.", "erro")
+        return redirect('/estoque')
 
     db = conectar()
 
     db.execute("""
-        INSERT INTO pecas 
+        INSERT INTO pecas
         (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor)
         VALUES (?, ?, ?, ?, ?, ?)
     """, (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor))
@@ -84,6 +111,7 @@ def cadastrar_peca():
     db.commit()
     db.close()
 
+    flash(f'Peça "{nome}" cadastrada com sucesso.', "sucesso")
     return redirect('/estoque')
 
     
@@ -91,12 +119,20 @@ def cadastrar_peca():
 def excluir_peca(id):
     db = conectar()
 
-    db.execute("""
-        DELETE FROM pecas
-        WHERE id = ?
-    """, (id,))
+    try:
+        db.execute("""
+            DELETE FROM pecas
+            WHERE id = ?
+        """, (id,))
+        db.commit()
+        flash("Peça excluída com sucesso.", "sucesso")
+    except sqlite3.IntegrityError:
+        db.rollback()
+        flash(
+            "Não é possível excluir esta peça porque ela possui registros vinculados.",
+            "erro",
+        )
 
-    db.commit()
     db.close()
 
     return redirect('/estoque')
@@ -112,6 +148,10 @@ def editar_peca(id):
     """, (id,)).fetchone()
 
     db.close()
+
+    if peca is None:
+        flash("Peça não encontrada.", "erro")
+        return redirect("/estoque")
 
     return render_template('editar_peca.html', peca=peca)
 
@@ -149,6 +189,7 @@ def atualizar_peca(id):
     db.commit()
     db.close()
 
+    flash("Peça atualizada com sucesso.", "sucesso")
     return redirect('/estoque')
 
 @estoque_bp.route('/estoque/movimentar/<int:id>')
@@ -169,14 +210,12 @@ def movimentar_peca(id):
 def salvar_movimentacao(id):
 
     tipo = request.form['tipo']
-    quantidade = int(request.form['quantidade'])
+    quantidade = int(request.form['quantidade'] or 0)
     observacao = request.form['observacao']
 
     if quantidade <= 0:
-        return "Quantidade deve ser maior que zero"
-    
-    if tipo == 'saida' and quantidade > peca['quantidade']:
-        return flash("Estoque insuficiente")
+        flash("A quantidade deve ser maior que zero.", "erro")
+        return redirect(f'/estoque/movimentar/{id}')
 
     db = conectar()
 
@@ -185,6 +224,11 @@ def salvar_movimentacao(id):
         FROM pecas
         WHERE id = ?
     """, (id,)).fetchone()
+
+    if peca is None:
+        db.close()
+        flash("Peça não encontrada.", "erro")
+        return redirect('/estoque')
 
     estoque_atual = peca['quantidade']
 
@@ -195,7 +239,11 @@ def salvar_movimentacao(id):
 
         if novo_estoque < 0:
             db.close()
-            return "Estoque insuficiente"
+            flash(
+                f"Estoque insuficiente: há apenas {estoque_atual} unidade(s) disponível(is).",
+                "erro",
+            )
+            return redirect(f'/estoque/movimentar/{id}')
 
     db.execute("""
         UPDATE pecas
@@ -224,6 +272,10 @@ def salvar_movimentacao(id):
     db.commit()
     db.close()
 
+    flash(
+        f"{tipo} de {quantidade} unidade(s) registrada com sucesso. Novo estoque: {novo_estoque}.",
+        "sucesso",
+    )
     return redirect('/estoque')
 
 @estoque_bp.route('/estoque/historico')
