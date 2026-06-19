@@ -5,6 +5,7 @@ from routes.cadastro import cadastro_bp
 from routes.orcamento import orcamento_bp
 from routes.funcionarios import funcionarios_bp, criar_tabela_funcionarios
 from routes.home import home_bp
+from routes.acompanhamento import acompanhamento_bp
 
 # Cria a aplicação Flask
 app = Flask(__name__)
@@ -30,6 +31,8 @@ app.register_blueprint(funcionarios_bp)
 # Registra a página home
 app.register_blueprint(home_bp)
 
+app.register_blueprint(acompanhamento_bp)
+
 
 # Página inicial
 @app.before_request
@@ -37,6 +40,7 @@ def proteger_rotas():
     rotas_livres = (
         "/login",
         "/funcionarios/cadastrar",
+        "/acompanhamento",
         "/static",
     )
 

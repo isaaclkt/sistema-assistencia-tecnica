@@ -1,0 +1,22 @@
+{% extends "base_auth.html" %}
+{% block titulo %}Acompanhamento de Ordem{% endblock %}
+{% block conteudo %}
+<section class="auth-card card">
+    <h2>Acompanhar ordem de serviço</h2>
+
+    <form action="/acompanhamento/resultado" method="POST">
+        <div class="campo">
+            <label for="consulta">Nome do cliente ou ID da ordem</label>
+            <input
+                type="text"
+                id="consulta"
+                name="consulta"
+                placeholder="Ex.: Maria Silva ou 12"
+                required
+            >
+        </div>
+
+        <button type="submit">Buscar</button>
+    </form>
+</section>
+{% endblock %}

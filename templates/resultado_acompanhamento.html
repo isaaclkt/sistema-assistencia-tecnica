@@ -1,0 +1,51 @@
+{% extends "base_auth.html" %}
+{% block titulo %}Resultado do Acompanhamento{% endblock %}
+{% block conteudo %}
+<section class="auth-card card">
+    <h2>Resultado da busca</h2>
+
+    {% if ordens %}
+        {% for ordem in ordens %}
+            <h3>Ordem #{{ ordem["ordem_id"] }}</h3>
+
+            <p><strong>Nome do cliente:</strong> {{ ordem["cliente_nome"] }}</p>
+            <p>
+                <strong>Equipamento:</strong>
+                {{ ordem["equipamento_tipo"] or ordem["equipamento"] }}
+                {% if ordem["equipamento_marca"] %} - {{ ordem["equipamento_marca"] }}{% endif %}
+                {% if ordem["equipamento_modelo"] %} - {{ ordem["equipamento_modelo"] }}{% endif %}
+            </p>
+            <p><strong>Defeito relatado:</strong> {{ ordem["problema_relatado"] }}</p>
+            <p><strong>Diagnóstico:</strong> {{ ordem["diagnostico"] or "-" }}</p>
+            <p>
+                <strong>Status da ordem:</strong>
+                <span class="status status-{{ ordem['status']|lower|replace(' ', '-') }}">
+                    {% if ordem["status"] == "Aberto" %}
+                        Aberta
+                    {% elif ordem["status"] == "Finalizado" %}
+                        Finalizada
+                    {% else %}
+                        {{ ordem["status"] }}
+                    {% endif %}
+                </span>
+            </p>
+            <p>
+                <strong>Valor do serviço:</strong>
+                {% if ordem["valor_servico"] is not none %}
+                    R$ {{ "%.2f"|format(ordem["valor_servico"]) }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+            <p><strong>Data de abertura:</strong> -</p>
+            <p><strong>Data de finalização:</strong> -</p>
+        {% endfor %}
+    {% else %}
+        <p class="mensagem-vazia">Ordem não encontrada</p>
+    {% endif %}
+
+    <p class="auth-link">
+        <a href="/acompanhamento">Fazer nova busca</a>
+    </p>
+</section>
+{% endblock %}
