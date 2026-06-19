@@ -16,9 +16,14 @@ def pagina_orcamento():
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
             clientes.nome AS cliente_nome,
-            pecas.id AS peca_id,
-            pecas.nome AS peca_nome,
-            pecas.preco_unitario AS valor_peca
+            GROUP_CONCAT(
+                pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
+                ', '
+            ) AS peca_nome,
+            COALESCE(
+                SUM(ordem_pecas.quantidade * ordem_pecas.valor_unitario),
+                0
+            ) AS valor_peca
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
@@ -26,6 +31,12 @@ def pagina_orcamento():
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
             ON pecas.id = ordem_pecas.peca_id
+        GROUP BY
+            ordens_servico.ordem_id,
+            ordens_servico.cliente_id,
+            ordens_servico.equipamento,
+            ordens_servico.problema_relatado,
+            clientes.nome
         ORDER BY ordens_servico.ordem_id DESC
     """)
     ordens_servico = cursor.fetchall()
@@ -41,14 +52,21 @@ def pagina_orcamento():
             orcamentos.valor_total,
             clientes.nome AS nome_cliente,
             ordens_servico.problema_relatado,
-            pecas.nome AS peca_nome
+            (
+                SELECT GROUP_CONCAT(
+                    pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
+                    ', '
+                )
+                FROM ordem_pecas
+                JOIN pecas
+                    ON pecas.id = ordem_pecas.peca_id
+                WHERE ordem_pecas.ordem_id = orcamentos.ordem_id
+            ) AS peca_nome
         FROM orcamentos
         JOIN clientes
             ON clientes.id = orcamentos.cliente_id
         JOIN ordens_servico
             ON ordens_servico.ordem_id = orcamentos.ordem_id
-        LEFT JOIN pecas
-            ON pecas.id = orcamentos.peca_id
         ORDER BY orcamentos.id DESC
     """)
     orcamentos = cursor.fetchall()
@@ -75,20 +93,25 @@ def criar_orcamento():
         SELECT
             ordens_servico.cliente_id,
             ordens_servico.equipamento,
-            ordem_pecas.peca_id,
-            pecas.preco_unitario AS valor_peca
+            MIN(ordem_pecas.peca_id) AS peca_id,
+            COALESCE(
+                SUM(ordem_pecas.quantidade * ordem_pecas.valor_unitario),
+                0
+            ) AS valor_peca
         FROM ordens_servico
         LEFT JOIN ordem_pecas
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
-        LEFT JOIN pecas
-            ON pecas.id = ordem_pecas.peca_id
         WHERE ordens_servico.ordem_id = ?
+        GROUP BY
+            ordens_servico.ordem_id,
+            ordens_servico.cliente_id,
+            ordens_servico.equipamento
     """, (ordem_id,))
     ordem = cursor.fetchone()
 
     if ordem is None:
         conexao.close()
-        return "Ordem de serviço nao encontrada"
+        return "Ordem de serviço não encontrada"
 
     if ordem["peca_id"] is None:
         conexao.close()

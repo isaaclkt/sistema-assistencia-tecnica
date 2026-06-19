@@ -39,7 +39,7 @@
                     <th>ID</th>
                     <th>Cliente</th>
                     <th>Equipamento</th>
-                    <th>Peça</th>
+                    <th>Peças</th>
                     <th>Problema relatado</th>
                     <th>Status</th>
                     <th>Ações</th>
@@ -52,7 +52,7 @@
                     <td>{{ ordem["ordem_id"] }}</td>
                     <td>{{ ordem["cliente_nome"] }}</td>
                     <td>{{ ordem["equipamento"] }}</td>
-                    <td>{{ ordem["peca_nome"] or "-" }}</td>
+                    <td>{{ ordem["pecas_nomes"] or "-" }}</td>
                     <td>{{ ordem["problema_relatado"] }}</td>
                     <td>{{ ordem["status"] }}</td>
                     <td>

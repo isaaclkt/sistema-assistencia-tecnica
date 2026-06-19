@@ -1,3 +1,24 @@
 main {
     width: min(1050px, calc(100% - 32px));
 }
+
+.linha-peca {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 110px auto;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-remover-peca {
+    background: #dc2626;
+}
+
+.btn-remover-peca:hover {
+    background: #b91c1c;
+}
+
+@media (max-width: 700px) {
+    .linha-peca {
+        grid-template-columns: 1fr;
+    }
+}

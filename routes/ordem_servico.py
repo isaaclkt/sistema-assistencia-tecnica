@@ -3,7 +3,32 @@ from database import conectar
 
 ordem_servico_bp = Blueprint("ordem_servico", __name__)
 
-# Página com as ordens de serviço
+
+def salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades):
+    for peca_id, quantidade_texto in zip(pecas_ids, quantidades):
+        if not peca_id:
+            continue
+
+        quantidade = max(int(quantidade_texto or 1), 1)
+        peca = db.execute("""
+            SELECT preco_unitario
+            FROM pecas
+            WHERE id = ?
+        """, (peca_id,)).fetchone()
+
+        if peca is not None:
+            db.execute("""
+                INSERT INTO ordem_pecas
+                (ordem_id, peca_id, quantidade, valor_unitario)
+                VALUES (?, ?, ?, ?)
+            """, (
+                ordem_id,
+                peca_id,
+                quantidade,
+                peca["preco_unitario"]
+            ))
+
+
 @ordem_servico_bp.route("/ordem-servico")
 def listar_ordens():
     db = conectar()
@@ -15,7 +40,10 @@ def listar_ordens():
             ordens_servico.problema_relatado,
             ordens_servico.status,
             clientes.nome AS cliente_nome,
-            pecas.nome AS peca_nome
+            GROUP_CONCAT(
+                pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
+                ', '
+            ) AS pecas_nomes
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
@@ -23,6 +51,12 @@ def listar_ordens():
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
             ON pecas.id = ordem_pecas.peca_id
+        GROUP BY
+            ordens_servico.ordem_id,
+            ordens_servico.equipamento,
+            ordens_servico.problema_relatado,
+            ordens_servico.status,
+            clientes.nome
         ORDER BY ordens_servico.ordem_id DESC
     """).fetchall()
 
@@ -30,7 +64,7 @@ def listar_ordens():
 
     return render_template("ordem-servico.html", ordens=ordens)
 
-# Página pra criar uma nova ordem de serviço
+
 @ordem_servico_bp.route("/ordem-servico/nova")
 def pagina_nova_ordem():
     db = conectar()
@@ -62,7 +96,8 @@ def cadastrar_ordem():
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
-    peca_id = request.form["peca_id"]
+    pecas_ids = request.form.getlist("peca_id")
+    quantidades = request.form.getlist("quantidade")
 
     db = conectar()
 
@@ -72,20 +107,12 @@ def cadastrar_ordem():
         VALUES (?, ?, ?, ?)
     """, (cliente_id, equipamento, problema_relatado, status))
 
-    ordem_id = cursor.lastrowid
-
-    peca = db.execute("""
-        SELECT preco_unitario
-        FROM pecas
-        WHERE id = ?
-    """, (peca_id,)).fetchone()
-
-    if peca is not None:
-        db.execute("""
-            INSERT INTO ordem_pecas
-            (ordem_id, peca_id, quantidade, valor_unitario)
-            VALUES (?, ?, ?, ?)
-        """, (ordem_id, peca_id, 1, peca["preco_unitario"]))
+    salvar_pecas_da_ordem(
+        db,
+        cursor.lastrowid,
+        pecas_ids,
+        quantidades
+    )
 
     db.commit()
     db.close()
@@ -99,16 +126,13 @@ def pagina_editar_ordem(ordem_id):
 
     ordem = db.execute("""
         SELECT
-            ordens_servico.ordem_id,
-            ordens_servico.cliente_id,
-            ordens_servico.equipamento,
-            ordens_servico.problema_relatado,
-            ordens_servico.status,
-            ordem_pecas.peca_id
+            ordem_id,
+            cliente_id,
+            equipamento,
+            problema_relatado,
+            status
         FROM ordens_servico
-        LEFT JOIN ordem_pecas
-            ON ordem_pecas.ordem_id = ordens_servico.ordem_id
-        WHERE ordens_servico.ordem_id = ?
+        WHERE ordem_id = ?
     """, (ordem_id,)).fetchone()
 
     clientes = db.execute("""
@@ -123,6 +147,13 @@ def pagina_editar_ordem(ordem_id):
         ORDER BY nome
     """).fetchall()
 
+    pecas_vinculadas = db.execute("""
+        SELECT peca_id, quantidade
+        FROM ordem_pecas
+        WHERE ordem_id = ?
+        ORDER BY id
+    """, (ordem_id,)).fetchall()
+
     db.close()
 
     if ordem is None:
@@ -132,7 +163,8 @@ def pagina_editar_ordem(ordem_id):
         "editar-ordem-servico.html",
         ordem=ordem,
         clientes=clientes,
-        pecas=pecas
+        pecas=pecas,
+        pecas_vinculadas=pecas_vinculadas
     )
 
 
@@ -142,7 +174,8 @@ def atualizar_ordem(ordem_id):
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
-    peca_id = request.form["peca_id"]
+    pecas_ids = request.form.getlist("peca_id")
+    quantidades = request.form.getlist("quantidade")
 
     db = conectar()
 
@@ -155,23 +188,17 @@ def atualizar_ordem(ordem_id):
         WHERE ordem_id = ?
     """, (cliente_id, equipamento, problema_relatado, status, ordem_id))
 
-    peca = db.execute("""
-        SELECT preco_unitario
-        FROM pecas
-        WHERE id = ?
-    """, (peca_id,)).fetchone()
-
     db.execute("""
         DELETE FROM ordem_pecas
         WHERE ordem_id = ?
     """, (ordem_id,))
 
-    if peca is not None:
-        db.execute("""
-            INSERT INTO ordem_pecas
-            (ordem_id, peca_id, quantidade, valor_unitario)
-            VALUES (?, ?, ?, ?)
-        """, (ordem_id, peca_id, 1, peca["preco_unitario"]))
+    salvar_pecas_da_ordem(
+        db,
+        ordem_id,
+        pecas_ids,
+        quantidades
+    )
 
     db.commit()
     db.close()
