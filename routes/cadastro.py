@@ -34,16 +34,54 @@ def cadastrar_cliente():
 # READ
 @cadastro_bp.route("/cadastro")
 def listar_cadastros():
+    pagina = request.args.get("pagina", 1, type=int)
+    busca = request.args.get("busca", "").strip()
+    por_pagina = 5
+
+    if pagina < 1:
+        pagina = 1
 
     conexao = conectar()
     cursor = conexao.cursor()
 
-    cursor.execute("SELECT * FROM clientes")
+    termo_busca = f"%{busca}%"
+    parametros_busca = (termo_busca,) * 5
+    filtro_busca = """
+        WHERE nome LIKE ?
+           OR cpf LIKE ?
+           OR telefone LIKE ?
+           OR email LIKE ?
+           OR endereco LIKE ?
+    """
+
+    total_clientes = cursor.execute(
+        f"SELECT COUNT(*) FROM clientes {filtro_busca}",
+        parametros_busca
+    ).fetchone()[0]
+    total_paginas = max(1, (total_clientes + por_pagina - 1) // por_pagina)
+
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    offset = (pagina - 1) * por_pagina
+    cursor.execute(f"""
+        SELECT *
+        FROM clientes
+        {filtro_busca}
+        ORDER BY id
+        LIMIT ? OFFSET ?
+    """, parametros_busca + (por_pagina, offset))
     clientes = cursor.fetchall()
 
     conexao.close()
 
-    return render_template("gerenciar_clientes.html", clientes=clientes)
+    return render_template(
+        "gerenciar_clientes.html",
+        clientes=clientes,
+        busca=busca,
+        pagina=pagina,
+        total_paginas=total_paginas
+    )
 
 
 # Página editar cliente

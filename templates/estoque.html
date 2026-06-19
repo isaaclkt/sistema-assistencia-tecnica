@@ -159,6 +159,24 @@
         {% endfor %}
     </tbody>
         </table>
+
+        {% if total_paginas > 1 %}
+        <nav class="paginacao" aria-label="Paginação de peças">
+            {% if pagina > 1 %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ pagina - 1 }}">Anterior</a>
+            {% endif %}
+
+            {% for numero in range(1, total_paginas + 1) %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ numero }}" {% if numero == pagina %}class="ativa" aria-current="page"{% endif %}>
+                    {{ numero }}
+                </a>
+            {% endfor %}
+
+            {% if pagina < total_paginas %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ pagina + 1 }}">Próxima</a>
+            {% endif %}
+        </nav>
+        {% endif %}
     </div>
 </main>
 

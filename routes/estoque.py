@@ -13,6 +13,29 @@ def listar_estoque():
     db = conectar()
 
     busca = request.args.get('busca', '')
+    pagina = request.args.get('pagina', 1, type=int)
+    por_pagina = 5
+
+    if pagina < 1:
+        pagina = 1
+
+    termo_busca = f'%{busca}%'
+    parametros_busca = (termo_busca,) * 3
+
+    total_filtrado = db.execute("""
+        SELECT COUNT(*) AS total
+        FROM pecas
+        WHERE nome LIKE ?
+           OR descricao LIKE ?
+           OR fornecedor LIKE ?
+    """, parametros_busca).fetchone()['total']
+
+    total_paginas = max(1, (total_filtrado + por_pagina - 1) // por_pagina)
+
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    offset = (pagina - 1) * por_pagina
 
     pecas = db.execute("""
         SELECT *
@@ -21,11 +44,8 @@ def listar_estoque():
            OR descricao LIKE ?
            OR fornecedor LIKE ?
         ORDER BY nome
-    """, (
-        f'%{busca}%',
-        f'%{busca}%',
-        f'%{busca}%'
-    )).fetchall()
+        LIMIT ? OFFSET ?
+    """, parametros_busca + (por_pagina, offset)).fetchall()
 
     total_pecas = db.execute("""
         SELECT COUNT(*) as total
@@ -49,6 +69,8 @@ def listar_estoque():
         'estoque.html',
         pecas=pecas,
         busca=busca,
+        pagina=pagina,
+        total_paginas=total_paginas,
         total_pecas=total_pecas,
         estoque_baixo=estoque_baixo,
         total_movimentacoes=total_movimentacoes

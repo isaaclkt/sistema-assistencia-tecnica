@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect
+import sqlite3
+
+from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 
 orcamento_bp = Blueprint("orcamento", __name__)
@@ -26,6 +28,11 @@ def pagina_orcamento():
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
             ON pecas.id = ordem_pecas.peca_id
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM orcamentos
+            WHERE orcamentos.ordem_id = ordens_servico.ordem_id
+        )
         ORDER BY ordens_servico.ordem_id DESC
     """)
     ordens_servico = cursor.fetchall()
@@ -71,6 +78,17 @@ def criar_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
 
+    orcamento_existente = cursor.execute("""
+        SELECT 1
+        FROM orcamentos
+        WHERE ordem_id = ?
+    """, (ordem_id,)).fetchone()
+
+    if orcamento_existente:
+        conexao.close()
+        flash("Esta ordem de serviço já possui um orçamento.", "erro")
+        return redirect("/orcamento")
+
     cursor.execute("""
         SELECT
             ordens_servico.cliente_id,
@@ -97,32 +115,49 @@ def criar_orcamento():
     valor_peca = float(ordem["valor_peca"] or 0)
     valor_total = valor_peca + valor_mao_obra
 
-    cursor.execute("""
-        INSERT INTO orcamentos
-        (
+    try:
+        cursor.execute("""
+            INSERT INTO orcamentos
+            (
+                ordem_id,
+                cliente_id,
+                peca_id,
+                equipamento,
+                problema_analisado,
+                valor_orcamento,
+                valor_peca,
+                valor_mao_obra,
+                valor_total
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
             ordem_id,
-            cliente_id,
-            peca_id,
-            equipamento,
+            ordem["cliente_id"],
+            ordem["peca_id"],
+            ordem["equipamento"],
             problema_analisado,
-            valor_orcamento,
+            valor_total,
             valor_peca,
             valor_mao_obra,
             valor_total
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        ordem_id,
-        ordem["cliente_id"],
-        ordem["peca_id"],
-        ordem["equipamento"],
-        problema_analisado,
-        valor_total,
-        valor_peca,
-        valor_mao_obra,
-        valor_total
-    ))
+        ))
+        conexao.commit()
+    except sqlite3.IntegrityError:
+        conexao.rollback()
+        flash("Esta ordem de serviço já possui um orçamento.", "erro")
 
+    conexao.close()
+
+    return redirect("/orcamento")
+
+
+@orcamento_bp.route("/orcamentos/excluir/<int:orcamento_id>", methods=["POST"])
+def excluir_orcamento(orcamento_id):
+    conexao = conectar()
+    cursor = conexao.execute(
+        "DELETE FROM orcamentos WHERE id = ?",
+        (orcamento_id,)
+    )
     conexao.commit()
     conexao.close()
 

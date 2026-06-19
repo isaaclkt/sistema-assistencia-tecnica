@@ -30,6 +30,10 @@
             <a href="/" class="btn btn-home">Voltar para Home</a>
         </div>
 
+        {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+            <p class="mensagem-{{ categoria }}">{{ mensagem }}</p>
+        {% endfor %}
+
         <form action="/orcamentos/cadastrar" method="POST">
             <div class="form-grid">
                 <div class="campo">
@@ -94,6 +98,7 @@
                     <th>Valor peça</th>
                     <th>Mão de obra</th>
                     <th>Total</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -108,10 +113,17 @@
                     <td>R$ {{ orcamento['valor_peca'] }}</td>
                     <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
                     <td>R$ {{ orcamento['valor_total'] }}</td>
+                    <td>
+                        <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
+                            <button type="submit" class="btn-danger" onclick="return confirm('Deseja realmente excluir este orçamento?')">
+                                Excluir
+                            </button>
+                        </form>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+                    <td colspan="9" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -40,7 +40,7 @@ CREATE TABLE ordens_servico (
 
 CREATE TABLE orcamentos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ordem_id INTEGER NOT NULL,
+    ordem_id INTEGER NOT NULL UNIQUE,
     cliente_id INTEGER NOT NULL,
     peca_id INTEGER,
     equipamento TEXT NOT NULL,

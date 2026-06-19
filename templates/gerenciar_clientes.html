@@ -33,7 +33,32 @@
             </div>
         </div>
 
-        <table>
+        <div class="busca-container">
+            <form action="/cadastro" method="GET" class="form-busca">
+                <input
+                    type="text"
+                    name="busca"
+                    placeholder="Buscar por nome, CPF, telefone, email ou endereço"
+                    value="{{ busca }}"
+                >
+                <button type="submit" class="btn">Pesquisar</button>
+                {% if busca %}
+                    <a href="/cadastro" class="btn btn-home">Limpar</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="tabela-clientes-wrapper">
+        <table class="tabela-clientes">
+            <colgroup>
+                <col class="col-id">
+                <col class="col-nome">
+                <col class="col-cpf">
+                <col class="col-telefone">
+                <col class="col-email">
+                <col class="col-endereco">
+                <col class="col-acoes">
+            </colgroup>
             <thead>
                 <tr>
                     <th>ID</th>
@@ -50,27 +75,50 @@
                 {% for cliente in clientes %}
                 <tr>
                     <td>{{ cliente['id'] }}</td>
-                    <td>{{ cliente['nome'] }}</td>
-                    <td>{{ cliente['cpf'] }}</td>
-                    <td>{{ cliente['telefone'] }}</td>
-                    <td>{{ cliente['email'] }}</td>
-                    <td>{{ cliente['endereco'] }}</td>
-                    <td>
-                        <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
-                        <a href="/clientes/excluir/{{ cliente['id'] }}"
-                           class="excluir"
-                           onclick="return confirm('Deseja realmente excluir este cliente?')">
-                            Excluir
-                        </a>
+                    <td title="{{ cliente['nome'] }}">{{ cliente['nome'] }}</td>
+                    <td title="{{ cliente['cpf'] }}">{{ cliente['cpf'] }}</td>
+                    <td title="{{ cliente['telefone'] }}">{{ cliente['telefone'] }}</td>
+                    <td title="{{ cliente['email'] }}">{{ cliente['email'] }}</td>
+                    <td title="{{ cliente['endereco'] }}">{{ cliente['endereco'] }}</td>
+                    <td class="celula-acoes">
+                        <div class="acoes-clientes">
+                            <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar">Editar</a>
+                            <a href="/clientes/excluir/{{ cliente['id'] }}"
+                               class="excluir"
+                               onclick="return confirm('Deseja realmente excluir este cliente?')">
+                                Excluir
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" class="mensagem-vazia">Nenhum cliente cadastrado.</td>
+                    <td colspan="7" class="mensagem-vazia">
+                        {% if busca %}Nenhum cliente encontrado.{% else %}Nenhum cliente cadastrado.{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        </div>
+
+        {% if total_paginas > 1 %}
+        <nav class="paginacao" aria-label="Paginação de clientes">
+            {% if pagina > 1 %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ pagina - 1 }}">Anterior</a>
+            {% endif %}
+
+            {% for numero in range(1, total_paginas + 1) %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ numero }}" {% if numero == pagina %}class="ativa" aria-current="page"{% endif %}>
+                    {{ numero }}
+                </a>
+            {% endfor %}
+
+            {% if pagina < total_paginas %}
+                <a href="?busca={{ busca|urlencode }}&pagina={{ pagina + 1 }}">Próxima</a>
+            {% endif %}
+        </nav>
+        {% endif %}
     </div>
 </main>
 
