@@ -79,6 +79,20 @@
     const listaPecas = document.querySelector("#lista-pecas");
     const botaoAdicionar = document.querySelector("#adicionar-peca");
 
+    function atualizarOpcoesDisponiveis() {
+        const selects = Array.from(listaPecas.querySelectorAll('select[name="peca_id"]'));
+        const selecionadas = selects.map((select) => select.value).filter(Boolean);
+
+        selects.forEach((select) => {
+            Array.from(select.options).forEach((option) => {
+                option.disabled =
+                    option.value !== "" &&
+                    option.value !== select.value &&
+                    selecionadas.includes(option.value);
+            });
+        });
+    }
+
     function atualizarBotoesRemover() {
         const linhas = listaPecas.querySelectorAll(".linha-peca");
         linhas.forEach((linha) => {
@@ -92,13 +106,18 @@
         novaLinha.querySelector('input[name="quantidade"]').value = "1";
         listaPecas.appendChild(novaLinha);
         atualizarBotoesRemover();
+        atualizarOpcoesDisponiveis();
     });
 
     listaPecas.addEventListener("click", (event) => {
         if (event.target.classList.contains("btn-remover-peca")) {
             event.target.closest(".linha-peca").remove();
             atualizarBotoesRemover();
+            atualizarOpcoesDisponiveis();
         }
     });
+
+    listaPecas.addEventListener("change", atualizarOpcoesDisponiveis);
+    atualizarOpcoesDisponiveis();
 </script>
 {% endblock %}
