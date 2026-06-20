@@ -7,6 +7,11 @@ def _coluna_existe(conexao, tabela, coluna):
 
 
 def _garantir_schema(conexao):
+    if not _coluna_existe(conexao, "ordens_servico", "funcionario_id"):
+        conexao.execute(
+            "ALTER TABLE ordens_servico ADD COLUMN funcionario_id INTEGER REFERENCES funcionarios(id)"
+        )
+
     colunas_orcamento = {
         "peca_id": "ALTER TABLE orcamentos ADD COLUMN peca_id INTEGER",
         "problema_analisado": "ALTER TABLE orcamentos ADD COLUMN problema_analisado TEXT NOT NULL DEFAULT ''",

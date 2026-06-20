@@ -26,6 +26,7 @@
             <tr>
                 <th>ID</th>
                 <th>Cliente</th>
+                <th>Funcionário</th>
                 <th>Equipamento</th>
                 <th>Peças</th>
                 <th>Problema relatado</th>
@@ -39,6 +40,7 @@
             <tr>
                 <td>{{ ordem["ordem_id"] }}</td>
                 <td>{{ ordem["cliente_nome"] }}</td>
+                <td>{{ ordem["funcionario_nome"] or "Não atribuído" }}</td>
                 <td>{{ ordem["equipamento"] }}</td>
                 <td>{{ ordem["pecas_nomes"] or "-" }}</td>
                 <td>{{ ordem["problema_relatado"] }}</td>
@@ -59,7 +61,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
+                <td colspan="8" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
             </tr>
             {% endfor %}
         </tbody>

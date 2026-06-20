@@ -9,6 +9,7 @@
             <h3>Ordem #{{ ordem["ordem_id"] }}</h3>
 
             <p><strong>Nome do cliente:</strong> {{ ordem["cliente_nome"] }}</p>
+            <p><strong>Funcionário responsável:</strong> {{ ordem["funcionario_nome"] or "Não atribuído" }}</p>
             <p>
                 <strong>Equipamento:</strong>
                 {{ ordem["equipamento_tipo"] or ordem["equipamento"] }}

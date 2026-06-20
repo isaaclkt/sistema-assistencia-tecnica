@@ -29,6 +29,18 @@
         </div>
 
         <div class="campo">
+            <label for="funcionario_id">Funcionário responsável <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <select id="funcionario_id" name="funcionario_id" required>
+                <option value="">Selecione um funcionário</option>
+                {% for funcionario in funcionarios %}
+                <option value="{{ funcionario['id'] }}" {% if funcionario['id'] == ordem['funcionario_id'] %}selected{% endif %}>
+                    {{ funcionario["nome"] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="campo">
             <label for="equipamento">Equipamento <span class="obrigatorio" title="Campo obrigatório">*</span></label>
             <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required>
         </div>

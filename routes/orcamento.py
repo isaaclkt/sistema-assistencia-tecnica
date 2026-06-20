@@ -19,6 +19,7 @@ def pagina_orcamento():
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
             clientes.nome AS cliente_nome,
+            funcionarios.nome AS funcionario_nome,
             GROUP_CONCAT(
                 pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
                 ', '
@@ -30,6 +31,8 @@ def pagina_orcamento():
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
+        LEFT JOIN funcionarios
+            ON funcionarios.id = ordens_servico.funcionario_id
         LEFT JOIN ordem_pecas
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
@@ -44,7 +47,8 @@ def pagina_orcamento():
             ordens_servico.cliente_id,
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
-            clientes.nome
+            clientes.nome,
+            funcionarios.nome
         ORDER BY ordens_servico.ordem_id DESC
     """)
     ordens_servico = cursor.fetchall()
@@ -59,6 +63,7 @@ def pagina_orcamento():
             orcamentos.valor_mao_obra,
             orcamentos.valor_total,
             clientes.nome AS nome_cliente,
+            funcionarios.nome AS funcionario_nome,
             ordens_servico.problema_relatado,
             (
                 SELECT GROUP_CONCAT(
@@ -75,6 +80,8 @@ def pagina_orcamento():
             ON clientes.id = orcamentos.cliente_id
         JOIN ordens_servico
             ON ordens_servico.ordem_id = orcamentos.ordem_id
+        LEFT JOIN funcionarios
+            ON funcionarios.id = ordens_servico.funcionario_id
         ORDER BY orcamentos.id DESC
     """)
     orcamentos = cursor.fetchall()

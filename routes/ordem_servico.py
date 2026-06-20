@@ -70,6 +70,7 @@ def listar_ordens():
             ordens_servico.problema_relatado,
             ordens_servico.status,
             clientes.nome AS cliente_nome,
+            funcionarios.nome AS funcionario_nome,
             GROUP_CONCAT(
                 pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
                 ', '
@@ -77,6 +78,8 @@ def listar_ordens():
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
+        LEFT JOIN funcionarios
+            ON funcionarios.id = ordens_servico.funcionario_id
         LEFT JOIN ordem_pecas
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
@@ -86,7 +89,8 @@ def listar_ordens():
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
             ordens_servico.status,
-            clientes.nome
+            clientes.nome,
+            funcionarios.nome
         ORDER BY ordens_servico.ordem_id DESC
     """).fetchall()
 
@@ -111,18 +115,26 @@ def pagina_nova_ordem():
         ORDER BY nome
     """).fetchall()
 
+    funcionarios = db.execute("""
+        SELECT id, nome
+        FROM funcionarios
+        ORDER BY nome
+    """).fetchall()
+
     db.close()
 
     return render_template(
         "nova-ordem-servico.html",
         clientes=clientes,
-        pecas=pecas
+        pecas=pecas,
+        funcionarios=funcionarios
     )
 
 
 @ordem_servico_bp.route("/ordem-servico/cadastrar", methods=["POST"])
 def cadastrar_ordem():
     cliente_id = request.form["cliente_id"]
+    funcionario_id = request.form["funcionario_id"]
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
@@ -133,9 +145,9 @@ def cadastrar_ordem():
 
     cursor = db.execute("""
         INSERT INTO ordens_servico
-        (cliente_id, equipamento, problema_relatado, status)
-        VALUES (?, ?, ?, ?)
-    """, (cliente_id, equipamento, problema_relatado, status))
+        (cliente_id, funcionario_id, equipamento, problema_relatado, status)
+        VALUES (?, ?, ?, ?, ?)
+    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status))
 
     salvar_pecas_da_ordem(
         db,
@@ -159,6 +171,7 @@ def pagina_editar_ordem(ordem_id):
         SELECT
             ordem_id,
             cliente_id,
+            funcionario_id,
             equipamento,
             problema_relatado,
             status
@@ -175,6 +188,12 @@ def pagina_editar_ordem(ordem_id):
     pecas = db.execute("""
         SELECT id, nome, preco_unitario
         FROM pecas
+        ORDER BY nome
+    """).fetchall()
+
+    funcionarios = db.execute("""
+        SELECT id, nome
+        FROM funcionarios
         ORDER BY nome
     """).fetchall()
 
@@ -195,6 +214,7 @@ def pagina_editar_ordem(ordem_id):
         ordem=ordem,
         clientes=clientes,
         pecas=pecas,
+        funcionarios=funcionarios,
         pecas_vinculadas=pecas_vinculadas
     )
 
@@ -202,6 +222,7 @@ def pagina_editar_ordem(ordem_id):
 @ordem_servico_bp.route("/ordem-servico/atualizar/<int:ordem_id>", methods=["POST"])
 def atualizar_ordem(ordem_id):
     cliente_id = request.form["cliente_id"]
+    funcionario_id = request.form["funcionario_id"]
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
@@ -213,11 +234,12 @@ def atualizar_ordem(ordem_id):
     db.execute("""
         UPDATE ordens_servico
         SET cliente_id = ?,
+            funcionario_id = ?,
             equipamento = ?,
             problema_relatado = ?,
             status = ?
         WHERE ordem_id = ?
-    """, (cliente_id, equipamento, problema_relatado, status, ordem_id))
+    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, ordem_id))
 
     db.execute("""
         DELETE FROM ordem_pecas

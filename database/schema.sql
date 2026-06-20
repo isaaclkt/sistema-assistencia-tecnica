@@ -31,11 +31,13 @@ CREATE TABLE equipamentos (
 CREATE TABLE ordens_servico (
     ordem_id INTEGER PRIMARY KEY AUTOINCREMENT,
     cliente_id INTEGER NOT NULL,
+    funcionario_id INTEGER,
     equipamento TEXT NOT NULL,
     problema_relatado TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'Aberto',
 
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
 );
 
 CREATE TABLE orcamentos (

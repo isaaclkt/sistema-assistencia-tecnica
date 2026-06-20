@@ -25,6 +25,7 @@
                     <option
                         value="{{ ordem['ordem_id'] }}"
                         data-peca="{{ ordem['peca_nome'] or '' }}"
+                        data-funcionario="{{ ordem['funcionario_nome'] or 'Não atribuído' }}"
                         data-valor-peca="{{ ordem['valor_peca'] or 0 }}">
                         Ordem #{{ ordem['ordem_id'] }} -
                         {{ ordem['cliente_nome'] }} -
@@ -32,6 +33,11 @@
                     </option>
                     {% endfor %}
                 </select>
+            </div>
+
+            <div class="campo">
+                <label for="funcionario_nome">Funcionário responsável</label>
+                <input type="text" id="funcionario_nome" readonly>
             </div>
 
             <div class="campo">
@@ -73,6 +79,7 @@
                 <th>ID</th>
                 <th>Ordem</th>
                 <th>Cliente</th>
+                <th>Funcionário</th>
                 <th>Análise técnica</th>
                 <th>Peças</th>
                 <th>Valor das peças</th>
@@ -88,6 +95,7 @@
                 <td>{{ orcamento['id'] }}</td>
                 <td>#{{ orcamento['ordem_id'] }}</td>
                 <td>{{ orcamento['nome_cliente'] }}</td>
+                <td>{{ orcamento['funcionario_nome'] or "Não atribuído" }}</td>
                 <td>{{ orcamento['problema_analisado'] }}</td>
                 <td>{{ orcamento['peca_nome'] or "-" }}</td>
                 <td>R$ {{ orcamento['valor_peca'] }}</td>
@@ -104,7 +112,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="9" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+                <td colspan="10" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -115,6 +123,7 @@
 {% block scripts %}
 <script>
     const ordemSelect = document.getElementById("ordem_id");
+    const funcionarioNome = document.getElementById("funcionario_nome");
     const pecaNome = document.getElementById("peca_nome");
     const valorPeca = document.getElementById("valor_peca");
     const valorMaoObra = document.getElementById("valor_mao_obra");
@@ -126,6 +135,7 @@
         const maoObra = Number(valorMaoObra.value || 0);
 
         pecaNome.value = option.dataset.peca || "";
+        funcionarioNome.value = option.dataset.funcionario || "";
         valorPeca.value = preco.toFixed(2);
         valorTotal.value = (preco + maoObra).toFixed(2);
     }

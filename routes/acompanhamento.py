@@ -20,6 +20,7 @@ def buscar_ordens(consulta):
             ordens_servico.problema_relatado,
             ordens_servico.status,
             clientes.nome AS cliente_nome,
+            funcionarios.nome AS funcionario_nome,
             orcamentos.problema_analisado AS diagnostico,
             orcamentos.valor_total AS valor_servico,
             equipamentos.tipo AS equipamento_tipo,
@@ -28,6 +29,8 @@ def buscar_ordens(consulta):
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
+        LEFT JOIN funcionarios
+            ON funcionarios.id = ordens_servico.funcionario_id
         LEFT JOIN orcamentos
             ON orcamentos.ordem_id = ordens_servico.ordem_id
         LEFT JOIN equipamentos
