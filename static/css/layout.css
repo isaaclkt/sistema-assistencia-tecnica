@@ -1,6 +1,5 @@
 /* ==========================================================================
-   Layout global do sistema (sidebar + navbar + área de conteúdo)
-   Reaproveita as variáveis de cor definidas em global.css
+   Layout global (sidebar + navbar + área de conteúdo)
    ========================================================================== */
 
 .app-shell {
@@ -9,38 +8,57 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sidebar (menu lateral de navegação principal)
+   Sidebar
    -------------------------------------------------------------------------- */
 .sidebar {
     display: flex;
     flex-direction: column;
-    flex: 0 0 250px;
-    width: 250px;
-    color: rgba(255, 255, 255, 0.92);
-    background: linear-gradient(180deg, var(--azul-900), var(--azul-800));
-    box-shadow: 0 8px 24px rgba(15, 39, 71, 0.18);
+    flex: 0 0 248px;
+    width: 248px;
+    background: var(--sidebar);
+    color: var(--sidebar-ink);
+    /* Mantém a sidebar sempre visível durante a rolagem vertical */
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
 }
 
 .sidebar-topo {
-    padding: 22px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    color: #fff;
+    background: var(--primary);
+    border-radius: 9px;
 }
 
 .sidebar-topo .marca {
     display: block;
-    color: var(--branco);
-    font-size: 1.05rem;
+    color: #fff;
+    font-size: 0.95rem;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.25;
     text-decoration: none;
 }
 
 .sidebar-topo .marca small {
     display: block;
-    margin-top: 4px;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.74rem;
-    font-weight: 600;
+    margin-top: 2px;
+    color: var(--sidebar-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -48,43 +66,75 @@
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 16px 12px;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 2px;
+    padding: 14px 12px;
     overflow-y: auto;
 }
 
+.sidebar-grupo-titulo {
+    padding: 14px 12px 6px;
+    color: var(--sidebar-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
 .sidebar-nav a {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
+    gap: 11px;
+    padding: 10px 12px;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--sidebar-ink);
     text-decoration: none;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+.sidebar-nav a .icon {
+    color: var(--sidebar-muted);
+    transition: color 0.15s ease;
+}
+
 .sidebar-nav a:hover {
-    color: var(--branco);
-    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    text-decoration: none;
+}
+
+.sidebar-nav a:hover .icon {
+    color: var(--sidebar-ink);
 }
 
 .sidebar-nav a.ativo {
-    color: var(--branco);
-    background: var(--azul-600);
-    box-shadow: 0 6px 14px rgba(29, 116, 216, 0.35);
+    color: #fff;
+    background: rgba(37, 99, 235, 0.16);
+    font-weight: 600;
 }
 
-.sidebar-nav .item-icone {
-    font-size: 1.1rem;
-    line-height: 1;
-    width: 22px;
-    text-align: center;
+.sidebar-nav a.ativo .icon {
+    color: #fff;
+}
+
+.sidebar-nav a.ativo::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 22px;
+    border-radius: 0 3px 3px 0;
+    background: var(--primary);
 }
 
 /* --------------------------------------------------------------------------
-   Coluna principal (navbar + conteúdo)
+   Coluna principal
    -------------------------------------------------------------------------- */
 .app-main {
     display: flex;
@@ -93,37 +143,49 @@
     min-width: 0;
 }
 
+.app-main > main {
+    flex: 1;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: clamp(18px, 3vw, 30px);
+}
+
 /* --------------------------------------------------------------------------
-   Navbar superior
+   Navbar superior (branca, plana)
    -------------------------------------------------------------------------- */
 .navbar {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 30;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px clamp(16px, 3vw, 32px);
-    color: var(--branco);
-    background: linear-gradient(135deg, var(--azul-900), var(--azul-700));
-    box-shadow: 0 6px 18px rgba(15, 39, 71, 0.16);
+    padding: 0 clamp(16px, 3vw, 28px);
+    min-height: 60px;
+    color: var(--ink);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
 }
 
 .navbar-titulo {
     margin: 0;
-    color: var(--branco);
-    font-size: clamp(1rem, 1.8vw, 1.25rem);
-    font-weight: 700;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-/* Botão "menu" que só aparece no mobile para abrir a sidebar */
-.navbar-toggle {
+.navbar-marca-mobile {
     display: none;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--ink);
 }
 
 /* --------------------------------------------------------------------------
-   Menu do usuário (dropdown 100% CSS, sem JavaScript)
+   Menu do usuário (dropdown 100% CSS)
    -------------------------------------------------------------------------- */
 .user-menu {
     position: relative;
@@ -133,23 +195,53 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 7px 14px;
-    color: var(--azul-900);
-    background: rgba(255, 255, 255, 0.93);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 999px;
-    font-weight: 700;
+    padding: 6px 10px 6px 6px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-pill);
+    font-weight: 600;
+    font-size: 0.88rem;
     list-style: none;
     cursor: pointer;
     user-select: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.user-menu summary:hover {
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
 .user-menu summary::-webkit-details-marker {
     display: none;
 }
 
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.user-menu .user-nome {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .user-menu summary .seta {
-    font-size: 0.7rem;
+    color: var(--subtle);
+    display: inline-flex;
     transition: transform 0.15s ease;
 }
 
@@ -161,54 +253,68 @@
     position: absolute;
     right: 0;
     top: calc(100% + 10px);
-    min-width: 230px;
-    padding: 8px;
-    color: var(--cinza-900);
-    background: var(--branco);
-    border: 1px solid var(--cinza-200);
-    border-radius: 10px;
-    box-shadow: var(--sombra);
+    min-width: 240px;
+    padding: 6px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-md);
 }
 
 .user-dropdown .user-info {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--cinza-200);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 10px 12px;
+    border-bottom: 1px solid var(--border);
     margin-bottom: 6px;
 }
 
 .user-dropdown .user-info strong {
     display: block;
-    color: var(--azul-900);
+    color: var(--ink);
+    font-size: 0.9rem;
 }
 
 .user-dropdown .user-info small {
-    color: var(--cinza-500);
+    color: var(--subtle);
+    font-size: 0.78rem;
 }
 
 .user-dropdown .dropdown-link {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
-    border-radius: 7px;
-    color: var(--cinza-900);
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    color: var(--ink);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 0.88rem;
+}
+
+.user-dropdown .dropdown-link .icon {
+    color: var(--subtle);
 }
 
 .user-dropdown .dropdown-link:hover {
-    background: var(--azul-50);
+    background: var(--surface-2);
+    text-decoration: none;
 }
 
 .user-dropdown .dropdown-link.sair {
-    color: var(--vermelho-700);
+    color: var(--danger);
+}
+
+.user-dropdown .dropdown-link.sair .icon {
+    color: var(--danger);
 }
 
 .user-dropdown .dropdown-link.sair:hover {
-    background: var(--vermelho-100);
+    background: var(--danger-soft);
 }
 
-/* Fecha o dropdown ao clicar fora (camada invisível) */
 .user-menu[open] .clique-fora {
     position: fixed;
     inset: 0;
@@ -218,34 +324,31 @@
 }
 
 /* --------------------------------------------------------------------------
-   Conteúdo: o <main> reaproveita as larguras definidas em global.css
-   e nos CSS de cada página.
+   Cabeçalho de página
    -------------------------------------------------------------------------- */
-.app-main > main {
-    flex: 1;
-}
-
 .page-head {
     margin: 0 0 22px;
 }
 
 .page-head h1 {
     margin: 0;
-    color: var(--azul-900);
-    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    color: var(--ink);
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
 .page-head p {
-    margin: 6px 0 0;
-    color: var(--cinza-700);
+    margin: 5px 0 0;
+    color: var(--muted);
 }
 
 /* --------------------------------------------------------------------------
-   Mensagens de feedback (flash) — visibilidade do status (Nielsen #1/#9)
+   Mensagens de feedback (flash)
    -------------------------------------------------------------------------- */
 .flash-area {
-    width: min(1180px, calc(100% - 32px));
-    margin: 22px auto -6px;
+    max-width: 1280px;
+    margin: 0 auto 18px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -255,39 +358,39 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 13px 16px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: var(--r-md);
     border: 1px solid transparent;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .flash .flash-icone {
-    font-size: 1.15rem;
-    line-height: 1;
+    display: inline-flex;
+    flex-shrink: 0;
 }
 
 .flash--sucesso {
-    color: var(--verde-700);
-    background: var(--verde-100);
+    color: #14532d;
+    background: var(--success-soft);
     border-color: #bbf7d0;
 }
 
 .flash--erro {
-    color: var(--vermelho-700);
-    background: var(--vermelho-100);
+    color: #7f1d1d;
+    background: var(--danger-soft);
     border-color: #fecaca;
 }
 
 .flash--aviso {
-    color: var(--amarelo-700);
-    background: var(--amarelo-100);
+    color: #78350f;
+    background: var(--warning-soft);
     border-color: #fde68a;
 }
 
 /* --------------------------------------------------------------------------
-   Responsividade — sidebar colapsável no mobile
+   Responsividade — sidebar colapsa no topo
    -------------------------------------------------------------------------- */
-@media (max-width: 860px) {
+@media (max-width: 880px) {
     .app-shell {
         flex-direction: column;
     }
@@ -295,11 +398,20 @@
     .sidebar {
         flex: 0 0 auto;
         width: 100%;
+        /* No mobile a sidebar volta ao fluxo normal (barra no topo) */
+        position: static;
+        height: auto;
+        align-self: auto;
+    }
+
+    .sidebar-grupo-titulo {
+        display: none;
     }
 
     .sidebar-nav {
         flex-direction: row;
         flex-wrap: wrap;
+        gap: 6px;
     }
 
     .sidebar-nav a {
@@ -307,7 +419,15 @@
         justify-content: center;
     }
 
-    .flash-area {
-        width: calc(100% - 32px);
+    .sidebar-nav a.ativo::before {
+        display: none;
+    }
+
+    .user-menu .user-nome {
+        display: none;
+    }
+
+    .navbar-marca-mobile {
+        display: inline-flex;
     }
 }

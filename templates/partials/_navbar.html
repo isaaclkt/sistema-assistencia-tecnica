@@ -1,27 +1,39 @@
-{# Navbar superior com o nome do sistema e o menu do usuário (dropdown CSS) #}
+{% import 'partials/_icons.html' as icons %}
+{# Navbar superior: marca (mobile) à esquerda, menu do usuário à direita #}
+{% set nome_usuario = session.get("funcionario_nome") or "Usuário" %}
+{% set partes_nome = nome_usuario.split() %}
+{% set iniciais = (partes_nome[0][0] ~ (partes_nome[1][0] if partes_nome|length > 1 else "")) if partes_nome else "U" %}
 <nav class="navbar">
-    <h2 class="navbar-titulo">Sistema de Assistência Técnica</h2>
+    <span class="navbar-marca-mobile">
+        <span class="sidebar-logo">{{ icons.icon('wrench', 16) }}</span>
+        Assistência Técnica
+    </span>
+
+    <div style="flex:1"></div>
 
     <details class="user-menu">
         <summary>
-            <span class="user-icon" aria-hidden="true"></span>
-            <span>{{ session.get("funcionario_nome", "Usuário") }}</span>
-            <span class="seta" aria-hidden="true">▾</span>
+            <span class="avatar">{{ iniciais }}</span>
+            <span class="user-nome">{{ nome_usuario }}</span>
+            <span class="seta">{{ icons.icon('chevron-down', 16) }}</span>
         </summary>
 
         <span class="clique-fora" aria-hidden="true"></span>
 
         <div class="user-dropdown">
             <div class="user-info">
-                <strong>{{ session.get("funcionario_nome", "Usuário") }}</strong>
-                <small>{{ session.get("funcionario_cargo") or "Funcionário" }}</small>
+                <span class="avatar">{{ iniciais }}</span>
+                <span>
+                    <strong>{{ nome_usuario }}</strong>
+                    <small>{{ session.get("funcionario_cargo") or "Funcionário" }}</small>
+                </span>
             </div>
 
-            <a href="/configuracoes" class="dropdown-link">
-                <span aria-hidden="true">⚙️</span> Configurações
+            <a href="{{ url_for('funcionarios.configuracoes') }}" class="dropdown-link">
+                {{ icons.icon('settings', 18) }} Configurações
             </a>
-            <a href="/logout" class="dropdown-link sair">
-                <span aria-hidden="true">🚪</span> Sair
+            <a href="{{ url_for('funcionarios.logout') }}" class="dropdown-link sair">
+                {{ icons.icon('log-out', 18) }} Sair
             </a>
         </div>
     </details>

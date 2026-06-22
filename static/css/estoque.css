@@ -1,26 +1,5 @@
-main {
-    width: min(1220px, calc(100% - 32px));
-}
-
-td:last-child {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
 .estoque-baixo {
-    background-color: #fee2e2;
-}
-
-.status-baixo {
-    color: #dc2626;
-    font-weight: bold;
-}
-
-.status-normal {
-    color: #16a34a;
-    font-weight: bold;
+    background-color: #fff5f5 !important;
 }
 
 .busca-container {
@@ -36,37 +15,66 @@ td:last-child {
     flex: 1;
 }
 
+/* Indicadores (KPIs) do estoque */
 .dashboard-cards {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
 }
 
 .card-indicador {
-    flex: 1;
-    background: white;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.card-indicador .ind-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
     border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: var(--primary);
+    background: var(--primary-soft);
 }
 
-.card-indicador h3 {
-    margin: 0;
-    color: #1f2937;
+.card-indicador.alerta .ind-icone {
+    color: var(--danger);
+    background: var(--danger-soft);
 }
 
-.card-indicador p {
-    font-size: 32px;
-    font-weight: bold;
-    margin: 15px 0 0;
-    color: #2563eb;
+.card-indicador .ind-texto {
+    display: flex;
+    flex-direction: column;
 }
 
-.alerta p {
-    color: #dc2626;
+.card-indicador .ind-rotulo {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
 }
 
+.card-indicador .ind-valor {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.card-indicador.alerta .ind-valor {
+    color: var(--danger);
+}
+
+/* Paginação */
 .paginacao {
     display: flex;
     flex-wrap: wrap;
@@ -77,16 +85,29 @@ td:last-child {
 }
 
 .paginacao a {
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: var(--azul-700);
-    background: var(--azul-100);
+    padding: 8px 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--ink);
+    background: var(--surface);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 0.88rem;
 }
 
-.paginacao a:hover,
+.paginacao a:hover {
+    background: var(--surface-2);
+    text-decoration: none;
+}
+
 .paginacao a.ativa {
-    color: var(--branco);
-    background: var(--azul-700);
+    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+@media (max-width: 760px) {
+    .form-busca {
+        flex-direction: column;
+    }
 }

@@ -1,3 +1,4 @@
+{% import 'partials/_icons.html' as icons %}
 {# Mensagens de feedback padronizadas (sucesso / erro / aviso) #}
 {% set mensagens = get_flashed_messages(with_categories=true) %}
 {% if mensagens %}
@@ -6,7 +7,9 @@
         {% set tipo = categoria if categoria in ['sucesso', 'erro', 'aviso'] else 'sucesso' %}
         <div class="flash flash--{{ tipo }}" role="alert">
             <span class="flash-icone" aria-hidden="true">
-                {%- if tipo == 'sucesso' -%}✓{%- elif tipo == 'erro' -%}⚠{%- else -%}ℹ{%- endif -%}
+                {%- if tipo == 'sucesso' -%}{{ icons.icon('check-circle', 18) }}
+                {%- elif tipo == 'erro' -%}{{ icons.icon('alert-circle', 18) }}
+                {%- else -%}{{ icons.icon('alert-triangle', 18) }}{%- endif -%}
             </span>
             <span>{{ mensagem }}</span>
         </div>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import 'partials/_icons.html' as icons %}
 
 {% block titulo %}Orçamentos{% endblock %}
 
@@ -73,6 +74,7 @@
 
     <h2>Orçamentos cadastrados</h2>
 
+    <div class="tabela-wrapper">
     <table>
         <thead>
             <tr>
@@ -98,26 +100,34 @@
                 <td>{{ orcamento['funcionario_nome'] or "Não atribuído" }}</td>
                 <td>{{ orcamento['problema_analisado'] }}</td>
                 <td>{{ orcamento['peca_nome'] or "-" }}</td>
-                <td>R$ {{ orcamento['valor_peca'] }}</td>
-                <td>R$ {{ orcamento['valor_mao_obra'] }}</td>
-                <td>R$ {{ orcamento['valor_total'] }}</td>
+                <td class="num">R$ {{ orcamento['valor_peca'] }}</td>
+                <td class="num">R$ {{ orcamento['valor_mao_obra'] }}</td>
+                <td class="num">R$ {{ orcamento['valor_total'] }}</td>
                 <td>
-                    <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
-                        <button type="submit" class="btn-danger"
-                                onclick="return confirm('Deseja realmente excluir este orçamento?')">
-                            Excluir
-                        </button>
-                    </form>
+                    <div class="acoes-celula">
+                        <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
+                            <button type="submit" class="btn-danger btn--sm"
+                                    onclick="return confirm('Deseja realmente excluir este orçamento?')">
+                                {{ icons.icon('trash', 15) }} Excluir
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="10" class="mensagem-vazia">Nenhum orçamento cadastrado.</td>
+                <td colspan="10">
+                    <div class="empty-state">
+                        <span class="empty-icone">{{ icons.icon('file-text', 26) }}</span>
+                        <h3>Nenhum orçamento cadastrado</h3>
+                        <p>Gere o primeiro orçamento selecionando uma ordem de serviço no formulário acima.</p>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
+    </div>
 {% endblock %}
 
 {% block scripts %}

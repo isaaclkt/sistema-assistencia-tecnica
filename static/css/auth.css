@@ -22,12 +22,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    margin-bottom: 12px;
-    font-size: 1.8rem;
-    background: var(--azul-100);
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 14px;
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-radius: 16px;
 }
 
 .auth-brand h1 {

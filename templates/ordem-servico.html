@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import 'partials/_icons.html' as icons %}
 
 {% block titulo %}Ordens de Serviço{% endblock %}
 
@@ -17,10 +18,11 @@
         <h2>Ordens cadastradas</h2>
 
         <div class="acoes-topo">
-            <a href="/ordem-servico/nova" class="btn">Nova ordem</a>
+            <a href="/ordem-servico/nova" class="btn">{{ icons.icon('plus', 17) }} Nova ordem</a>
         </div>
     </div>
 
+    <div class="tabela-wrapper">
     <table>
         <thead>
             <tr>
@@ -50,21 +52,30 @@
                     </span>
                 </td>
                 <td>
-                    <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="btn">Editar</a>
-                    <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
-                        <button type="submit" class="btn btn-danger"
-                                onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
-                            Excluir
-                        </button>
-                    </form>
+                    <div class="acoes-celula">
+                        <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
+                        <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
+                            <button type="submit" class="btn-danger btn--sm"
+                                    onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
+                                {{ icons.icon('trash', 15) }} Excluir
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="mensagem-vazia">Nenhuma ordem cadastrada.</td>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <span class="empty-icone">{{ icons.icon('wrench', 26) }}</span>
+                        <h3>Nenhuma ordem de serviço cadastrada</h3>
+                        <p>Registre o primeiro atendimento para começar a acompanhar os serviços.</p>
+                        <a href="/ordem-servico/nova" class="btn">{{ icons.icon('plus', 17) }} Nova ordem</a>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
+    </div>
 {% endblock %}

@@ -1,11 +1,7 @@
-main {
-    width: min(1180px, calc(100% - 32px));
-}
-
 /* ---- Alertas operacionais ---- */
 .alertas {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 14px;
     margin-bottom: 22px;
 }
@@ -14,29 +10,45 @@ main {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 18px;
-    border-radius: var(--raio);
+    padding: 14px 16px;
+    border-radius: var(--r-md);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     border: 1px solid transparent;
 }
 
+.alerta:hover {
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.alerta-icone {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.alerta-seta {
+    display: inline-flex;
+    margin-left: auto;
+    opacity: 0.7;
+}
+
 .alerta--critico {
-    color: var(--vermelho-700);
-    background: var(--vermelho-100);
+    color: #7f1d1d;
+    background: var(--danger-soft);
     border-color: #fecaca;
 }
 
 .alerta--aviso {
-    color: var(--amarelo-700);
-    background: var(--amarelo-100);
+    color: #78350f;
+    background: var(--warning-soft);
     border-color: #fde68a;
 }
 
 /* ---- KPIs ---- */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 16px;
     margin-bottom: 26px;
 }
@@ -44,46 +56,74 @@ main {
 .kpi-card {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 20px;
-    background: var(--branco);
-    border: 1px solid rgba(219, 228, 239, 0.9);
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
+    gap: 10px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
     text-decoration: none;
-    color: var(--cinza-900);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    color: var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .kpi-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 18px 40px rgba(15, 39, 71, 0.16);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+    text-decoration: none;
+}
+
+.kpi-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .kpi-icone {
-    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    flex-shrink: 0;
+}
+
+.kpi-icone--azul { color: var(--primary); background: var(--primary-soft); }
+.kpi-icone--verde { color: var(--success); background: var(--success-soft); }
+.kpi-icone--ambar { color: var(--warning); background: var(--warning-soft); }
+.kpi-icone--vermelho { color: var(--danger); background: var(--danger-soft); }
+
+.kpi-rotulo {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.82rem;
 }
 
 .kpi-valor {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--azul-700);
-    line-height: 1.1;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
 }
 
-.kpi-rotulo {
-    color: var(--cinza-700);
-    font-weight: 600;
-    font-size: 0.9rem;
+.kpi-contexto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--subtle);
+    font-size: 0.8rem;
 }
 
 .kpi-card--alerta {
     border-color: #fecaca;
-    background: var(--vermelho-100);
+    background: linear-gradient(0deg, var(--danger-soft), var(--surface));
 }
 
 .kpi-card--alerta .kpi-valor {
-    color: var(--vermelho-700);
+    color: var(--danger);
 }
 
 /* ---- Gráficos de barra (HTML/CSS) ---- */
@@ -111,9 +151,9 @@ main {
 }
 
 .barra-rotulo {
-    color: var(--cinza-700);
-    font-weight: 600;
-    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.88rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -122,58 +162,58 @@ main {
 .barra-trilho {
     display: block;
     width: 100%;
-    height: 16px;
-    background: var(--cinza-100);
-    border-radius: 999px;
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: var(--r-pill);
     overflow: hidden;
 }
 
 .barra-preenchida {
     display: block;
     height: 100%;
-    border-radius: 999px;
-    background: var(--azul-600);
+    border-radius: var(--r-pill);
+    background: var(--primary);
     min-width: 2px;
     transition: width 0.4s ease;
 }
 
 .barra-valor {
     text-align: right;
-    font-weight: 700;
-    color: var(--azul-900);
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
 }
 
-.barra-azul { background: var(--azul-600); }
-.barra-entrada { background: #16a34a; }
-.barra-saida { background: #dc2626; }
+.barra-azul { background: var(--primary); }
+.barra-entrada { background: var(--success); }
+.barra-saida { background: var(--danger); }
 
-/* Cores por status nas barras de ordens */
-.status-aberto { background: var(--azul-500); }
-.status-em-andamento { background: var(--amarelo-700); }
-.status-finalizado { background: #16a34a; }
-.status-cancelado { background: #dc2626; }
+.status-aberto { background: var(--primary); }
+.status-em-andamento { background: var(--warning); }
+.status-finalizado { background: var(--success); }
+.status-cancelado { background: var(--danger); }
 
 /* Movimentações por dia */
 .legenda {
     display: flex;
     gap: 18px;
     margin-bottom: 14px;
-    color: var(--cinza-700);
-    font-size: 0.88rem;
-    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 .ponto {
     display: inline-block;
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    margin-right: 4px;
+    margin-right: 5px;
     vertical-align: middle;
 }
 
-.ponto-entrada { background: #16a34a; }
-.ponto-saida { background: #dc2626; }
+.ponto-entrada { background: var(--success); }
+.ponto-saida { background: var(--danger); }
 
 .mov-dia {
     display: grid;
@@ -184,9 +224,9 @@ main {
 }
 
 .mov-data {
-    font-weight: 700;
-    color: var(--azul-900);
-    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.82rem;
 }
 
 .mov-barras {
@@ -197,9 +237,10 @@ main {
 
 .mov-valores {
     text-align: right;
-    font-weight: 600;
-    font-size: 0.82rem;
-    color: var(--cinza-700);
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
 }
 
 /* ---- Atividade recente ---- */
@@ -222,7 +263,7 @@ main {
     justify-content: space-between;
     gap: 12px;
     padding: 12px 0;
-    border-bottom: 1px solid var(--cinza-200);
+    border-bottom: 1px solid var(--border);
 }
 
 .lista-recente li:last-child {
@@ -237,19 +278,17 @@ main {
 }
 
 .lista-info strong {
-    color: var(--azul-900);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.9rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .lista-info small {
-    color: var(--cinza-500);
+    color: var(--subtle);
 }
-
-/* Badges de status de OS herdam de global.css; aqui só as tags de movimentação */
-.mov-tag-entrada { background: var(--verde-100); color: var(--verde-700); }
-.mov-tag-saida { background: var(--vermelho-100); color: var(--vermelho-700); }
 
 /* ---- Acesso rápido ---- */
 .acesso-rapido h2 {
@@ -266,20 +305,27 @@ main {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 16px 18px;
-    background: var(--branco);
-    border: 1px solid rgba(219, 228, 239, 0.9);
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
-    color: var(--azul-900);
-    font-weight: 700;
+    padding: 15px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.9rem;
     text-decoration: none;
-    transition: transform 0.15s ease, background-color 0.15s ease;
+    transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.atalho .icon {
+    color: var(--primary);
 }
 
 .atalho:hover {
     transform: translateY(-2px);
-    background: var(--azul-50);
+    border-color: var(--primary);
+    color: var(--primary);
+    text-decoration: none;
 }
 
 @media (max-width: 640px) {

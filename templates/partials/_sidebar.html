@@ -1,36 +1,44 @@
+{% import 'partials/_icons.html' as icons %}
 {# Menu lateral de navegação principal — presente em todas as telas internas #}
 <aside class="sidebar">
     <div class="sidebar-topo">
-        <a href="/" class="marca">
+        <span class="sidebar-logo">{{ icons.icon('wrench', 18) }}</span>
+        <a href="{{ url_for('home.home') }}" class="marca">
             Assistência Técnica
             <small>Gestão Interna</small>
         </a>
     </div>
 
     <nav class="sidebar-nav" aria-label="Navegação principal">
-        <a href="/" class="{{ 'ativo' if request.path == '/' else '' }}">
-            <span class="item-icone" aria-hidden="true">🏠</span> Home
+        <a href="{{ url_for('home.home') }}" class="{{ 'ativo' if request.path == '/' else '' }}">
+            {{ icons.icon('home', 18) }} Home
         </a>
-        <a href="/cadastro" class="{{ 'ativo' if request.path.startswith('/cadastro') or request.path.startswith('/clientes') else '' }}">
-            <span class="item-icone" aria-hidden="true">👥</span> Clientes
+
+        <div class="sidebar-grupo-titulo">Operação</div>
+        <a href="{{ url_for('cadastro.listar_cadastros') }}" class="{{ 'ativo' if request.path.startswith('/cadastro') or request.path.startswith('/clientes') else '' }}">
+            {{ icons.icon('users', 18) }} Clientes
         </a>
-        <a href="/ordem-servico" class="{{ 'ativo' if request.path.startswith('/ordem-servico') else '' }}">
-            <span class="item-icone" aria-hidden="true">🛠️</span> Ordens de Serviço
+        <a href="{{ url_for('ordem_servico.listar_ordens') }}" class="{{ 'ativo' if request.path.startswith('/ordem-servico') else '' }}">
+            {{ icons.icon('wrench', 18) }} Ordens de Serviço
         </a>
-        <a href="/orcamento" class="{{ 'ativo' if request.path.startswith('/orcamento') else '' }}">
-            <span class="item-icone" aria-hidden="true">📄</span> Orçamentos
+        <a href="{{ url_for('orcamento.pagina_orcamento') }}" class="{{ 'ativo' if request.path.startswith('/orcamento') else '' }}">
+            {{ icons.icon('file-text', 18) }} Orçamentos
         </a>
-        <a href="/acompanhamento" target="_blank" rel="noopener" class="{{ 'ativo' if request.path.startswith('/acompanhamento') else '' }}">
-            <span class="item-icone" aria-hidden="true">🔎</span> Acompanhamento
+        <a href="{{ url_for('acompanhamento.pagina_acompanhamento') }}" target="_blank" rel="noopener" class="{{ 'ativo' if request.path.startswith('/acompanhamento') else '' }}">
+            {{ icons.icon('search', 18) }} Acompanhamento
         </a>
-        <a href="/estoque" class="{{ 'ativo' if request.path.startswith('/estoque') else '' }}">
-            <span class="item-icone" aria-hidden="true">📦</span> Estoque
+
+        <div class="sidebar-grupo-titulo">Estoque</div>
+        <a href="{{ url_for('estoque.listar_estoque') }}" class="{{ 'ativo' if request.path.startswith('/estoque') else '' }}">
+            {{ icons.icon('package', 18) }} Estoque
         </a>
-        <a href="/estoque/relatorio/pdf">
-            <span class="item-icone" aria-hidden="true">📊</span> Relatórios
+        <a href="{{ url_for('estoque.gerar_relatorio_pdf') }}">
+            {{ icons.icon('bar-chart', 18) }} Relatórios
         </a>
-        <a href="/configuracoes" class="{{ 'ativo' if request.path.startswith('/configuracoes') else '' }}">
-            <span class="item-icone" aria-hidden="true">⚙️</span> Configurações
+
+        <div class="sidebar-grupo-titulo">Sistema</div>
+        <a href="{{ url_for('funcionarios.configuracoes') }}" class="{{ 'ativo' if request.path.startswith('/configuracoes') else '' }}">
+            {{ icons.icon('settings', 18) }} Configurações
         </a>
     </nav>
 </aside>
