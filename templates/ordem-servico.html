@@ -53,6 +53,7 @@
                 </td>
                 <td>
                     <div class="acoes-celula">
+                        <a href="{{ url_for('ordem_servico.visualizar_ordem', ordem_id=ordem['ordem_id']) }}" class="btn--secondary btn--sm">{{ icons.icon('file-text', 15) }} Visualizar</a>
                         <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
                         <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="btn-danger btn--sm"
