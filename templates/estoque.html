@@ -45,8 +45,8 @@
 
         <div class="acoes-topo">
             <a href="/estoque/historico" class="btn--secondary">{{ icons.icon('history', 16) }} Histórico</a>
-            <a href="/estoque/relatorio/pdf" class="btn--secondary">{{ icons.icon('download', 16) }} Gerar PDF</a>
-            <a href="/estoque/relatorio/excel" class="btn--secondary">{{ icons.icon('download', 16) }} Exportar Excel</a>
+            <a href="/estoque/relatorio/pdf?busca={{ busca|urlencode }}" class="btn--secondary">{{ icons.icon('download', 16) }} Gerar PDF</a>
+            <a href="/estoque/relatorio/excel?busca={{ busca|urlencode }}" class="btn--secondary">{{ icons.icon('download', 16) }} Exportar Excel</a>
         </div>
     </div>
 
@@ -105,16 +105,27 @@
 
     <h2>Peças cadastradas</h2>
 
+    {% macro th_ord(rotulo, col, classe='') %}
+    <th class="{{ classe }}">
+        <a class="th-sort" href="?busca={{ busca|urlencode }}&ordenar={{ col }}&dir={{ 'desc' if (ordenar == col and direcao == 'asc') else 'asc' }}">
+            <span>{{ rotulo }}</span>
+            {% if ordenar == col %}
+            <span class="th-seta" style="{% if direcao == 'asc' %}transform: rotate(180deg);{% endif %}">{{ icons.icon('chevron-down', 13) }}</span>
+            {% endif %}
+        </a>
+    </th>
+    {% endmacro %}
+
     <div class="tabela-wrapper">
     <table>
         <thead>
             <tr>
-                <th>Nome</th>
+                {{ th_ord('Nome', 'nome') }}
                 <th>Descrição</th>
-                <th class="num">Quantidade</th>
-                <th class="num">Estoque mínimo</th>
-                <th class="num">Preço unitário</th>
-                <th>Fornecedor</th>
+                {{ th_ord('Quantidade', 'quantidade', 'num') }}
+                {{ th_ord('Estoque mínimo', 'estoque_minimo', 'num') }}
+                {{ th_ord('Preço unitário', 'preco_unitario', 'num') }}
+                {{ th_ord('Fornecedor', 'fornecedor') }}
                 <th>Status</th>
                 <th>Ações</th>
             </tr>
@@ -171,19 +182,20 @@
     </div>
 
     {% if (total_paginas | default(1)) > 1 %}
+    {% set ordem_qs = '&ordenar=' ~ ordenar ~ '&dir=' ~ direcao %}
     <nav class="paginacao" aria-label="Paginação de peças">
         {% if pagina > 1 %}
-            <a href="?busca={{ busca|urlencode }}&pagina={{ pagina - 1 }}">Anterior</a>
+            <a href="?busca={{ busca|urlencode }}{{ ordem_qs }}&pagina={{ pagina - 1 }}">Anterior</a>
         {% endif %}
 
         {% for numero in range(1, total_paginas + 1) %}
-            <a href="?busca={{ busca|urlencode }}&pagina={{ numero }}" {% if numero == pagina %}class="ativa" aria-current="page"{% endif %}>
+            <a href="?busca={{ busca|urlencode }}{{ ordem_qs }}&pagina={{ numero }}" {% if numero == pagina %}class="ativa" aria-current="page"{% endif %}>
                 {{ numero }}
             </a>
         {% endfor %}
 
         {% if pagina < total_paginas %}
-            <a href="?busca={{ busca|urlencode }}&pagina={{ pagina + 1 }}">Próxima</a>
+            <a href="?busca={{ busca|urlencode }}{{ ordem_qs }}&pagina={{ pagina + 1 }}">Próxima</a>
         {% endif %}
     </nav>
     {% endif %}

@@ -29,6 +29,9 @@ CREATE TABLE ordens_servico (
     status TEXT NOT NULL DEFAULT 'Aberto',
     data_abertura TEXT,
     data_finalizacao TEXT,
+    laudo TEXT,
+    garantia TEXT,
+    prazo_entrega TEXT,
 
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)

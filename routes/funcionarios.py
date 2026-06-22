@@ -20,6 +20,18 @@ def criar_tabela_funcionarios():
         )
     """)
 
+    # Usuário administrador de demonstração (acadêmico). Criado uma única vez.
+    existe = conexao.execute(
+        "SELECT 1 FROM funcionarios WHERE email = ?", ("admin@sistema.com",)
+    ).fetchone()
+    if not existe:
+        conexao.execute(
+            """INSERT INTO funcionarios (nome, email, senha, cargo, ativo, perfil)
+               VALUES (?, ?, ?, ?, 1, 'admin')""",
+            ("Administrador", "admin@sistema.com",
+             generate_password_hash("admin123"), "Administrador"),
+        )
+
     conexao.commit()
     conexao.close()
 
@@ -31,14 +43,22 @@ def cadastrar_funcionario():
         email = request.form["email"]
         senha = generate_password_hash(request.form["senha"])
         cargo = request.form["cargo"]
+        perfil = request.form.get("perfil", "funcionario")
 
         conexao = conectar()
 
+        # Bootstrap: o primeiro funcionário do sistema é sempre administrador.
+        total = conexao.execute("SELECT COUNT(*) FROM funcionarios").fetchone()[0]
+        if total == 0:
+            perfil = "admin"
+        elif perfil not in ("admin", "tecnico", "atendente", "funcionario"):
+            perfil = "funcionario"
+
         try:
             conexao.execute("""
-                INSERT INTO funcionarios (nome, email, senha, cargo)
-                VALUES (?, ?, ?, ?)
-            """, (nome, email, senha, cargo))
+                INSERT INTO funcionarios (nome, email, senha, cargo, perfil)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome, email, senha, cargo, perfil))
             conexao.commit()
         except sqlite3.IntegrityError:
             conexao.close()
@@ -62,7 +82,7 @@ def login():
 
         conexao = conectar()
         funcionario = conexao.execute("""
-            SELECT id, nome, email, senha, cargo, ativo
+            SELECT id, nome, email, senha, cargo, ativo, perfil
             FROM funcionarios
             WHERE email = ?
         """, (email,)).fetchone()
@@ -78,6 +98,7 @@ def login():
             session["funcionario_id"] = funcionario["id"]
             session["funcionario_nome"] = funcionario["nome"]
             session["funcionario_cargo"] = funcionario["cargo"]
+            session["funcionario_perfil"] = funcionario["perfil"]
 
             return redirect("/")
 
@@ -114,7 +135,7 @@ def configuracoes():
 def listar_funcionarios():
     conexao = conectar()
     funcionarios = conexao.execute("""
-        SELECT id, nome, email, cargo, ativo
+        SELECT id, nome, email, cargo, ativo, perfil
         FROM funcionarios
         ORDER BY nome
     """).fetchall()
@@ -127,7 +148,7 @@ def listar_funcionarios():
 def pagina_editar_funcionario(id):
     conexao = conectar()
     funcionario = conexao.execute(
-        "SELECT id, nome, email, cargo FROM funcionarios WHERE id = ?", (id,)
+        "SELECT id, nome, email, cargo, perfil FROM funcionarios WHERE id = ?", (id,)
     ).fetchone()
     conexao.close()
 
@@ -143,12 +164,15 @@ def atualizar_funcionario(id):
     nome = request.form["nome"]
     email = request.form["email"]
     cargo = request.form["cargo"]
+    perfil = request.form.get("perfil", "funcionario")
+    if perfil not in ("admin", "tecnico", "atendente", "funcionario"):
+        perfil = "funcionario"
 
     conexao = conectar()
     try:
         conexao.execute(
-            "UPDATE funcionarios SET nome = ?, email = ?, cargo = ? WHERE id = ?",
-            (nome, email, cargo, id),
+            "UPDATE funcionarios SET nome = ?, email = ?, cargo = ?, perfil = ? WHERE id = ?",
+            (nome, email, cargo, perfil, id),
         )
         conexao.commit()
         flash("Funcionário atualizado com sucesso.", "sucesso")

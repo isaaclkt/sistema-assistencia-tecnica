@@ -1,9 +1,19 @@
 from datetime import datetime
 
 from flask import Blueprint, flash, render_template, request, redirect, send_file
-from database import conectar
+from database import conectar, registrar_movimentacao
 
 ordem_servico_bp = Blueprint("ordem_servico", __name__)
+
+
+class EstoqueInsuficiente(Exception):
+    """Saldo insuficiente de uma peça para atender a ordem de serviço."""
+
+    def __init__(self, nome, disponivel, solicitado):
+        super().__init__(
+            f'Estoque insuficiente para "{nome}": '
+            f"disponível {disponivel}, necessário {solicitado}."
+        )
 
 
 def _carregar_ordem_completa(db, ordem_id):
@@ -14,6 +24,9 @@ def _carregar_ordem_completa(db, ordem_id):
             os.equipamento,
             os.problema_relatado,
             os.status,
+            os.laudo,
+            os.garantia,
+            os.prazo_entrega,
             c.nome AS cliente_nome,
             c.cpf AS cliente_cpf,
             c.telefone AS cliente_telefone,
@@ -38,6 +51,8 @@ def _carregar_ordem_completa(db, ordem_id):
 
 
 def salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades):
+    """Vincula peças à ordem e BAIXA o estoque, registrando uma saída para
+    cada peça consumida. Levanta EstoqueInsuficiente se o saldo não cobrir."""
     itens = {}
 
     for peca_id, quantidade_texto in zip(pecas_ids, quantidades):
@@ -49,22 +64,50 @@ def salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades):
 
     for peca_id, quantidade in itens.items():
         peca = db.execute("""
-            SELECT preco_unitario
+            SELECT nome, quantidade, preco_unitario
             FROM pecas
             WHERE id = ?
         """, (peca_id,)).fetchone()
 
-        if peca is not None:
-            db.execute("""
-                INSERT INTO ordem_pecas
-                (ordem_id, peca_id, quantidade, valor_unitario)
-                VALUES (?, ?, ?, ?)
-            """, (
-                ordem_id,
-                peca_id,
-                quantidade,
-                peca["preco_unitario"]
-            ))
+        if peca is None:
+            continue
+
+        if peca["quantidade"] < quantidade:
+            raise EstoqueInsuficiente(peca["nome"], peca["quantidade"], quantidade)
+
+        db.execute("""
+            INSERT INTO ordem_pecas
+            (ordem_id, peca_id, quantidade, valor_unitario)
+            VALUES (?, ?, ?, ?)
+        """, (ordem_id, peca_id, quantidade, peca["preco_unitario"]))
+
+        db.execute(
+            "UPDATE pecas SET quantidade = quantidade - ? WHERE id = ?",
+            (quantidade, peca_id),
+        )
+        registrar_movimentacao(
+            db, peca_id, "Saida", quantidade,
+            f"Uso na ordem de serviço #{ordem_id}",
+        )
+
+
+def estornar_pecas_da_ordem(db, ordem_id):
+    """Devolve ao estoque as peças vinculadas à ordem (entrada de estorno).
+    Usado ao editar (antes de reaplicar) e ao excluir a ordem."""
+    itens = db.execute(
+        "SELECT peca_id, quantidade FROM ordem_pecas WHERE ordem_id = ?",
+        (ordem_id,),
+    ).fetchall()
+
+    for item in itens:
+        db.execute(
+            "UPDATE pecas SET quantidade = quantidade + ? WHERE id = ?",
+            (item["quantidade"], item["peca_id"]),
+        )
+        registrar_movimentacao(
+            db, item["peca_id"], "Entrada", item["quantidade"],
+            f"Estorno da ordem de serviço #{ordem_id}",
+        )
 
 
 def atualizar_valores_orcamento(db, ordem_id):
@@ -171,6 +214,9 @@ def cadastrar_ordem():
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
+    laudo = request.form.get("laudo", "")
+    garantia = request.form.get("garantia", "")
+    prazo_entrega = request.form.get("prazo_entrega", "")
     pecas_ids = request.form.getlist("peca_id")
     quantidades = request.form.getlist("quantidade")
 
@@ -179,20 +225,28 @@ def cadastrar_ordem():
 
     db = conectar()
 
-    cursor = db.execute("""
-        INSERT INTO ordens_servico
-        (cliente_id, funcionario_id, equipamento, problema_relatado, status, data_abertura, data_finalizacao)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, agora, data_finalizacao))
+    try:
+        cursor = db.execute("""
+            INSERT INTO ordens_servico
+            (cliente_id, funcionario_id, equipamento, problema_relatado, status,
+             data_abertura, data_finalizacao, laudo, garantia, prazo_entrega)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (cliente_id, funcionario_id, equipamento, problema_relatado, status,
+              agora, data_finalizacao, laudo, garantia, prazo_entrega))
 
-    salvar_pecas_da_ordem(
-        db,
-        cursor.lastrowid,
-        pecas_ids,
-        quantidades
-    )
+        salvar_pecas_da_ordem(db, cursor.lastrowid, pecas_ids, quantidades)
+        db.commit()
+    except EstoqueInsuficiente as erro:
+        db.rollback()
+        db.close()
+        flash(str(erro), "erro")
+        return redirect("/ordem-servico/nova")
+    except ValueError:
+        db.rollback()
+        db.close()
+        flash("Quantidade de peças inválida.", "erro")
+        return redirect("/ordem-servico/nova")
 
-    db.commit()
     db.close()
 
     flash("Ordem de serviço criada com sucesso.", "sucesso")
@@ -210,7 +264,10 @@ def pagina_editar_ordem(ordem_id):
             funcionario_id,
             equipamento,
             problema_relatado,
-            status
+            status,
+            laudo,
+            garantia,
+            prazo_entrega
         FROM ordens_servico
         WHERE ordem_id = ?
     """, (ordem_id,)).fetchone()
@@ -262,6 +319,9 @@ def atualizar_ordem(ordem_id):
     equipamento = request.form["equipamento"]
     problema_relatado = request.form["problema_relatado"]
     status = request.form["status"]
+    laudo = request.form.get("laudo", "")
+    garantia = request.form.get("garantia", "")
+    prazo_entrega = request.form.get("prazo_entrega", "")
     pecas_ids = request.form.getlist("peca_id")
     quantidades = request.form.getlist("quantidade")
 
@@ -283,31 +343,40 @@ def atualizar_ordem(ordem_id):
     else:
         data_finalizacao = None
 
-    db.execute("""
-        UPDATE ordens_servico
-        SET cliente_id = ?,
-            funcionario_id = ?,
-            equipamento = ?,
-            problema_relatado = ?,
-            status = ?,
-            data_finalizacao = ?
-        WHERE ordem_id = ?
-    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, data_finalizacao, ordem_id))
+    try:
+        db.execute("""
+            UPDATE ordens_servico
+            SET cliente_id = ?,
+                funcionario_id = ?,
+                equipamento = ?,
+                problema_relatado = ?,
+                status = ?,
+                data_finalizacao = ?,
+                laudo = ?,
+                garantia = ?,
+                prazo_entrega = ?
+            WHERE ordem_id = ?
+        """, (cliente_id, funcionario_id, equipamento, problema_relatado, status,
+              data_finalizacao, laudo, garantia, prazo_entrega, ordem_id))
 
-    db.execute("""
-        DELETE FROM ordem_pecas
-        WHERE ordem_id = ?
-    """, (ordem_id,))
+        # Devolve ao estoque as peças antigas, remove os vínculos e reaplica o
+        # novo conjunto (baixando o estoque novamente).
+        estornar_pecas_da_ordem(db, ordem_id)
+        db.execute("DELETE FROM ordem_pecas WHERE ordem_id = ?", (ordem_id,))
+        salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades)
+        atualizar_valores_orcamento(db, ordem_id)
+        db.commit()
+    except EstoqueInsuficiente as erro:
+        db.rollback()
+        db.close()
+        flash(str(erro), "erro")
+        return redirect(f"/ordem-servico/editar/{ordem_id}")
+    except ValueError:
+        db.rollback()
+        db.close()
+        flash("Quantidade de peças inválida.", "erro")
+        return redirect(f"/ordem-servico/editar/{ordem_id}")
 
-    salvar_pecas_da_ordem(
-        db,
-        ordem_id,
-        pecas_ids,
-        quantidades
-    )
-    atualizar_valores_orcamento(db, ordem_id)
-
-    db.commit()
     db.close()
 
     flash("Ordem de serviço atualizada com sucesso.", "sucesso")
@@ -317,6 +386,9 @@ def atualizar_ordem(ordem_id):
 @ordem_servico_bp.route("/ordem-servico/excluir/<int:ordem_id>", methods=["POST"])
 def excluir_ordem(ordem_id):
     db = conectar()
+
+    # Devolve as peças ao estoque antes de remover os vínculos da ordem.
+    estornar_pecas_da_ordem(db, ordem_id)
 
     db.execute("DELETE FROM orcamentos WHERE ordem_id = ?", (ordem_id,))
     db.execute("DELETE FROM ordem_pecas WHERE ordem_id = ?", (ordem_id,))
@@ -449,8 +521,11 @@ def gerar_os_pdf(ordem_id):
         add("Nº de série", "")
         add("Acessórios", "")
         add("Defeito", ordem["problema_relatado"], altura=36)
+        add("Laudo técnico", ordem["laudo"], altura=36)
 
-        add("Observações", "", altura=40)
+        add("Garantia", ordem["garantia"])
+        add("Prazo de entrega", ordem["prazo_entrega"])
+        add("Observações", "", altura=32)
         add("Atendente", ordem["funcionario_nome"])
 
         if com_assinatura:

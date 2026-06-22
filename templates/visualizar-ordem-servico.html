@@ -55,10 +55,12 @@
     <div class="os-grid">
         {{ campo('Equipamento', ordem['equipamento']) }}
         {{ campo('Atendente', ordem['funcionario_nome']) }}
-        {{ campo('Nº da OS', ordem['ordem_id']) }}
+        {{ campo('Garantia', ordem['garantia']) }}
+        {{ campo('Prazo de entrega', ordem['prazo_entrega']) }}
     </div>
     <div class="os-grid os-grid--full" style="margin-top:14px;">
         {{ campo('Defeito relatado', ordem['problema_relatado']) }}
+        {{ campo('Laudo técnico', ordem['laudo']) }}
     </div>
 </div>
 

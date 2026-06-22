@@ -34,6 +34,21 @@ def listar_estoque():
     if pagina < 1:
         pagina = 1
 
+    # Ordenação por coluna (lista branca para evitar SQL injection)
+    colunas_ordenaveis = {
+        'nome': 'nome',
+        'quantidade': 'quantidade',
+        'estoque_minimo': 'estoque_minimo',
+        'preco_unitario': 'preco_unitario',
+        'fornecedor': 'fornecedor',
+    }
+    ordenar = request.args.get('ordenar', 'nome')
+    if ordenar not in colunas_ordenaveis:
+        ordenar = 'nome'
+    direcao = 'desc' if request.args.get('dir') == 'desc' else 'asc'
+    coluna_sql = colunas_ordenaveis[ordenar]
+    direcao_sql = 'DESC' if direcao == 'desc' else 'ASC'
+
     termo_busca = f'%{busca}%'
     parametros_busca = (termo_busca,) * 3
 
@@ -52,13 +67,13 @@ def listar_estoque():
 
     offset = (pagina - 1) * por_pagina
 
-    pecas = db.execute("""
+    pecas = db.execute(f"""
         SELECT *
         FROM pecas
         WHERE nome LIKE ?
            OR descricao LIKE ?
            OR fornecedor LIKE ?
-        ORDER BY nome
+        ORDER BY {coluna_sql} {direcao_sql}
         LIMIT ? OFFSET ?
     """, parametros_busca + (por_pagina, offset)).fetchall()
 
@@ -80,6 +95,8 @@ def listar_estoque():
         'estoque.html',
         pecas=pecas,
         busca=busca,
+        ordenar=ordenar,
+        direcao=direcao,
         pagina=pagina,
         total_paginas=total_paginas,
         total_pecas=total_pecas,
@@ -281,15 +298,22 @@ def historico_movimentacoes():
     return render_template('historico_movimentacoes.html', movimentacoes=movimentacoes)
 
 
-def _carregar_dados_relatorio():
+def _carregar_dados_relatorio(busca=""):
     db = conectar()
-    pecas = db.execute("SELECT * FROM pecas ORDER BY nome").fetchall()
+    termo = f"%{busca}%"
+    pecas = db.execute("""
+        SELECT *
+        FROM pecas
+        WHERE nome LIKE ? OR descricao LIKE ? OR fornecedor LIKE ?
+        ORDER BY nome
+    """, (termo, termo, termo)).fetchall()
     movimentacoes = db.execute("""
         SELECT m.id, p.nome AS nome_peca, m.tipo, m.quantidade, m.data_movimentacao
         FROM movimentacoes_estoque m
         INNER JOIN pecas p ON p.id = m.peca_id
+        WHERE p.nome LIKE ?
         ORDER BY m.data_movimentacao DESC
-    """).fetchall()
+    """, (termo,)).fetchall()
     db.close()
     return pecas, movimentacoes
 
@@ -304,7 +328,8 @@ def gerar_relatorio_pdf():
     from reportlab.pdfgen import canvas
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
-    pecas, movimentacoes = _carregar_dados_relatorio()
+    busca = request.args.get('busca', '')
+    pecas, movimentacoes = _carregar_dados_relatorio(busca)
 
     total_pecas = len(pecas)
     qtd_total = sum(p['quantidade'] for p in pecas)
@@ -502,7 +527,8 @@ def gerar_relatorio_excel():
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
-    pecas, movimentacoes = _carregar_dados_relatorio()
+    busca = request.args.get('busca', '')
+    pecas, movimentacoes = _carregar_dados_relatorio(busca)
 
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill("solid", fgColor="123A66")

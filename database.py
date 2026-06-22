@@ -1,9 +1,24 @@
 import sqlite3
+from datetime import datetime
 
 
 def _coluna_existe(conexao, tabela, coluna):
     colunas = conexao.execute(f"PRAGMA table_info({tabela})").fetchall()
     return any(item["name"] == coluna for item in colunas)
+
+
+def registrar_movimentacao(conexao, peca_id, tipo, quantidade, observacao=""):
+    """Insere um registro no histórico de movimentações de estoque.
+    Centraliza a escrita para manter estoque e histórico sincronizados."""
+    conexao.execute(
+        """
+        INSERT INTO movimentacoes_estoque
+            (peca_id, tipo, quantidade, data_movimentacao, observacao)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (peca_id, tipo, quantidade,
+         datetime.now().strftime("%Y-%m-%d %H:%M:%S"), observacao),
+    )
 
 
 def _garantir_schema(conexao):
@@ -47,10 +62,24 @@ def _garantir_schema(conexao):
             "ALTER TABLE orcamentos ADD COLUMN desconto REAL NOT NULL DEFAULT 0",
         ("orcamentos", "data_cadastro"):
             "ALTER TABLE orcamentos ADD COLUMN data_cadastro TEXT",
+        ("ordens_servico", "laudo"):
+            "ALTER TABLE ordens_servico ADD COLUMN laudo TEXT",
+        ("ordens_servico", "garantia"):
+            "ALTER TABLE ordens_servico ADD COLUMN garantia TEXT",
+        ("ordens_servico", "prazo_entrega"):
+            "ALTER TABLE ordens_servico ADD COLUMN prazo_entrega TEXT",
     }
     for (tabela, coluna), comando in novas_colunas.items():
         if not _coluna_existe(conexao, tabela, coluna):
             conexao.execute(comando)
+
+    # Perfil de acesso. Funcionários já existentes viram administradores
+    # (mantêm o acesso atual); novos nascem como 'funcionario'.
+    if not _coluna_existe(conexao, "funcionarios", "perfil"):
+        conexao.execute(
+            "ALTER TABLE funcionarios ADD COLUMN perfil TEXT NOT NULL DEFAULT 'funcionario'"
+        )
+        conexao.execute("UPDATE funcionarios SET perfil = 'admin'")
 
     conexao.execute("""
         UPDATE orcamentos
@@ -65,6 +94,38 @@ def _garantir_schema(conexao):
 
     # Remove tabela morta (nunca utilizada pela aplicação)
     conexao.execute("DROP TABLE IF EXISTS usuarios")
+
+    # Controle de migração e baixa retroativa do estoque das OS já existentes
+    # (evita que estornos futuros inflem o saldo). Roda apenas uma vez.
+    conexao.execute(
+        "CREATE TABLE IF NOT EXISTS config_sistema (chave TEXT PRIMARY KEY, valor TEXT)"
+    )
+    ja_reconciliado = conexao.execute(
+        "SELECT 1 FROM config_sistema WHERE chave = 'reconciliacao_estoque_os'"
+    ).fetchone()
+    if ja_reconciliado is None:
+        itens = conexao.execute(
+            "SELECT peca_id, SUM(quantidade) AS total FROM ordem_pecas GROUP BY peca_id"
+        ).fetchall()
+        for item in itens:
+            peca = conexao.execute(
+                "SELECT quantidade FROM pecas WHERE id = ?", (item["peca_id"],)
+            ).fetchone()
+            if peca is None:
+                continue
+            baixa = min(peca["quantidade"], item["total"])
+            if baixa > 0:
+                conexao.execute(
+                    "UPDATE pecas SET quantidade = quantidade - ? WHERE id = ?",
+                    (baixa, item["peca_id"]),
+                )
+                registrar_movimentacao(
+                    conexao, item["peca_id"], "Saida", baixa,
+                    "Baixa retroativa: peças vinculadas a ordens de serviço",
+                )
+        conexao.execute(
+            "INSERT OR REPLACE INTO config_sistema (chave, valor) VALUES ('reconciliacao_estoque_os', '1')"
+        )
 
     conexao.commit()
 

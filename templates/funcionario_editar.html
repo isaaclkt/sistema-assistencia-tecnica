@@ -25,6 +25,14 @@
                 <label for="cargo">Cargo</label>
                 <input type="text" id="cargo" name="cargo" value="{{ funcionario['cargo'] or '' }}">
             </div>
+            <div class="campo">
+                <label for="perfil">Perfil de acesso</label>
+                <select id="perfil" name="perfil">
+                    {% for valor, rotulo in [('funcionario','Funcionário'), ('tecnico','Técnico'), ('atendente','Atendente'), ('admin','Administrador')] %}
+                    <option value="{{ valor }}" {% if funcionario['perfil'] == valor %}selected{% endif %}>{{ rotulo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
         <div class="botoes">
             <button type="submit">Salvar Alterações</button>

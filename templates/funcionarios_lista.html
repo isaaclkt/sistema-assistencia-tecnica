@@ -26,6 +26,7 @@
                 <th>Nome</th>
                 <th>E-mail</th>
                 <th>Cargo</th>
+                <th>Perfil</th>
                 <th>Status</th>
                 <th>Ações</th>
             </tr>
@@ -36,6 +37,7 @@
                 <td>{{ f['nome'] }}</td>
                 <td>{{ f['email'] }}</td>
                 <td>{{ f['cargo'] or "—" }}</td>
+                <td>{{ (f['perfil'] or 'funcionario')|capitalize }}</td>
                 <td>
                     {% if f['ativo'] %}
                         <span class="status aprovado">Ativo</span>
@@ -58,7 +60,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     <div class="empty-state">
                         <span class="empty-icone">{{ icons.icon('users', 26) }}</span>
                         <h3>Nenhum funcionário cadastrado</h3>

@@ -11,6 +11,15 @@
 
     <div style="flex:1"></div>
 
+    <a href="{{ url_for('estoque.listar_estoque') }}" class="navbar-sino"
+       title="{{ alerta_estoque_baixo }} peça(s) com estoque baixo"
+       aria-label="Estoque baixo: {{ alerta_estoque_baixo }}">
+        {{ icons.icon('bell', 20) }}
+        {% if alerta_estoque_baixo and alerta_estoque_baixo > 0 %}
+        <span class="navbar-badge">{{ alerta_estoque_baixo }}</span>
+        {% endif %}
+    </a>
+
     <details class="user-menu">
         <summary>
             <span class="avatar">{{ iniciais }}</span>

@@ -87,4 +87,5 @@ def acompanhamento_cliente(ordem_id):
     return render_template(
         "acompanhamento_cliente.html",
         ordem=ordem,
+        whatsapp=WHATSAPP_NUMERO,
     )

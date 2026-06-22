@@ -34,6 +34,17 @@
             <input type="text" id="cargo" name="cargo" placeholder="Ex.: Técnico, Atendente">
         </div>
 
+        <div class="campo">
+            <label for="perfil">Perfil de acesso</label>
+            <select id="perfil" name="perfil">
+                <option value="funcionario">Funcionário</option>
+                <option value="tecnico">Técnico</option>
+                <option value="atendente">Atendente</option>
+                <option value="admin">Administrador</option>
+            </select>
+            <small class="ajuda">O primeiro funcionário do sistema é criado como administrador automaticamente.</small>
+        </div>
+
         <button type="submit" class="btn">Cadastrar</button>
     </form>
 

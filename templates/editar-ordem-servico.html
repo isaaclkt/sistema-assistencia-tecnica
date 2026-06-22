@@ -96,6 +96,23 @@
             </select>
         </div>
 
+        <div class="campo">
+            <label for="laudo">Laudo técnico</label>
+            <textarea id="laudo" name="laudo" placeholder="Diagnóstico e serviço executado (preenchido pelo técnico)">{{ ordem['laudo'] or '' }}</textarea>
+        </div>
+
+        <div class="form-grid">
+            <div class="campo">
+                <label for="garantia">Garantia</label>
+                <input type="text" id="garantia" name="garantia" value="{{ ordem['garantia'] or '' }}" placeholder="Ex.: 90 dias">
+            </div>
+
+            <div class="campo">
+                <label for="prazo_entrega">Prazo de entrega</label>
+                <input type="date" id="prazo_entrega" name="prazo_entrega" value="{{ ordem['prazo_entrega'] or '' }}">
+            </div>
+        </div>
+
         <div class="botoes">
             <button type="submit">Salvar ordem</button>
             <a href="/ordem-servico" class="btn btn-home">Voltar</a>

@@ -30,6 +30,24 @@
         color: var(--ink);
         font-weight: 500;
     }
+
+    .btn-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 44px;
+        margin-top: 18px;
+        padding: 11px 16px;
+        border-radius: var(--r-sm);
+        background: #25d366;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-whatsapp:hover { background: #1eb858; text-decoration: none; }
 </style>
 
 <section class="auth-card card">
@@ -88,6 +106,13 @@
                 <dd>{{ ordem["data_finalizacao"] or "-" }}</dd>
             </div>
         </dl>
+
+        {% set msg = 'Olá, gostaria de informações sobre a Ordem de Serviço nº ' ~ ordem['ordem_id'] ~ '.' %}
+        <a class="btn-whatsapp"
+           href="https://wa.me/{{ whatsapp }}?text={{ msg | urlencode }}"
+           target="_blank" rel="noopener">
+            Falar com a Assistência
+        </a>
     {% else %}
         <h2>Acompanhamento da ordem</h2>
         <p class="mensagem-vazia">Ordem não encontrada</p>

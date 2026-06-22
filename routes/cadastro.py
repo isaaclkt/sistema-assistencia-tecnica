@@ -1,3 +1,4 @@
+import re
 import sqlite3
 from datetime import datetime
 
@@ -5,6 +6,21 @@ from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
 
 cadastro_bp = Blueprint("cadastro", __name__)
+
+
+def _validar_cliente(nome, cpf, email):
+    """Retorna uma mensagem de erro ou None se os dados forem válidos."""
+    if not (nome or "").strip():
+        return "O nome do cliente é obrigatório."
+
+    cpf_digitos = re.sub(r"\D", "", cpf or "")
+    if cpf and len(cpf_digitos) != 11:
+        return "CPF inválido: informe 11 dígitos."
+
+    if email and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        return "E-mail inválido."
+
+    return None
 
 
 # Página adicionar cliente
@@ -23,6 +39,11 @@ def cadastrar_cliente():
     telefone = request.form["telefone"]
     email = request.form["email"]
     endereco = request.form["endereco"]
+
+    erro = _validar_cliente(nome, cpf, email)
+    if erro:
+        flash(erro, "erro")
+        return redirect("/clientes/novo")
 
     conexao = conectar()
     cursor = conexao.cursor()
@@ -122,6 +143,11 @@ def atualizar_cliente(id):
     telefone = request.form["telefone"]
     email = request.form["email"]
     endereco = request.form["endereco"]
+
+    erro = _validar_cliente(nome, cpf, email)
+    if erro:
+        flash(erro, "erro")
+        return redirect(f"/clientes/atualizar/{id}")
 
     conexao = conectar()
     cursor = conexao.cursor()

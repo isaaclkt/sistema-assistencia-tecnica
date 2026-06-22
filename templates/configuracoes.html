@@ -31,6 +31,7 @@
     {% endif %}
 </div>
 
+{% if session.get('funcionario_perfil') == 'admin' %}
 <div class="container" style="margin-top: 20px;">
     <div class="topo">
         <h2>Acessos do sistema</h2>
@@ -41,4 +42,5 @@
     </div>
     <p>Atualmente há <strong>{{ total_funcionarios }}</strong> funcionário(s) com acesso ao sistema.</p>
 </div>
+{% endif %}
 {% endblock %}

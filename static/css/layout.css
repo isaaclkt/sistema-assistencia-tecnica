@@ -185,6 +185,44 @@
 }
 
 /* --------------------------------------------------------------------------
+   Sino de notificações (estoque baixo)
+   -------------------------------------------------------------------------- */
+.navbar-sino {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--muted);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.navbar-sino:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+
+.navbar-badge {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--danger);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
    Menu do usuário (dropdown 100% CSS)
    -------------------------------------------------------------------------- */
 .user-menu {

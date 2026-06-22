@@ -3,8 +3,51 @@
 {% block titulo %}Login — Sistema de Assistência Técnica{% endblock %}
 
 {% block conteudo %}
+<style>
+    .demo-card {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 14px 16px;
+        background: var(--primary-soft);
+        border: 1px solid #c7d2fe;
+        border-radius: var(--r-md);
+        color: var(--ink);
+    }
+    .demo-card .demo-icone {
+        flex-shrink: 0;
+        color: var(--primary);
+    }
+    .demo-card strong { display: block; color: var(--primary); margin-bottom: 4px; }
+    .demo-card .demo-cred { font-size: 0.9rem; line-height: 1.6; }
+    .demo-card .demo-cred code {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-weight: 600;
+    }
+</style>
+
 <section class="container auth-card">
     <h2>Entrar</h2>
+
+    <div class="demo-card">
+        <span class="demo-icone" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/>
+                <line x1="12" x2="12.01" y1="8" y2="8"/>
+            </svg>
+        </span>
+        <div>
+            <strong>Acesso para Demonstração</strong>
+            <div class="demo-cred">
+                E-mail: <code>admin@sistema.com</code><br>
+                Senha: <code>admin123</code>
+            </div>
+        </div>
+    </div>
 
     {% if erro %}
         <div class="flash flash--erro" role="alert">
