@@ -1,11 +1,38 @@
 {% extends "base_auth.html" %}
 {% block titulo %}Resultado do Acompanhamento{% endblock %}
 {% block conteudo %}
+<style>
+    .contato-card {
+        margin-top: 16px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        background: var(--surface-2);
+    }
+    .btn-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 16px;
+        border-radius: var(--r-sm);
+        background: #25d366;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .btn-whatsapp:hover { background: #1eb858; text-decoration: none; }
+    .os-bloco + .os-bloco { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 18px; }
+</style>
+
 <section class="auth-card card">
     <h2>Resultado da busca</h2>
 
     {% if ordens %}
         {% for ordem in ordens %}
+        <div class="os-bloco">
             <h3>Ordem #{{ ordem["ordem_id"] }}</h3>
 
             <p><strong>Nome do cliente:</strong> {{ ordem["cliente_nome"] }}</p>
@@ -38,8 +65,18 @@
                     -
                 {% endif %}
             </p>
-            <p><strong>Data de abertura:</strong> -</p>
-            <p><strong>Data de finalização:</strong> -</p>
+            <p><strong>Data de abertura:</strong> {{ ordem["data_abertura"] or "—" }}</p>
+            <p><strong>Data de finalização:</strong> {{ ordem["data_finalizacao"] or "—" }}</p>
+
+            {% set msg = 'Olá, estou acompanhando minha Ordem de Serviço nº ' ~ ordem['ordem_id'] ~ ' e gostaria de mais informações.' %}
+            <div class="contato-card">
+                <a class="btn-whatsapp"
+                   href="https://wa.me/{{ whatsapp }}?text={{ msg|urlencode }}"
+                   target="_blank" rel="noopener">
+                    Falar com a Assistência
+                </a>
+            </div>
+        </div>
         {% endfor %}
     {% else %}
         <p class="mensagem-vazia">Ordem não encontrada</p>

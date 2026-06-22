@@ -174,13 +174,16 @@ def cadastrar_ordem():
     pecas_ids = request.form.getlist("peca_id")
     quantidades = request.form.getlist("quantidade")
 
+    agora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    data_finalizacao = agora if status == "Finalizado" else None
+
     db = conectar()
 
     cursor = db.execute("""
         INSERT INTO ordens_servico
-        (cliente_id, funcionario_id, equipamento, problema_relatado, status)
-        VALUES (?, ?, ?, ?, ?)
-    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status))
+        (cliente_id, funcionario_id, equipamento, problema_relatado, status, data_abertura, data_finalizacao)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, agora, data_finalizacao))
 
     salvar_pecas_da_ordem(
         db,
@@ -264,15 +267,32 @@ def atualizar_ordem(ordem_id):
 
     db = conectar()
 
+    # Preserva a data de finalização original; define-a quando a OS é concluída
+    # e limpa caso a OS seja reaberta. A data de abertura nunca é alterada.
+    atual = db.execute(
+        "SELECT data_finalizacao FROM ordens_servico WHERE ordem_id = ?",
+        (ordem_id,),
+    ).fetchone()
+
+    if status == "Finalizado":
+        data_finalizacao = (
+            atual["data_finalizacao"]
+            if atual and atual["data_finalizacao"]
+            else datetime.now().strftime("%d/%m/%Y %H:%M")
+        )
+    else:
+        data_finalizacao = None
+
     db.execute("""
         UPDATE ordens_servico
         SET cliente_id = ?,
             funcionario_id = ?,
             equipamento = ?,
             problema_relatado = ?,
-            status = ?
+            status = ?,
+            data_finalizacao = ?
         WHERE ordem_id = ?
-    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, ordem_id))
+    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status, data_finalizacao, ordem_id))
 
     db.execute("""
         DELETE FROM ordem_pecas

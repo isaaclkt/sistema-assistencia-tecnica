@@ -12,6 +12,13 @@ def _garantir_schema(conexao):
             "ALTER TABLE ordens_servico ADD COLUMN funcionario_id INTEGER REFERENCES funcionarios(id)"
         )
 
+    # Datas reais da OS (NULL para ordens antigas; preenchidas a partir de agora)
+    if not _coluna_existe(conexao, "ordens_servico", "data_abertura"):
+        conexao.execute("ALTER TABLE ordens_servico ADD COLUMN data_abertura TEXT")
+
+    if not _coluna_existe(conexao, "ordens_servico", "data_finalizacao"):
+        conexao.execute("ALTER TABLE ordens_servico ADD COLUMN data_finalizacao TEXT")
+
     colunas_orcamento = {
         "peca_id": "ALTER TABLE orcamentos ADD COLUMN peca_id INTEGER",
         "problema_analisado": "ALTER TABLE orcamentos ADD COLUMN problema_analisado TEXT NOT NULL DEFAULT ''",

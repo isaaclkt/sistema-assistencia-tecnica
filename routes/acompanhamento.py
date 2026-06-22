@@ -2,6 +2,12 @@ from flask import Blueprint, render_template, request
 from database import conectar
 acompanhamento_bp = Blueprint("acompanhamento", __name__)
 
+# Número de WhatsApp da assistência (formato internacional: 55 + DDD + número).
+# Mantém apenas dígitos, removendo +, espaços, parênteses e traços.
+# TODO: confirmar o número real — celulares BR têm 13 dígitos (55 + DDD + 9 + 8 dígitos).
+_WHATSAPP_BRUTO = "5541992121508"
+WHATSAPP_NUMERO = "".join(c for c in _WHATSAPP_BRUTO if c.isdigit())
+
 
 def buscar_ordens(consulta):
     db = conectar()
@@ -19,6 +25,8 @@ def buscar_ordens(consulta):
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
             ordens_servico.status,
+            ordens_servico.data_abertura,
+            ordens_servico.data_finalizacao,
             clientes.nome AS cliente_nome,
             funcionarios.nome AS funcionario_nome,
             orcamentos.problema_analisado AS diagnostico,
@@ -66,5 +74,6 @@ def resultado_acompanhamento():
     return render_template(
         "resultado_acompanhamento.html",
         ordens=ordens,
-        consulta=consulta
+        consulta=consulta,
+        whatsapp=WHATSAPP_NUMERO,
     )
