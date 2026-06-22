@@ -1,0 +1,96 @@
+{% extends "base_auth.html" %}
+{% block titulo %}Acompanhamento da Ordem{% endblock %}
+{% block conteudo %}
+<style>
+    .dados-ordem {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .dados-ordem div {
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dados-ordem div:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .dados-ordem dt {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .dados-ordem dd {
+        margin: 4px 0 0;
+        color: var(--ink);
+        font-weight: 500;
+    }
+</style>
+
+<section class="auth-card card">
+    {% if ordem %}
+        <h2>Ordem #{{ ordem["ordem_id"] }}</h2>
+
+        <dl class="dados-ordem">
+            <div>
+                <dt>Número da ordem</dt>
+                <dd>{{ ordem["ordem_id"] }}</dd>
+            </div>
+            <div>
+                <dt>Nome do cliente</dt>
+                <dd>{{ ordem["cliente_nome"] }}</dd>
+            </div>
+            <div>
+                <dt>Equipamento</dt>
+                <dd>
+                    {{ ordem["equipamento_tipo"] or ordem["equipamento"] }}
+                    {% if ordem["equipamento_marca"] %} - {{ ordem["equipamento_marca"] }}{% endif %}
+                    {% if ordem["equipamento_modelo"] %} - {{ ordem["equipamento_modelo"] }}{% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt>Defeito relatado</dt>
+                <dd>{{ ordem["problema_relatado"] or "-" }}</dd>
+            </div>
+            <div>
+                <dt>Diagnóstico</dt>
+                <dd>{{ ordem["diagnostico"] or "-" }}</dd>
+            </div>
+            <div>
+                <dt>Status</dt>
+                <dd>
+                    <span class="status status-{{ ordem['status']|lower|replace(' ', '-') }}">
+                        {{ ordem["status"] or "-" }}
+                    </span>
+                </dd>
+            </div>
+            <div>
+                <dt>Valor do serviço</dt>
+                <dd>
+                    {% if ordem["valor_servico"] is not none %}
+                        R$ {{ "%.2f"|format(ordem["valor_servico"]) }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt>Data de abertura</dt>
+                <dd>{{ ordem["data_abertura"] or "-" }}</dd>
+            </div>
+            <div>
+                <dt>Data de finalização</dt>
+                <dd>{{ ordem["data_finalizacao"] or "-" }}</dd>
+            </div>
+        </dl>
+    {% else %}
+        <h2>Acompanhamento da ordem</h2>
+        <p class="mensagem-vazia">Ordem não encontrada</p>
+    {% endif %}
+</section>
+{% endblock %}

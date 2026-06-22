@@ -1,89 +1,70 @@
 {% extends "base_auth.html" %}
-{% block titulo %}Resultado do Acompanhamento{% endblock %}
+{% block titulo %}Link de Acompanhamento{% endblock %}
 {% block conteudo %}
 <style>
-    .contato-card {
-        margin-top: 16px;
-        padding: 14px;
-        border: 1px solid var(--border);
-        border-radius: var(--r-md);
-        background: var(--surface-2);
+    .link-bloco + .link-bloco {
+        border-top: 1px solid var(--border);
+        margin-top: 18px;
+        padding-top: 18px;
     }
-    .btn-whatsapp {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+
+    .link-campo {
+        display: flex;
         gap: 8px;
-        width: 100%;
-        min-height: 42px;
-        padding: 10px 16px;
-        border-radius: var(--r-sm);
-        background: #25d366;
-        color: #fff;
-        font-weight: 600;
-        text-decoration: none;
+        margin-top: 12px;
     }
-    .btn-whatsapp:hover { background: #1eb858; text-decoration: none; }
-    .os-bloco + .os-bloco { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 18px; }
+
+    .link-campo input {
+        font-size: 0.9rem;
+    }
+
+    .link-ajuda {
+        margin: 10px 0 0;
+        color: var(--muted);
+    }
+
+    @media (max-width: 560px) {
+        .link-campo {
+            flex-direction: column;
+        }
+    }
 </style>
 
 <section class="auth-card card">
-    <h2>Resultado da busca</h2>
+    <h2>Link de acompanhamento</h2>
 
     {% if ordens %}
+        <p class="link-ajuda">Copie o link gerado e envie para o cliente acompanhar a ordem.</p>
+
         {% for ordem in ordens %}
-        <div class="os-bloco">
-            <h3>Ordem #{{ ordem["ordem_id"] }}</h3>
+            {% set link = url_for('acompanhamento.acompanhamento_cliente', ordem_id=ordem['ordem_id'], _external=True) %}
+            <div class="link-bloco">
+                <h3>Ordem #{{ ordem["ordem_id"] }} - {{ ordem["cliente_nome"] }}</h3>
 
-            <p><strong>Nome do cliente:</strong> {{ ordem["cliente_nome"] }}</p>
-            <p><strong>Funcionário responsável:</strong> {{ ordem["funcionario_nome"] or "Não atribuído" }}</p>
-            <p>
-                <strong>Equipamento:</strong>
-                {{ ordem["equipamento_tipo"] or ordem["equipamento"] }}
-                {% if ordem["equipamento_marca"] %} - {{ ordem["equipamento_marca"] }}{% endif %}
-                {% if ordem["equipamento_modelo"] %} - {{ ordem["equipamento_modelo"] }}{% endif %}
-            </p>
-            <p><strong>Defeito relatado:</strong> {{ ordem["problema_relatado"] }}</p>
-            <p><strong>Diagnóstico:</strong> {{ ordem["diagnostico"] or "-" }}</p>
-            <p>
-                <strong>Status da ordem:</strong>
-                <span class="status status-{{ ordem['status']|lower|replace(' ', '-') }}">
-                    {% if ordem["status"] == "Aberto" %}
-                        Aberta
-                    {% elif ordem["status"] == "Finalizado" %}
-                        Finalizada
-                    {% else %}
-                        {{ ordem["status"] }}
-                    {% endif %}
-                </span>
-            </p>
-            <p>
-                <strong>Valor do serviço:</strong>
-                {% if ordem["valor_servico"] is not none %}
-                    R$ {{ "%.2f"|format(ordem["valor_servico"]) }}
-                {% else %}
-                    -
-                {% endif %}
-            </p>
-            <p><strong>Data de abertura:</strong> {{ ordem["data_abertura"] or "—" }}</p>
-            <p><strong>Data de finalização:</strong> {{ ordem["data_finalizacao"] or "—" }}</p>
-
-            {% set msg = 'Olá, estou acompanhando minha Ordem de Serviço nº ' ~ ordem['ordem_id'] ~ ' e gostaria de mais informações.' %}
-            <div class="contato-card">
-                <a class="btn-whatsapp"
-                   href="https://wa.me/{{ whatsapp }}?text={{ msg|urlencode }}"
-                   target="_blank" rel="noopener">
-                    Falar com a Assistência
-                </a>
+                <div class="link-campo">
+                    <input id="link-{{ ordem['ordem_id'] }}" type="text" value="{{ link }}" readonly>
+                    <button type="button" data-copy-target="link-{{ ordem['ordem_id'] }}">Copiar link</button>
+                </div>
             </div>
-        </div>
         {% endfor %}
     {% else %}
         <p class="mensagem-vazia">Ordem não encontrada</p>
     {% endif %}
-
-    <p class="auth-link">
-        <a href="/acompanhamento">Fazer nova busca</a>
-    </p>
 </section>
+
+<script>
+    document.querySelectorAll("[data-copy-target]").forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            var campo = document.getElementById(botao.dataset.copyTarget);
+            campo.select();
+            campo.setSelectionRange(0, campo.value.length);
+            navigator.clipboard.writeText(campo.value).then(function () {
+                botao.textContent = "Copiado";
+                setTimeout(function () {
+                    botao.textContent = "Copiar link";
+                }, 1800);
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -2,9 +2,6 @@ from flask import Blueprint, render_template, request
 from database import conectar
 acompanhamento_bp = Blueprint("acompanhamento", __name__)
 
-# Número de WhatsApp da assistência (formato internacional: 55 + DDD + número).
-# Mantém apenas dígitos, removendo +, espaços, parênteses e traços.
-# TODO: confirmar o número real — celulares BR têm 13 dígitos (55 + DDD + 9 + 8 dígitos).
 _WHATSAPP_BRUTO = "5541992121508"
 WHATSAPP_NUMERO = "".join(c for c in _WHATSAPP_BRUTO if c.isdigit())
 
@@ -57,6 +54,11 @@ def buscar_ordens(consulta):
     return ordens
 
 
+def buscar_ordem_por_id(ordem_id):
+    ordens = buscar_ordens(str(ordem_id))
+    return ordens[0] if ordens else None
+
+
 @acompanhamento_bp.route("/acompanhamento")
 def pagina_acompanhamento():
     return render_template("acompanhamento.html")
@@ -75,5 +77,14 @@ def resultado_acompanhamento():
         "resultado_acompanhamento.html",
         ordens=ordens,
         consulta=consulta,
-        whatsapp=WHATSAPP_NUMERO,
+    )
+
+
+@acompanhamento_bp.route("/acompanhamento/<int:ordem_id>")
+def acompanhamento_cliente(ordem_id):
+    ordem = buscar_ordem_por_id(ordem_id)
+
+    return render_template(
+        "acompanhamento_cliente.html",
+        ordem=ordem,
     )

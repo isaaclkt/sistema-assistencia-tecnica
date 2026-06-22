@@ -46,7 +46,7 @@ def proteger_rotas():
 
     if request.path.startswith(rotas_livres):
         return None
-    #pra quem ta vendo depois isso é para quem não ta logado não conseguir ver o resto do site mas talvez de errado com os outros modulos se for por mais coisa depois
+    # Coloquem as rotas que queiram acessar depois de logado
     rotas_protegidas = (
         "/cadastro",
         "/clientes",
