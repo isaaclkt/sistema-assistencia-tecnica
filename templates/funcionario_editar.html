@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import 'partials/_icons.html' as icons %}
+
+{% block titulo %}Editar Funcionário{% endblock %}
+
+{% block conteudo %}
+<div class="page-head">
+    <h1>Editar Funcionário</h1>
+    <p>Atualize os dados de acesso da equipe</p>
+</div>
+
+<section class="card">
+    <h2>Dados do funcionário</h2>
+    <form action="{{ url_for('funcionarios.atualizar_funcionario', id=funcionario['id']) }}" method="POST">
+        <div class="form-grid">
+            <div class="campo">
+                <label for="nome">Nome <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+                <input type="text" id="nome" name="nome" value="{{ funcionario['nome'] }}" required>
+            </div>
+            <div class="campo">
+                <label for="email">E-mail <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+                <input type="email" id="email" name="email" value="{{ funcionario['email'] }}" required>
+            </div>
+            <div class="campo">
+                <label for="cargo">Cargo</label>
+                <input type="text" id="cargo" name="cargo" value="{{ funcionario['cargo'] or '' }}">
+            </div>
+        </div>
+        <div class="botoes">
+            <button type="submit">Salvar Alterações</button>
+            <a href="{{ url_for('funcionarios.listar_funcionarios') }}" class="btn--secondary">Voltar</a>
+        </div>
+    </form>
+</section>
+
+<section class="card" style="margin-top: 20px;">
+    <h2>Redefinir senha</h2>
+    <form action="{{ url_for('funcionarios.redefinir_senha', id=funcionario['id']) }}" method="POST">
+        <div class="campo">
+            <label for="senha">Nova senha <span class="obrigatorio" title="Campo obrigatório">*</span></label>
+            <input type="password" id="senha" name="senha" minlength="4" required>
+            <small class="ajuda">Mínimo de 4 caracteres. O funcionário usará esta senha no próximo login.</small>
+        </div>
+        <div class="botoes">
+            <button type="submit">Redefinir senha</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

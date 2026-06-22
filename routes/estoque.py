@@ -109,9 +109,10 @@ def cadastrar_peca():
     db = conectar()
     db.execute("""
         INSERT INTO pecas
-        (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor))
+        (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor, data_cadastro)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (nome, descricao, quantidade, estoque_minimo, preco_unitario, fornecedor,
+          datetime.now().strftime("%d/%m/%Y %H:%M")))
     db.commit()
     db.close()
 

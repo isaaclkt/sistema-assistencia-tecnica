@@ -1,19 +1,11 @@
-CREATE TABLE usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    senha TEXT NOT NULL,
-    perfil TEXT NOT NULL DEFAULT 'funcionario',
-    ativo INTEGER DEFAULT 1
-);
-
 CREATE TABLE clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     cpf TEXT UNIQUE,
     telefone TEXT,
     email TEXT,
-    endereco TEXT
+    endereco TEXT,
+    data_cadastro TEXT
 );
 
 CREATE TABLE equipamentos (
@@ -35,6 +27,8 @@ CREATE TABLE ordens_servico (
     equipamento TEXT NOT NULL,
     problema_relatado TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'Aberto',
+    data_abertura TEXT,
+    data_finalizacao TEXT,
 
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
@@ -51,6 +45,10 @@ CREATE TABLE orcamentos (
     valor_peca REAL NOT NULL DEFAULT 0,
     valor_mao_obra REAL NOT NULL DEFAULT 0,
     valor_total REAL NOT NULL DEFAULT 0,
+    desconto REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'Pendente',
+    validade TEXT,
+    data_cadastro TEXT,
 
     FOREIGN KEY (ordem_id) REFERENCES ordens_servico(ordem_id),
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
@@ -64,7 +62,8 @@ CREATE TABLE pecas (
     quantidade INTEGER NOT NULL DEFAULT 0,
     estoque_minimo INTEGER DEFAULT 1,
     preco_unitario REAL DEFAULT 0,
-    fornecedor TEXT
+    fornecedor TEXT,
+    data_cadastro TEXT
 );
 
 CREATE TABLE movimentacoes_estoque (
@@ -94,5 +93,6 @@ CREATE TABLE funcionarios (
     nome TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     senha TEXT NOT NULL,
-    cargo TEXT
+    cargo TEXT,
+    ativo INTEGER NOT NULL DEFAULT 1
 );

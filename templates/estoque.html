@@ -127,7 +127,7 @@
                 <td>{{ peca['descricao'] }}</td>
                 <td class="num">{{ peca['quantidade'] }}</td>
                 <td class="num">{{ peca['estoque_minimo'] }}</td>
-                <td class="num">R$ {{ peca['preco_unitario'] }}</td>
+                <td class="num">{{ peca['preco_unitario'] | moeda }}</td>
                 <td>{{ peca['fornecedor'] }}</td>
                 <td>
                     {% if peca['quantidade'] <= peca['estoque_minimo'] %}

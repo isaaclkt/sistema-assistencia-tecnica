@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 from flask import Blueprint, flash, render_template, request, redirect
 from database import conectar
@@ -28,8 +29,9 @@ def cadastrar_cliente():
 
     try:
         cursor.execute(
-            """INSERT INTO clientes (nome, cpf, telefone, email, endereco) VALUES (?, ?, ?, ?, ?)""",
-            (nome, cpf, telefone, email, endereco),
+            """INSERT INTO clientes (nome, cpf, telefone, email, endereco, data_cadastro)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (nome, cpf, telefone, email, endereco, datetime.now().strftime("%d/%m/%Y %H:%M")),
         )
         conexao.commit()
         flash(f'Cliente "{nome}" cadastrado com sucesso.', "sucesso")
