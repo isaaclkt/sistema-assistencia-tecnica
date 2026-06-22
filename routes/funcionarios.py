@@ -62,13 +62,19 @@ def login():
 
         conexao = conectar()
         funcionario = conexao.execute("""
-            SELECT id, nome, email, senha, cargo
+            SELECT id, nome, email, senha, cargo, ativo
             FROM funcionarios
             WHERE email = ?
         """, (email,)).fetchone()
         conexao.close()
 
         if funcionario and check_password_hash(funcionario["senha"], senha):
+            if not funcionario["ativo"]:
+                return render_template(
+                    "login.html",
+                    erro="Esta conta está desativada. Procure um administrador."
+                )
+
             session["funcionario_id"] = funcionario["id"]
             session["funcionario_nome"] = funcionario["nome"]
             session["funcionario_cargo"] = funcionario["cargo"]
@@ -102,6 +108,102 @@ def configuracoes():
         funcionario=funcionario,
         total_funcionarios=total_funcionarios,
     )
+
+
+@funcionarios_bp.route("/funcionarios")
+def listar_funcionarios():
+    conexao = conectar()
+    funcionarios = conexao.execute("""
+        SELECT id, nome, email, cargo, ativo
+        FROM funcionarios
+        ORDER BY nome
+    """).fetchall()
+    conexao.close()
+
+    return render_template("funcionarios_lista.html", funcionarios=funcionarios)
+
+
+@funcionarios_bp.route("/funcionarios/editar/<int:id>")
+def pagina_editar_funcionario(id):
+    conexao = conectar()
+    funcionario = conexao.execute(
+        "SELECT id, nome, email, cargo FROM funcionarios WHERE id = ?", (id,)
+    ).fetchone()
+    conexao.close()
+
+    if funcionario is None:
+        flash("Funcionário não encontrado.", "erro")
+        return redirect("/funcionarios")
+
+    return render_template("funcionario_editar.html", funcionario=funcionario)
+
+
+@funcionarios_bp.route("/funcionarios/atualizar/<int:id>", methods=["POST"])
+def atualizar_funcionario(id):
+    nome = request.form["nome"]
+    email = request.form["email"]
+    cargo = request.form["cargo"]
+
+    conexao = conectar()
+    try:
+        conexao.execute(
+            "UPDATE funcionarios SET nome = ?, email = ?, cargo = ? WHERE id = ?",
+            (nome, email, cargo, id),
+        )
+        conexao.commit()
+        flash("Funcionário atualizado com sucesso.", "sucesso")
+    except sqlite3.IntegrityError:
+        conexao.rollback()
+        flash("Não foi possível atualizar: este e-mail já está em uso.", "erro")
+    finally:
+        conexao.close()
+
+    return redirect("/funcionarios")
+
+
+@funcionarios_bp.route("/funcionarios/<int:id>/status", methods=["POST"])
+def alternar_status_funcionario(id):
+    if id == session.get("funcionario_id"):
+        flash("Você não pode desativar a própria conta em uso.", "erro")
+        return redirect("/funcionarios")
+
+    conexao = conectar()
+    atual = conexao.execute(
+        "SELECT ativo FROM funcionarios WHERE id = ?", (id,)
+    ).fetchone()
+
+    if atual is None:
+        conexao.close()
+        flash("Funcionário não encontrado.", "erro")
+        return redirect("/funcionarios")
+
+    novo = 0 if atual["ativo"] else 1
+    conexao.execute("UPDATE funcionarios SET ativo = ? WHERE id = ?", (novo, id))
+    conexao.commit()
+    conexao.close()
+
+    flash("Funcionário " + ("ativado." if novo else "desativado."), "sucesso")
+    return redirect("/funcionarios")
+
+
+@funcionarios_bp.route("/funcionarios/<int:id>/redefinir-senha", methods=["POST"])
+def redefinir_senha(id):
+    nova_senha = request.form.get("senha", "").strip()
+
+    if len(nova_senha) < 4:
+        flash("A nova senha deve ter pelo menos 4 caracteres.", "erro")
+        return redirect(f"/funcionarios/editar/{id}")
+
+    conexao = conectar()
+    conexao.execute(
+        "UPDATE funcionarios SET senha = ? WHERE id = ?",
+        (generate_password_hash(nova_senha), id),
+    )
+    conexao.commit()
+    conexao.close()
+
+    flash("Senha redefinida com sucesso.", "sucesso")
+    return redirect("/funcionarios")
 
 
 @funcionarios_bp.route("/logout")

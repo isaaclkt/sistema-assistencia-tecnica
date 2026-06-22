@@ -31,6 +31,27 @@ def _garantir_schema(conexao):
         if not _coluna_existe(conexao, "orcamentos", coluna):
             conexao.execute(comando)
 
+    # ---- Novas colunas (auditoria, orçamento comercial, acesso) ----
+    novas_colunas = {
+        ("clientes", "data_cadastro"):
+            "ALTER TABLE clientes ADD COLUMN data_cadastro TEXT",
+        ("pecas", "data_cadastro"):
+            "ALTER TABLE pecas ADD COLUMN data_cadastro TEXT",
+        ("funcionarios", "ativo"):
+            "ALTER TABLE funcionarios ADD COLUMN ativo INTEGER NOT NULL DEFAULT 1",
+        ("orcamentos", "status"):
+            "ALTER TABLE orcamentos ADD COLUMN status TEXT NOT NULL DEFAULT 'Pendente'",
+        ("orcamentos", "validade"):
+            "ALTER TABLE orcamentos ADD COLUMN validade TEXT",
+        ("orcamentos", "desconto"):
+            "ALTER TABLE orcamentos ADD COLUMN desconto REAL NOT NULL DEFAULT 0",
+        ("orcamentos", "data_cadastro"):
+            "ALTER TABLE orcamentos ADD COLUMN data_cadastro TEXT",
+    }
+    for (tabela, coluna), comando in novas_colunas.items():
+        if not _coluna_existe(conexao, tabela, coluna):
+            conexao.execute(comando)
+
     conexao.execute("""
         UPDATE orcamentos
         SET valor_total = valor_orcamento
@@ -41,6 +62,10 @@ def _garantir_schema(conexao):
         CREATE UNIQUE INDEX IF NOT EXISTS idx_orcamentos_ordem_id
         ON orcamentos (ordem_id)
     """)
+
+    # Remove tabela morta (nunca utilizada pela aplicação)
+    conexao.execute("DROP TABLE IF EXISTS usuarios")
+
     conexao.commit()
 
 

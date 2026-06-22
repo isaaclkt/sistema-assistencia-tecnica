@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% import 'partials/_icons.html' as icons %}
+
+{% block titulo %}Funcionários{% endblock %}
+
+{% block conteudo %}
+<div class="page-head">
+    <h1>Funcionários</h1>
+    <p>Gerencie os acessos da equipe da assistência técnica</p>
+</div>
+
+<div class="container">
+    <div class="topo">
+        <h2>Equipe cadastrada</h2>
+        <div class="acoes-topo">
+            <a href="{{ url_for('funcionarios.cadastrar_funcionario') }}" class="btn">
+                {{ icons.icon('plus', 17) }} Novo funcionário
+            </a>
+        </div>
+    </div>
+
+    <div class="tabela-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Cargo</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in funcionarios %}
+            <tr>
+                <td>{{ f['nome'] }}</td>
+                <td>{{ f['email'] }}</td>
+                <td>{{ f['cargo'] or "—" }}</td>
+                <td>
+                    {% if f['ativo'] %}
+                        <span class="status aprovado">Ativo</span>
+                    {% else %}
+                        <span class="status recusado">Inativo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="acoes-celula">
+                        <a href="{{ url_for('funcionarios.pagina_editar_funcionario', id=f['id']) }}"
+                           class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
+                        <form action="{{ url_for('funcionarios.alternar_status_funcionario', id=f['id']) }}"
+                              method="POST" class="acoes-form">
+                            <button type="submit" class="btn--secondary btn--sm">
+                                {% if f['ativo'] %}Desativar{% else %}Ativar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <span class="empty-icone">{{ icons.icon('users', 26) }}</span>
+                        <h3>Nenhum funcionário cadastrado</h3>
+                        <p>Cadastre o primeiro acesso da equipe.</p>
+                        <a href="{{ url_for('funcionarios.cadastrar_funcionario') }}" class="btn">
+                            {{ icons.icon('plus', 17) }} Novo funcionário
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

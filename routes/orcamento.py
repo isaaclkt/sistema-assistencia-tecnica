@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request
 
@@ -61,7 +62,10 @@ def pagina_orcamento():
             orcamentos.problema_analisado,
             orcamentos.valor_peca,
             orcamentos.valor_mao_obra,
+            orcamentos.desconto,
             orcamentos.valor_total,
+            orcamentos.status,
+            orcamentos.validade,
             clientes.nome AS nome_cliente,
             funcionarios.nome AS funcionario_nome,
             ordens_servico.problema_relatado,
@@ -99,7 +103,18 @@ def pagina_orcamento():
 def criar_orcamento():
     ordem_id = request.form["ordem_id"]
     problema_analisado = request.form["problema_analisado"]
-    valor_mao_obra = float(request.form["valor_mao_obra"] or 0)
+    validade = request.form.get("validade", "").strip()
+
+    try:
+        valor_mao_obra = float(request.form.get("valor_mao_obra") or 0)
+        desconto = float(request.form.get("desconto") or 0)
+    except ValueError:
+        flash("Valor da mão de obra e desconto devem ser números válidos.", "erro")
+        return redirect("/orcamento")
+
+    if valor_mao_obra < 0 or desconto < 0:
+        flash("Valor da mão de obra e desconto não podem ser negativos.", "erro")
+        return redirect("/orcamento")
 
     conexao = conectar()
     cursor = conexao.cursor()
@@ -149,7 +164,7 @@ def criar_orcamento():
         return redirect("/orcamento")
 
     valor_peca = float(ordem["valor_peca"] or 0)
-    valor_total = valor_peca + valor_mao_obra
+    valor_total = max(valor_peca + valor_mao_obra - desconto, 0)
 
     try:
         cursor.execute("""
@@ -163,9 +178,13 @@ def criar_orcamento():
                 valor_orcamento,
                 valor_peca,
                 valor_mao_obra,
-                valor_total
+                desconto,
+                valor_total,
+                status,
+                validade,
+                data_cadastro
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             ordem_id,
             ordem["cliente_id"],
@@ -175,7 +194,11 @@ def criar_orcamento():
             valor_total,
             valor_peca,
             valor_mao_obra,
+            desconto,
             valor_total,
+            "Pendente",
+            validade,
+            datetime.now().strftime("%d/%m/%Y %H:%M"),
         ))
         conexao.commit()
         flash("Orçamento cadastrado com sucesso.", "sucesso")
@@ -184,6 +207,43 @@ def criar_orcamento():
         flash("Esta ordem de serviço já possui um orçamento.", "erro")
 
     conexao.close()
+    return redirect("/orcamento")
+
+
+def _definir_status_orcamento(orcamento_id, novo_status, status_os):
+    """Atualiza o status do orçamento e reflete na ordem de serviço."""
+    conexao = conectar()
+    orc = conexao.execute(
+        "SELECT ordem_id FROM orcamentos WHERE id = ?", (orcamento_id,)
+    ).fetchone()
+
+    if orc is None:
+        conexao.close()
+        flash("Orçamento não encontrado.", "erro")
+        return
+
+    conexao.execute(
+        "UPDATE orcamentos SET status = ? WHERE id = ?", (novo_status, orcamento_id)
+    )
+    conexao.execute(
+        "UPDATE ordens_servico SET status = ? WHERE ordem_id = ?",
+        (status_os, orc["ordem_id"]),
+    )
+    conexao.commit()
+    conexao.close()
+
+
+@orcamento_bp.route("/orcamentos/aprovar/<int:orcamento_id>", methods=["POST"])
+def aprovar_orcamento(orcamento_id):
+    _definir_status_orcamento(orcamento_id, "Aprovado", "Em andamento")
+    flash("Orçamento aprovado. Ordem de serviço movida para 'Em andamento'.", "sucesso")
+    return redirect("/orcamento")
+
+
+@orcamento_bp.route("/orcamentos/recusar/<int:orcamento_id>", methods=["POST"])
+def recusar_orcamento(orcamento_id):
+    _definir_status_orcamento(orcamento_id, "Recusado", "Cancelado")
+    flash("Orçamento recusado. Ordem de serviço movida para 'Cancelado'.", "aviso")
     return redirect("/orcamento")
 
 

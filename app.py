@@ -11,6 +11,18 @@ from routes.acompanhamento import acompanhamento_bp
 app = Flask(__name__)
 app.secret_key = "sistema-assistencia-tecnica"
 
+
+@app.template_filter("moeda")
+def formatar_moeda(valor):
+    """Formata um número no padrão monetário brasileiro: R$ 1.234,56."""
+    try:
+        numero = float(valor or 0)
+    except (TypeError, ValueError):
+        numero = 0.0
+    formatado = f"{numero:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {formatado}"
+
+
 criar_tabela_funcionarios()
 
 # Registra o módulo estoque
@@ -57,6 +69,7 @@ def proteger_rotas():
         "/orcamentos",
         "/relatorios",
         "/configuracoes",
+        "/funcionarios",
     )
 
     # Bloqueia a home e os modulos internos quando nao ha funcionario autenticado.

@@ -34,7 +34,10 @@
 <div class="container" style="margin-top: 20px;">
     <div class="topo">
         <h2>Acessos do sistema</h2>
-        <a href="/funcionarios/cadastrar" class="btn">Cadastrar funcionário</a>
+        <div class="acoes-topo">
+            <a href="{{ url_for('funcionarios.listar_funcionarios') }}" class="btn">Gerenciar funcionários</a>
+            <a href="{{ url_for('funcionarios.cadastrar_funcionario') }}" class="btn--secondary">Cadastrar funcionário</a>
+        </div>
     </div>
     <p>Atualmente há <strong>{{ total_funcionarios }}</strong> funcionário(s) com acesso ao sistema.</p>
 </div>
