@@ -1,15 +1,9 @@
-/* ==========================================================================
-   Layout global (sidebar + navbar + área de conteúdo)
-   ========================================================================== */
 
 .app-shell {
     display: flex;
     min-height: 100vh;
 }
 
-/* --------------------------------------------------------------------------
-   Sidebar
-   -------------------------------------------------------------------------- */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -17,7 +11,6 @@
     width: 248px;
     background: var(--sidebar);
     color: var(--sidebar-ink);
-    /* Mantém a sidebar sempre visível durante a rolagem vertical */
     position: sticky;
     top: 0;
     align-self: flex-start;
@@ -133,9 +126,6 @@
     background: var(--primary);
 }
 
-/* --------------------------------------------------------------------------
-   Coluna principal
-   -------------------------------------------------------------------------- */
 .app-main {
     display: flex;
     flex-direction: column;
@@ -151,9 +141,6 @@
     padding: clamp(18px, 3vw, 30px);
 }
 
-/* --------------------------------------------------------------------------
-   Navbar superior (branca, plana)
-   -------------------------------------------------------------------------- */
 .navbar {
     position: sticky;
     top: 0;
@@ -184,9 +171,6 @@
     color: var(--ink);
 }
 
-/* --------------------------------------------------------------------------
-   Sino de notificações (estoque baixo)
-   -------------------------------------------------------------------------- */
 .navbar-sino {
     position: relative;
     display: inline-flex;
@@ -222,9 +206,6 @@
     line-height: 1;
 }
 
-/* --------------------------------------------------------------------------
-   Menu do usuário (dropdown 100% CSS)
-   -------------------------------------------------------------------------- */
 .user-menu {
     position: relative;
 }
@@ -361,9 +342,6 @@
     content: "";
 }
 
-/* --------------------------------------------------------------------------
-   Cabeçalho de página
-   -------------------------------------------------------------------------- */
 .page-head {
     margin: 0 0 22px;
 }
@@ -381,9 +359,6 @@
     color: var(--muted);
 }
 
-/* --------------------------------------------------------------------------
-   Mensagens de feedback (flash)
-   -------------------------------------------------------------------------- */
 .flash-area {
     max-width: 1280px;
     margin: 0 auto 18px;
@@ -425,9 +400,6 @@
     border-color: #fde68a;
 }
 
-/* --------------------------------------------------------------------------
-   Responsividade — sidebar colapsa no topo
-   -------------------------------------------------------------------------- */
 @media (max-width: 880px) {
     .app-shell {
         flex-direction: column;
@@ -436,7 +408,6 @@
     .sidebar {
         flex: 0 0 auto;
         width: 100%;
-        /* No mobile a sidebar volta ao fluxo normal (barra no topo) */
         position: static;
         height: auto;
         align-self: auto;

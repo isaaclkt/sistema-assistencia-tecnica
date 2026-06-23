@@ -15,7 +15,6 @@
     flex: 1;
 }
 
-/* Indicadores (KPIs) do estoque */
 .dashboard-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -74,7 +73,6 @@
     color: var(--danger);
 }
 
-/* Cabeçalhos clicáveis (ordenação) */
 .th-sort {
     display: inline-flex;
     align-items: center;
@@ -98,7 +96,6 @@ th.num .th-sort {
     justify-content: flex-end;
 }
 
-/* Paginação */
 .paginacao {
     display: flex;
     flex-wrap: wrap;

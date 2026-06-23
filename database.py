@@ -27,7 +27,6 @@ def _garantir_schema(conexao):
             "ALTER TABLE ordens_servico ADD COLUMN funcionario_id INTEGER REFERENCES funcionarios(id)"
         )
 
-    # Datas reais da OS (NULL para ordens antigas; preenchidas a partir de agora)
     if not _coluna_existe(conexao, "ordens_servico", "data_abertura"):
         conexao.execute("ALTER TABLE ordens_servico ADD COLUMN data_abertura TEXT")
 
@@ -46,7 +45,6 @@ def _garantir_schema(conexao):
         if not _coluna_existe(conexao, "orcamentos", coluna):
             conexao.execute(comando)
 
-    # ---- Novas colunas (auditoria, orçamento comercial, acesso) ----
     novas_colunas = {
         ("clientes", "data_cadastro"):
             "ALTER TABLE clientes ADD COLUMN data_cadastro TEXT",
@@ -73,8 +71,6 @@ def _garantir_schema(conexao):
         if not _coluna_existe(conexao, tabela, coluna):
             conexao.execute(comando)
 
-    # Perfil de acesso. Funcionários já existentes viram administradores
-    # (mantêm o acesso atual); novos nascem como 'funcionario'.
     if not _coluna_existe(conexao, "funcionarios", "perfil"):
         conexao.execute(
             "ALTER TABLE funcionarios ADD COLUMN perfil TEXT NOT NULL DEFAULT 'funcionario'"
@@ -92,11 +88,8 @@ def _garantir_schema(conexao):
         ON orcamentos (ordem_id)
     """)
 
-    # Remove tabela morta (nunca utilizada pela aplicação)
     conexao.execute("DROP TABLE IF EXISTS usuarios")
 
-    # Controle de migração e baixa retroativa do estoque das OS já existentes
-    # (evita que estornos futuros inflem o saldo). Roda apenas uma vez.
     conexao.execute(
         "CREATE TABLE IF NOT EXISTS config_sistema (chave TEXT PRIMARY KEY, valor TEXT)"
     )

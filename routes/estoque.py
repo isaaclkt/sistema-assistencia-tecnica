@@ -34,7 +34,6 @@ def listar_estoque():
     if pagina < 1:
         pagina = 1
 
-    # Ordenação por coluna (lista branca para evitar SQL injection)
     colunas_ordenaveis = {
         'nome': 'nome',
         'quantidade': 'quantidade',
@@ -370,7 +369,6 @@ def gerar_relatorio_pdf():
 
     elementos = []
 
-    # Cabeçalho corporativo (mesma identidade do PDF da OS)
     cab = Table([[
         Paragraph("SISTEMA DE ASSISTÊNCIA TÉCNICA"
                   "<br/><font size=9 color='#555555'>Relatório Geral de Estoque</font>", est_titulo),
@@ -387,7 +385,6 @@ def gerar_relatorio_pdf():
     elementos.append(cab)
     elementos.append(Spacer(1, 10))
 
-    # Resumo executivo
     elementos.append(banda("RESUMO EXECUTIVO"))
     elementos.append(Spacer(1, 6))
 
@@ -411,7 +408,6 @@ def gerar_relatorio_pdf():
     elementos.append(resumo)
     elementos.append(Spacer(1, 12))
 
-    # Tabela de peças
     elementos.append(banda("TABELA DE PEÇAS"))
     elementos.append(Spacer(1, 6))
 
@@ -450,7 +446,6 @@ def gerar_relatorio_pdf():
     elementos.append(tabela)
     elementos.append(Spacer(1, 14))
 
-    # Histórico de movimentações
     elementos.append(banda("HISTÓRICO DE MOVIMENTAÇÕES"))
     elementos.append(Spacer(1, 6))
 
@@ -481,7 +476,6 @@ def gerar_relatorio_pdf():
     tabela2.setStyle(TableStyle(estilo_mov))
     elementos.append(tabela2)
 
-    # Canvas com rodapé e paginação "Página X de Y"
     class NumberedCanvas(canvas.Canvas):
         def __init__(self, *args, **kwargs):
             canvas.Canvas.__init__(self, *args, **kwargs)
@@ -556,7 +550,6 @@ def gerar_relatorio_excel():
 
     wb = Workbook()
 
-    # Aba 1 — Estoque
     ws = wb.active
     ws.title = "Estoque"
     ws.append(["ID", "Nome", "Descrição", "Quantidade", "Estoque Mínimo",
@@ -579,7 +572,6 @@ def gerar_relatorio_excel():
     estilizar_cabecalho(ws, 8)
     autoajustar(ws)
 
-    # Aba 2 — Movimentações
     ws2 = wb.create_sheet("Movimentações")
     ws2.append(["ID da Movimentação", "Peça", "Tipo", "Quantidade", "Data", "Hora"])
     for m in movimentacoes:

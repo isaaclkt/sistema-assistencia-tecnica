@@ -34,7 +34,7 @@ def f_data(dt):
 
 
 def seed():
-    criar_tabela_funcionarios()  # garante o admin
+    criar_tabela_funcionarios()
     db = conectar()
 
     admin = db.execute(
@@ -42,7 +42,6 @@ def seed():
     ).fetchone()
     admin_id = admin["id"]
 
-    # ---- Limpeza (ordem segura para as FKs) ----
     for tabela in ["movimentacoes_estoque", "ordem_pecas", "orcamentos",
                    "ordens_servico", "equipamentos", "pecas", "clientes"]:
         db.execute(f"DELETE FROM {tabela}")
@@ -59,7 +58,6 @@ def seed():
             (peca_id, tipo, qtd, f_mov(dt), obs),
         )
 
-    # ---- Clientes ----
     clientes = [
         ("Mariana Oliveira Costa", "047.812.339-21", "(41) 99812-4471", "mariana.costa@gmail.com", "Rua das Acácias, 320 - Curitiba/PR"),
         ("Tech Solutions Informática Ltda", "12.345.678/0001-90", "(41) 3322-1180", "contato@techsolutions.com.br", "Av. Sete de Setembro, 2450 - Curitiba/PR"),
@@ -82,7 +80,6 @@ def seed():
         )
         cliente_id.append(cur.lastrowid)
 
-    # ---- Peças (nome, descrição, est_min, preço, fornecedor, entrada inicial) ----
     pecas = [
         ("Tela iPhone 11", "Display OLED compatível", 3, 480.00, "Apple Parts BR", 10),
         ("Bateria Samsung Galaxy S20", "Bateria 4000mAh", 5, 180.00, "Samsung Supply", 12),
@@ -116,7 +113,6 @@ def seed():
         peca_preco[nome] = preco
         mov(pid, "Entrada", entrada, dia((i % 12) + 2, hora=8), "Entrada por compra")
 
-    # ---- Ordens de serviço ----
     ordens = [
         dict(cli=0, equip="iPhone 11", prob="Tela trincada após queda", status="Finalizado",
              laudo="Substituição do display OLED. Aparelho testado e aprovado.", gar="90 dias",
@@ -200,7 +196,6 @@ def seed():
                      mao=mao, desc=desc, status=status_orc, ab=o["ab"])
             )
 
-    # ---- Orçamentos ----
     for oc in orcamentos_para_criar:
         total = max(oc["valor_peca"] + oc["mao"] - oc["desc"], 0)
         cadastro = dia(max(oc["ab"] - 1, 0))
@@ -217,7 +212,6 @@ def seed():
 
     db.commit()
 
-    # ---- Resumo ----
     def conta(sql):
         return db.execute(sql).fetchone()[0]
 

@@ -1,5 +1,4 @@
 {% import 'partials/_icons.html' as icons %}
-{# Navbar superior: marca (mobile) à esquerda, menu do usuário à direita #}
 {% set nome_usuario = session.get("funcionario_nome") or "Usuário" %}
 {% set partes_nome = nome_usuario.split() %}
 {% set iniciais = (partes_nome[0][0] ~ (partes_nome[1][0] if partes_nome|length > 1 else "")) if partes_nome else "U" %}

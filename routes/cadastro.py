@@ -23,14 +23,12 @@ def _validar_cliente(nome, cpf, email):
     return None
 
 
-# Página adicionar cliente
 @cadastro_bp.route("/clientes/novo")
 def pagina_adicionar_cliente():
     return render_template("adicionar_clientes.html")
 
 
 
-# CREATE
 @cadastro_bp.route("/clientes/cadastrar", methods=["POST"])
 def cadastrar_cliente():
 
@@ -64,7 +62,6 @@ def cadastrar_cliente():
 
     return redirect("/cadastro")
 
-# READ
 @cadastro_bp.route("/cadastro")
 def listar_cadastros():
     pagina = request.args.get("pagina", 1, type=int)
@@ -117,7 +114,6 @@ def listar_cadastros():
     )
 
 
-# Página editar cliente
 @cadastro_bp.route("/clientes/atualizar/<int:id>", methods=["GET"])
 def pagina_atualizar_cliente(id):
     conexao = conectar()
@@ -135,7 +131,6 @@ def pagina_atualizar_cliente(id):
     return render_template("editar_clientes.html", cliente=cliente)
 
 
-# UPDATE
 @cadastro_bp.route("/clientes/atualizar/<int:id>", methods=["POST"])
 def atualizar_cliente(id):
     nome = request.form["nome"]
@@ -167,7 +162,6 @@ def atualizar_cliente(id):
 
     return redirect("/cadastro")
 
-# DELETE
 @cadastro_bp.route("/clientes/excluir/<int:id>", methods=["POST"])
 def deletar_cliente(id):
     conexao = conectar()

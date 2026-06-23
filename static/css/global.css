@@ -1,31 +1,20 @@
-/* ==========================================================================
-   DESIGN SYSTEM — Sistema de Assistência Técnica
-   Superfícies neutras + accent azul (estilo ERP moderno).
-   Os tokens legados (--azul-*, --cinza-*, --sombra, --raio) foram remapeados
-   para a nova paleta, de modo que todos os CSS por página modernizam juntos.
-   ========================================================================== */
 
 :root {
-    /* Superfícies */
     --bg: #f6f7f9;
     --surface: #ffffff;
     --surface-2: #f9fafb;
 
-    /* Bordas */
     --border: #e6e8ec;
     --border-strong: #d5d9e0;
 
-    /* Texto */
     --ink: #1a2230;
     --muted: #5b6675;
     --subtle: #8a93a3;
 
-    /* Accent (azul de marca) */
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --primary-soft: #eef2ff;
 
-    /* Semânticos */
     --success: #16a34a;
     --success-soft: #dcfce7;
     --warning: #d97706;
@@ -34,12 +23,10 @@
     --danger-hover: #b91c1c;
     --danger-soft: #fee2e2;
 
-    /* Sidebar (navy sólido) */
     --sidebar: #0f172a;
     --sidebar-ink: #cbd5e1;
     --sidebar-muted: #7e8aa0;
 
-    /* Espaçamento */
     --s-1: 4px;
     --s-2: 8px;
     --s-3: 12px;
@@ -48,17 +35,14 @@
     --s-6: 24px;
     --s-8: 32px;
 
-    /* Raio */
     --r-sm: 6px;
     --r-md: 10px;
     --r-lg: 14px;
     --r-pill: 999px;
 
-    /* Sombra (sutil) */
     --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
     --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
 
-    /* ---- Aliases legados remapeados para a nova paleta ---- */
     --azul-900: #0f172a;
     --azul-800: #1e293b;
     --azul-700: #2563eb;
@@ -103,9 +87,6 @@ main {
     margin: 32px auto;
 }
 
-/* --------------------------------------------------------------------------
-   Tipografia
-   -------------------------------------------------------------------------- */
 h1, h2, h3, h4 {
     color: var(--ink);
     font-weight: 600;
@@ -131,9 +112,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --------------------------------------------------------------------------
-   Superfícies
-   -------------------------------------------------------------------------- */
 .container,
 .card {
     background: var(--surface);
@@ -167,9 +145,6 @@ a:hover {
     align-items: center;
 }
 
-/* --------------------------------------------------------------------------
-   Botões — hierarquia: primary / secondary / ghost / danger
-   -------------------------------------------------------------------------- */
 .btn,
 button,
 .voltar,
@@ -209,7 +184,6 @@ button .icon {
     margin: -2px 0;
 }
 
-/* Secundário (contorno neutro) — usado para "Voltar", ações não principais */
 .btn--secondary,
 .btn-home,
 .voltar,
@@ -235,7 +209,6 @@ button .icon {
     text-decoration: none;
 }
 
-/* Fantasma (sem fundo) — ações compactas em tabelas */
 .btn--ghost {
     background: transparent;
     color: var(--muted);
@@ -247,7 +220,6 @@ button .icon {
     color: var(--ink);
 }
 
-/* Perigo */
 .btn-danger,
 .excluir {
     background: var(--surface);
@@ -262,7 +234,6 @@ button .icon {
     border-color: #f0b4b4;
 }
 
-/* Tamanho compacto para ações de linha */
 .btn--sm {
     min-height: 32px;
     padding: 6px 11px;
@@ -273,9 +244,6 @@ button .icon {
     width: 100%;
 }
 
-/* --------------------------------------------------------------------------
-   Formulários
-   -------------------------------------------------------------------------- */
 form {
     margin: 0 0 24px;
 }
@@ -351,9 +319,6 @@ input[readonly]:focus {
     border-color: var(--border);
 }
 
-/* --------------------------------------------------------------------------
-   Tabelas — estilo corporativo (ERPNext / HubSpot)
-   -------------------------------------------------------------------------- */
 .tabela-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -431,9 +396,6 @@ tbody tr:last-child td {
     align-items: center;
 }
 
-/* --------------------------------------------------------------------------
-   Badges / status
-   -------------------------------------------------------------------------- */
 .status {
     display: inline-flex;
     align-items: center;
@@ -490,7 +452,6 @@ tbody tr:last-child td {
     color: var(--danger);
 }
 
-/* Badges de estoque na tabela de peças */
 .status-baixo {
     display: inline-flex;
     align-items: center;
@@ -515,9 +476,6 @@ tbody tr:last-child td {
     font-weight: 600;
 }
 
-/* --------------------------------------------------------------------------
-   Estados vazios (empty states)
-   -------------------------------------------------------------------------- */
 .mensagem-vazia {
     padding: 28px 18px;
     color: var(--muted);
@@ -557,18 +515,12 @@ tbody tr:last-child td {
     max-width: 420px;
 }
 
-/* --------------------------------------------------------------------------
-   Ícones
-   -------------------------------------------------------------------------- */
 .icon {
     display: inline-block;
     vertical-align: middle;
     flex-shrink: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Auxiliares
-   -------------------------------------------------------------------------- */
 .obrigatorio {
     color: var(--danger);
     font-weight: 700;
@@ -580,9 +532,6 @@ tbody tr:last-child td {
     line-height: 1.4;
 }
 
-/* --------------------------------------------------------------------------
-   Responsividade
-   -------------------------------------------------------------------------- */
 @media (max-width: 760px) {
     .topo {
         align-items: stretch;

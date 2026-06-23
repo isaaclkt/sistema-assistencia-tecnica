@@ -4,7 +4,6 @@ from database import conectar
 home_bp = Blueprint("home", __name__)
 
 
-# Status considerados "em aberto" para os indicadores operacionais
 STATUS_EM_ABERTO = ("Aberto", "Em andamento")
 
 
@@ -19,7 +18,6 @@ def _porcentagem(valor, maximo):
 def home():
     db = conectar()
 
-    # ----- Cards de indicadores (KPIs) ---------------------------------------
     total_clientes = db.execute(
         "SELECT COUNT(*) AS total FROM clientes"
     ).fetchone()["total"]
@@ -54,7 +52,6 @@ def home():
         "estoque_baixo": estoque_baixo,
     }
 
-    # ----- Gráfico: ordens por status ----------------------------------------
     linhas_status = db.execute("""
         SELECT status, COUNT(*) AS total
         FROM ordens_servico
@@ -72,7 +69,6 @@ def home():
         for linha in linhas_status
     ]
 
-    # ----- Gráfico: movimentações dos últimos 14 dias ------------------------
     linhas_mov = db.execute("""
         SELECT
             substr(data_movimentacao, 1, 10) AS dia,
@@ -99,7 +95,6 @@ def home():
         for linha in linhas_mov
     ]
 
-    # ----- Gráfico: top 5 peças mais movimentadas ----------------------------
     linhas_top = db.execute("""
         SELECT p.nome AS nome, SUM(m.quantidade) AS total
         FROM movimentacoes_estoque m
@@ -119,7 +114,6 @@ def home():
         for linha in linhas_top
     ]
 
-    # ----- Atividade recente -------------------------------------------------
     ultimas_ordens = db.execute("""
         SELECT
             o.ordem_id,

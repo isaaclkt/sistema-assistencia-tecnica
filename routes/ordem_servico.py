@@ -327,8 +327,6 @@ def atualizar_ordem(ordem_id):
 
     db = conectar()
 
-    # Preserva a data de finalização original; define-a quando a OS é concluída
-    # e limpa caso a OS seja reaberta. A data de abertura nunca é alterada.
     atual = db.execute(
         "SELECT data_finalizacao FROM ordens_servico WHERE ordem_id = ?",
         (ordem_id,),
@@ -359,8 +357,6 @@ def atualizar_ordem(ordem_id):
         """, (cliente_id, funcionario_id, equipamento, problema_relatado, status,
               data_finalizacao, laudo, garantia, prazo_entrega, ordem_id))
 
-        # Devolve ao estoque as peças antigas, remove os vínculos e reaplica o
-        # novo conjunto (baixando o estoque novamente).
         estornar_pecas_da_ordem(db, ordem_id)
         db.execute("DELETE FROM ordem_pecas WHERE ordem_id = ?", (ordem_id,))
         salvar_pecas_da_ordem(db, ordem_id, pecas_ids, quantidades)
@@ -387,7 +383,6 @@ def atualizar_ordem(ordem_id):
 def excluir_ordem(ordem_id):
     db = conectar()
 
-    # Devolve as peças ao estoque antes de remover os vínculos da ordem.
     estornar_pecas_da_ordem(db, ordem_id)
 
     db.execute("DELETE FROM orcamentos WHERE ordem_id = ?", (ordem_id,))
@@ -441,7 +436,6 @@ def gerar_os_pdf(ordem_id):
 
     emissao = datetime.now().strftime("%d/%m/%Y")
 
-    # Estilos compactos para caber as duas vias em uma folha A4
     est_empresa = ParagraphStyle("empresa", fontName="Helvetica-Bold", fontSize=11, leading=13)
     est_os = ParagraphStyle("os", fontName="Helvetica-Bold", fontSize=9, leading=12, alignment=2)
     est_band = ParagraphStyle("band", fontName="Helvetica-Bold", fontSize=8, leading=10, textColor=colors.white)
@@ -461,7 +455,6 @@ def gerar_os_pdf(ordem_id):
     def via_flowables(com_assinatura, titulo_via):
         elems = []
 
-        # Cabeçalho: empresa (esquerda) + número da OS / data / via (direita)
         cab = Table([[
             Paragraph(
                 "SISTEMA DE ASSISTÊNCIA TÉCNICA"
@@ -486,7 +479,6 @@ def gerar_os_pdf(ordem_id):
         ]))
         elems.append(cab)
 
-        # Corpo em coluna única (rótulo | valor), como no formulário físico
         linhas = []
         alturas = []
         estilo = [

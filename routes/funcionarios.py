@@ -20,7 +20,6 @@ def criar_tabela_funcionarios():
         )
     """)
 
-    # Usuário administrador de demonstração (acadêmico). Criado uma única vez.
     existe = conexao.execute(
         "SELECT 1 FROM funcionarios WHERE email = ?", ("admin@sistema.com",)
     ).fetchone()
@@ -47,7 +46,6 @@ def cadastrar_funcionario():
 
         conexao = conectar()
 
-        # Bootstrap: o primeiro funcionário do sistema é sempre administrador.
         total = conexao.execute("SELECT COUNT(*) FROM funcionarios").fetchone()[0]
         if total == 0:
             perfil = "admin"

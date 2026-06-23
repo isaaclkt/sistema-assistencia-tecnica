@@ -10,9 +10,7 @@ from routes.home import home_bp
 from routes.acompanhamento import acompanhamento_bp
 from database import conectar
 
-# Cria a aplicação Flask
 app = Flask(__name__)
-# Chave de sessão vem do ambiente em produção; fallback apenas para desenvolvimento.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-inseguro-troque-em-producao")
 
 
@@ -42,22 +40,16 @@ def injetar_alertas_estoque():
 
 criar_tabela_funcionarios()
 
-# Registra o módulo estoque
 app.register_blueprint(estoque_bp)
 
-# Registra o módulo ordem_servico
 app.register_blueprint(ordem_servico_bp)
 
-# Registra o módulo cadastro
 app.register_blueprint(cadastro_bp)
 
-# Registra o módulo orçamento
 app.register_blueprint(orcamento_bp)
 
-#Registra o modulo de usuario e login
 app.register_blueprint(funcionarios_bp)
 
-# Registra a página home
 app.register_blueprint(home_bp)
 
 app.register_blueprint(acompanhamento_bp)
@@ -71,7 +63,6 @@ def _sem_funcionarios():
     return total == 0
 
 
-# Página inicial
 @app.before_request
 def proteger_rotas():
     rotas_livres = (
@@ -83,7 +74,6 @@ def proteger_rotas():
     if request.path.startswith(rotas_livres):
         return None
 
-    # Bootstrap: criar o primeiro funcionário (admin) é permitido sem login.
     if request.path == "/funcionarios/cadastrar" and _sem_funcionarios():
         return None
 
@@ -100,11 +90,9 @@ def proteger_rotas():
         "/funcionarios",
     )
 
-    # Bloqueia a home e os modulos internos quando nao ha funcionario autenticado.
     if (request.path == "/" or request.path.startswith(rotas_protegidas)) and "funcionario_id" not in session:
         return redirect("/login")
 
-    # Área de funcionários (gestão de acessos) é exclusiva de administradores.
     if request.path.startswith("/funcionarios") and session.get("funcionario_perfil") != "admin":
         flash("Acesso restrito a administradores.", "erro")
         return redirect("/")
