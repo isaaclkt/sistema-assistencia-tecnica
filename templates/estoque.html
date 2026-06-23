@@ -41,15 +41,18 @@
 
 <div class="container">
     <div class="topo">
-        <h2>Cadastrar nova peça</h2>
+        <h2>{% if pode('admin') %}Cadastrar nova peça{% else %}Estoque de peças{% endif %}</h2>
 
         <div class="acoes-topo">
             <a href="/estoque/historico" class="btn--secondary">{{ icons.icon('history', 16) }} Histórico</a>
+            {% if pode('admin') %}
             <a href="/estoque/relatorio/pdf?busca={{ busca|urlencode }}" class="btn--secondary">{{ icons.icon('download', 16) }} Gerar PDF</a>
             <a href="/estoque/relatorio/excel?busca={{ busca|urlencode }}" class="btn--secondary">{{ icons.icon('download', 16) }} Exportar Excel</a>
+            {% endif %}
         </div>
     </div>
 
+    {% if pode('admin') %}
     <form action="/estoque/cadastrar" method="POST">
         <div class="form-grid">
             <div class="campo">
@@ -87,6 +90,7 @@
             <button type="submit" class="btn">{{ icons.icon('plus', 17) }} Cadastrar peça</button>
         </div>
     </form>
+    {% endif %}
 
     <div class="busca-container">
         <form action="/estoque" method="GET" class="form-busca">
@@ -149,6 +153,7 @@
                 </td>
                 <td>
                     <div class="acoes-celula">
+                        {% if pode('admin') %}
                         <a href="/estoque/editar/{{ peca['id'] }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
                         <a href="/estoque/movimentar/{{ peca['id'] }}" class="btn--secondary btn--sm">{{ icons.icon('arrow-right', 15) }} Movimentar</a>
                         <form action="/estoque/excluir/{{ peca['id'] }}" method="POST" class="acoes-form">
@@ -157,6 +162,9 @@
                                 {{ icons.icon('trash', 15) }} Excluir
                             </button>
                         </form>
+                        {% else %}
+                        <span class="ajuda">Apenas consulta</span>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

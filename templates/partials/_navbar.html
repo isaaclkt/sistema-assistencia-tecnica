@@ -10,6 +10,7 @@
 
     <div style="flex:1"></div>
 
+    {% if pode('admin') %}
     <a href="{{ url_for('estoque.listar_estoque') }}" class="navbar-sino"
        title="{{ alerta_estoque_baixo }} peça(s) com estoque baixo"
        aria-label="Estoque baixo: {{ alerta_estoque_baixo }}">
@@ -18,6 +19,7 @@
         <span class="navbar-badge">{{ alerta_estoque_baixo }}</span>
         {% endif %}
     </a>
+    {% endif %}
 
     <details class="user-menu">
         <summary>
@@ -37,9 +39,11 @@
                 </span>
             </div>
 
+            {% if pode('admin') %}
             <a href="{{ url_for('funcionarios.configuracoes') }}" class="dropdown-link">
                 {{ icons.icon('settings', 18) }} Configurações
             </a>
+            {% endif %}
             <a href="{{ url_for('funcionarios.logout') }}" class="dropdown-link sair">
                 {{ icons.icon('log-out', 18) }} Sair
             </a>

@@ -18,7 +18,9 @@
         <h2>Clientes Cadastrados</h2>
 
         <div class="acoes-topo">
+            {% if pode('atendente') %}
             <a href="/clientes/novo" class="btn">{{ icons.icon('plus', 17) }} Novo Cliente</a>
+            {% endif %}
         </div>
     </div>
 
@@ -52,7 +54,7 @@
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
-                <th>CPF</th>
+                <th>CPF/CNPJ</th>
                 <th>Telefone</th>
                 <th>Email</th>
                 <th>Endereço</th>
@@ -71,13 +73,18 @@
                 <td title="{{ cliente['endereco'] }}">{{ cliente['endereco'] }}</td>
                 <td class="celula-acoes">
                     <div class="acoes-clientes">
+                        {% if pode('atendente') %}
                         <a href="/clientes/atualizar/{{ cliente['id'] }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
+                        {% endif %}
+                        {% if pode('admin') %}
                         <form action="/clientes/excluir/{{ cliente['id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="excluir btn--sm"
                                     onclick="return confirm('Deseja realmente excluir o cliente {{ cliente['nome'] }}?')">
                                 {{ icons.icon('trash', 15) }} Excluir
                             </button>
                         </form>
+                        {% endif %}
+                        {% if not pode('atendente') and not pode('admin') %}<span class="ajuda">—</span>{% endif %}
                     </div>
                 </td>
             </tr>
@@ -93,7 +100,9 @@
                         {% else %}
                         <h3>Nenhum cliente cadastrado</h3>
                         <p>Cadastre o primeiro cliente para começar a registrar ordens e orçamentos.</p>
+                        {% if pode('atendente') %}
                         <a href="/clientes/novo" class="btn">{{ icons.icon('plus', 17) }} Novo Cliente</a>
+                        {% endif %}
                         {% endif %}
                     </div>
                 </td>

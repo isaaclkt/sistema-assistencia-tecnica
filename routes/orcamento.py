@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request
 
-from database import conectar
+from database import conectar, consumir_estoque, estornar_estoque, EstoqueInsuficiente
 
 orcamento_bp = Blueprint("orcamento", __name__)
 
@@ -20,39 +20,26 @@ def pagina_orcamento():
             ordens_servico.equipamento,
             ordens_servico.problema_relatado,
             clientes.nome AS cliente_nome,
-            funcionarios.nome AS funcionario_nome,
-            GROUP_CONCAT(
-                pecas.nome || ' (' || ordem_pecas.quantidade || 'x)',
-                ', '
-            ) AS peca_nome,
-            COALESCE(
-                SUM(ordem_pecas.quantidade * ordem_pecas.valor_unitario),
-                0
-            ) AS valor_peca
+            funcionarios.nome AS funcionario_nome
         FROM ordens_servico
         JOIN clientes
             ON clientes.id = ordens_servico.cliente_id
         LEFT JOIN funcionarios
             ON funcionarios.id = ordens_servico.funcionario_id
-        LEFT JOIN ordem_pecas
-            ON ordem_pecas.ordem_id = ordens_servico.ordem_id
-        LEFT JOIN pecas
-            ON pecas.id = ordem_pecas.peca_id
         WHERE NOT EXISTS (
             SELECT 1
             FROM orcamentos
             WHERE orcamentos.ordem_id = ordens_servico.ordem_id
         )
-        GROUP BY
-            ordens_servico.ordem_id,
-            ordens_servico.cliente_id,
-            ordens_servico.equipamento,
-            ordens_servico.problema_relatado,
-            clientes.nome,
-            funcionarios.nome
         ORDER BY ordens_servico.ordem_id DESC
     """)
     ordens_servico = cursor.fetchall()
+
+    pecas = cursor.execute("""
+        SELECT id, nome, preco_unitario
+        FROM pecas
+        ORDER BY nome
+    """).fetchall()
 
     cursor.execute("""
         SELECT
@@ -95,6 +82,7 @@ def pagina_orcamento():
     return render_template(
         "orcamento.html",
         ordens_servico=ordens_servico,
+        pecas=pecas,
         orcamentos=orcamentos,
     )
 
@@ -104,6 +92,8 @@ def criar_orcamento():
     ordem_id = request.form["ordem_id"]
     problema_analisado = request.form["problema_analisado"]
     validade = request.form.get("validade", "").strip()
+    pecas_ids = request.form.getlist("peca_id")
+    quantidades = request.form.getlist("quantidade")
 
     try:
         valor_mao_obra = float(request.form.get("valor_mao_obra") or 0)
@@ -119,51 +109,54 @@ def criar_orcamento():
     conexao = conectar()
     cursor = conexao.cursor()
 
-    orcamento_existente = cursor.execute("""
-        SELECT 1
-        FROM orcamentos
-        WHERE ordem_id = ?
-    """, (ordem_id,)).fetchone()
-
-    if orcamento_existente:
+    existente = cursor.execute(
+        "SELECT 1 FROM orcamentos WHERE ordem_id = ?", (ordem_id,)
+    ).fetchone()
+    if existente:
         conexao.close()
         flash("Esta ordem de serviço já possui um orçamento.", "erro")
         return redirect("/orcamento")
 
-    ordem = cursor.execute("""
-        SELECT
-            ordens_servico.cliente_id,
-            ordens_servico.equipamento,
-            MIN(ordem_pecas.peca_id) AS peca_id,
-            COALESCE(
-                SUM(ordem_pecas.quantidade * ordem_pecas.valor_unitario),
-                0
-            ) AS valor_peca
-        FROM ordens_servico
-        LEFT JOIN ordem_pecas
-            ON ordem_pecas.ordem_id = ordens_servico.ordem_id
-        WHERE ordens_servico.ordem_id = ?
-        GROUP BY
-            ordens_servico.ordem_id,
-            ordens_servico.cliente_id,
-            ordens_servico.equipamento
-    """, (ordem_id,)).fetchone()
-
+    ordem = cursor.execute(
+        "SELECT cliente_id, equipamento FROM ordens_servico WHERE ordem_id = ?",
+        (ordem_id,),
+    ).fetchone()
     if ordem is None:
         conexao.close()
         flash("Ordem de serviço não encontrada.", "erro")
         return redirect("/orcamento")
 
-    if ordem["peca_id"] is None:
+    # Consolida as peças selecionadas (soma quantidades por peça)
+    itens = {}
+    try:
+        for peca_id, quantidade_texto in zip(pecas_ids, quantidades):
+            if not peca_id:
+                continue
+            itens[peca_id] = itens.get(peca_id, 0) + max(int(quantidade_texto or 1), 1)
+    except ValueError:
         conexao.close()
-        flash(
-            "Esta ordem de serviço não possui peças vinculadas. "
-            "Edite a ordem e selecione ao menos uma peça antes de gerar o orçamento.",
-            "erro",
-        )
+        flash("Quantidade de peças inválida.", "erro")
         return redirect("/orcamento")
 
-    valor_peca = float(ordem["valor_peca"] or 0)
+    # Vincula as peças à ordem (sem baixar o estoque — isso ocorre na aprovação)
+    cursor.execute("DELETE FROM ordem_pecas WHERE ordem_id = ?", (ordem_id,))
+    valor_peca = 0.0
+    primeiro_peca_id = None
+    for peca_id, quantidade in itens.items():
+        peca = cursor.execute(
+            "SELECT preco_unitario FROM pecas WHERE id = ?", (peca_id,)
+        ).fetchone()
+        if peca is None:
+            continue
+        preco = peca["preco_unitario"] or 0
+        valor_peca += preco * quantidade
+        if primeiro_peca_id is None:
+            primeiro_peca_id = peca_id
+        cursor.execute(
+            "INSERT INTO ordem_pecas (ordem_id, peca_id, quantidade, valor_unitario) VALUES (?, ?, ?, ?)",
+            (ordem_id, peca_id, quantidade, preco),
+        )
+
     valor_total = max(valor_peca + valor_mao_obra - desconto, 0)
 
     try:
@@ -188,7 +181,7 @@ def criar_orcamento():
         """, (
             ordem_id,
             ordem["cliente_id"],
-            ordem["peca_id"],
+            primeiro_peca_id,
             ordem["equipamento"],
             problema_analisado,
             valor_total,
@@ -210,8 +203,45 @@ def criar_orcamento():
     return redirect("/orcamento")
 
 
-def _definir_status_orcamento(orcamento_id, novo_status, status_os):
-    """Atualiza o status do orçamento e reflete na ordem de serviço."""
+@orcamento_bp.route("/orcamentos/aprovar/<int:orcamento_id>", methods=["POST"])
+def aprovar_orcamento(orcamento_id):
+    conexao = conectar()
+    orc = conexao.execute(
+        "SELECT ordem_id, status FROM orcamentos WHERE id = ?", (orcamento_id,)
+    ).fetchone()
+
+    if orc is None:
+        conexao.close()
+        flash("Orçamento não encontrado.", "erro")
+        return redirect("/orcamento")
+
+    if orc["status"] != "Pendente":
+        conexao.close()
+        flash("Este orçamento já foi processado.", "aviso")
+        return redirect("/orcamento")
+
+    try:
+        # Aprovar baixa o estoque das peças do orçamento.
+        consumir_estoque(conexao, orc["ordem_id"])
+        conexao.execute(
+            "UPDATE orcamentos SET status = 'Aprovado' WHERE id = ?", (orcamento_id,)
+        )
+        conexao.execute(
+            "UPDATE ordens_servico SET status = 'Em andamento' WHERE ordem_id = ?",
+            (orc["ordem_id"],),
+        )
+        conexao.commit()
+        flash("Orçamento aprovado. Estoque baixado e ordem movida para 'Em andamento'.", "sucesso")
+    except EstoqueInsuficiente as erro:
+        conexao.rollback()
+        flash(str(erro), "erro")
+
+    conexao.close()
+    return redirect("/orcamento")
+
+
+@orcamento_bp.route("/orcamentos/recusar/<int:orcamento_id>", methods=["POST"])
+def recusar_orcamento(orcamento_id):
     conexao = conectar()
     orc = conexao.execute(
         "SELECT ordem_id FROM orcamentos WHERE id = ?", (orcamento_id,)
@@ -220,29 +250,18 @@ def _definir_status_orcamento(orcamento_id, novo_status, status_os):
     if orc is None:
         conexao.close()
         flash("Orçamento não encontrado.", "erro")
-        return
+        return redirect("/orcamento")
 
     conexao.execute(
-        "UPDATE orcamentos SET status = ? WHERE id = ?", (novo_status, orcamento_id)
+        "UPDATE orcamentos SET status = 'Recusado' WHERE id = ?", (orcamento_id,)
     )
     conexao.execute(
-        "UPDATE ordens_servico SET status = ? WHERE ordem_id = ?",
-        (status_os, orc["ordem_id"]),
+        "UPDATE ordens_servico SET status = 'Cancelado' WHERE ordem_id = ?",
+        (orc["ordem_id"],),
     )
     conexao.commit()
     conexao.close()
 
-
-@orcamento_bp.route("/orcamentos/aprovar/<int:orcamento_id>", methods=["POST"])
-def aprovar_orcamento(orcamento_id):
-    _definir_status_orcamento(orcamento_id, "Aprovado", "Em andamento")
-    flash("Orçamento aprovado. Ordem de serviço movida para 'Em andamento'.", "sucesso")
-    return redirect("/orcamento")
-
-
-@orcamento_bp.route("/orcamentos/recusar/<int:orcamento_id>", methods=["POST"])
-def recusar_orcamento(orcamento_id):
-    _definir_status_orcamento(orcamento_id, "Recusado", "Cancelado")
     flash("Orçamento recusado. Ordem de serviço movida para 'Cancelado'.", "aviso")
     return redirect("/orcamento")
 
@@ -250,11 +269,18 @@ def recusar_orcamento(orcamento_id):
 @orcamento_bp.route("/orcamentos/excluir/<int:orcamento_id>", methods=["POST"])
 def excluir_orcamento(orcamento_id):
     conexao = conectar()
-    conexao.execute(
-        "DELETE FROM orcamentos WHERE id = ?",
-        (orcamento_id,),
-    )
-    conexao.commit()
+    orc = conexao.execute(
+        "SELECT ordem_id, status FROM orcamentos WHERE id = ?", (orcamento_id,)
+    ).fetchone()
+
+    if orc is not None:
+        # Se já estava aprovado, o estoque foi baixado — devolve antes de excluir.
+        if orc["status"] == "Aprovado":
+            estornar_estoque(conexao, orc["ordem_id"])
+        conexao.execute("DELETE FROM ordem_pecas WHERE ordem_id = ?", (orc["ordem_id"],))
+        conexao.execute("DELETE FROM orcamentos WHERE id = ?", (orcamento_id,))
+        conexao.commit()
+
     conexao.close()
 
     flash("Orçamento excluído com sucesso.", "sucesso")

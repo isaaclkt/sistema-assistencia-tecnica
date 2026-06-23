@@ -21,6 +21,59 @@ def registrar_movimentacao(conexao, peca_id, tipo, quantidade, observacao=""):
     )
 
 
+class EstoqueInsuficiente(Exception):
+    """Saldo insuficiente de uma peça para atender o orçamento aprovado."""
+
+    def __init__(self, nome, disponivel, solicitado):
+        super().__init__(
+            f'Estoque insuficiente para "{nome}": '
+            f"disponível {disponivel}, necessário {solicitado}."
+        )
+
+
+def consumir_estoque(conexao, ordem_id):
+    """Baixa o estoque das peças vinculadas à ordem (registra saídas).
+    Valida tudo antes de debitar; levanta EstoqueInsuficiente se faltar saldo."""
+    itens = conexao.execute("""
+        SELECT op.peca_id, op.quantidade, p.nome AS nome, p.quantidade AS saldo
+        FROM ordem_pecas op
+        JOIN pecas p ON p.id = op.peca_id
+        WHERE op.ordem_id = ?
+    """, (ordem_id,)).fetchall()
+
+    for item in itens:
+        if item["saldo"] < item["quantidade"]:
+            raise EstoqueInsuficiente(item["nome"], item["saldo"], item["quantidade"])
+
+    for item in itens:
+        conexao.execute(
+            "UPDATE pecas SET quantidade = quantidade - ? WHERE id = ?",
+            (item["quantidade"], item["peca_id"]),
+        )
+        registrar_movimentacao(
+            conexao, item["peca_id"], "Saida", item["quantidade"],
+            f"Uso na ordem de serviço #{ordem_id} (orçamento aprovado)",
+        )
+
+
+def estornar_estoque(conexao, ordem_id):
+    """Devolve ao estoque as peças vinculadas à ordem (registra entradas)."""
+    itens = conexao.execute(
+        "SELECT peca_id, quantidade FROM ordem_pecas WHERE ordem_id = ?",
+        (ordem_id,),
+    ).fetchall()
+
+    for item in itens:
+        conexao.execute(
+            "UPDATE pecas SET quantidade = quantidade + ? WHERE id = ?",
+            (item["quantidade"], item["peca_id"]),
+        )
+        registrar_movimentacao(
+            conexao, item["peca_id"], "Entrada", item["quantidade"],
+            f"Estorno da ordem de serviço #{ordem_id}",
+        )
+
+
 def _garantir_schema(conexao):
     if not _coluna_existe(conexao, "ordens_servico", "funcionario_id"):
         conexao.execute(

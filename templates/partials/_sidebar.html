@@ -14,9 +14,11 @@
         </a>
 
         <div class="sidebar-grupo-titulo">Operação</div>
+        {% if pode('admin', 'atendente') %}
         <a href="{{ url_for('cadastro.listar_cadastros') }}" class="{{ 'ativo' if request.path.startswith('/cadastro') or request.path.startswith('/clientes') else '' }}">
             {{ icons.icon('users', 18) }} Clientes
         </a>
+        {% endif %}
         <a href="{{ url_for('ordem_servico.listar_ordens') }}" class="{{ 'ativo' if request.path.startswith('/ordem-servico') else '' }}">
             {{ icons.icon('wrench', 18) }} Ordens de Serviço
         </a>
@@ -31,13 +33,17 @@
         <a href="{{ url_for('estoque.listar_estoque') }}" class="{{ 'ativo' if request.path.startswith('/estoque') else '' }}">
             {{ icons.icon('package', 18) }} Estoque
         </a>
+        {% if pode('admin') %}
         <a href="{{ url_for('estoque.gerar_relatorio_pdf') }}">
             {{ icons.icon('bar-chart', 18) }} Relatórios
         </a>
+        {% endif %}
 
+        {% if pode('admin') %}
         <div class="sidebar-grupo-titulo">Sistema</div>
         <a href="{{ url_for('funcionarios.configuracoes') }}" class="{{ 'ativo' if request.path.startswith('/configuracoes') else '' }}">
             {{ icons.icon('settings', 18) }} Configurações
         </a>
+        {% endif %}
     </nav>
 </aside>

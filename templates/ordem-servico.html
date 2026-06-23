@@ -18,7 +18,9 @@
         <h2>Ordens cadastradas</h2>
 
         <div class="acoes-topo">
+            {% if pode('atendente') %}
             <a href="/ordem-servico/nova" class="btn">{{ icons.icon('plus', 17) }} Nova ordem</a>
+            {% endif %}
         </div>
     </div>
 
@@ -54,13 +56,17 @@
                 <td>
                     <div class="acoes-celula">
                         <a href="{{ url_for('ordem_servico.visualizar_ordem', ordem_id=ordem['ordem_id']) }}" class="btn--secondary btn--sm">{{ icons.icon('file-text', 15) }} Visualizar</a>
+                        {% if pode('atendente', 'tecnico') %}
                         <a href="/ordem-servico/editar/{{ ordem['ordem_id'] }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
+                        {% endif %}
+                        {% if pode('admin') %}
                         <form action="/ordem-servico/excluir/{{ ordem['ordem_id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="btn-danger btn--sm"
                                     onclick="return confirm('Deseja realmente excluir esta ordem de serviço?')">
                                 {{ icons.icon('trash', 15) }} Excluir
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
@@ -71,7 +77,9 @@
                         <span class="empty-icone">{{ icons.icon('wrench', 26) }}</span>
                         <h3>Nenhuma ordem de serviço cadastrada</h3>
                         <p>Registre o primeiro atendimento para começar a acompanhar os serviços.</p>
+                        {% if pode('atendente') %}
                         <a href="/ordem-servico/nova" class="btn">{{ icons.icon('plus', 17) }} Nova ordem</a>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

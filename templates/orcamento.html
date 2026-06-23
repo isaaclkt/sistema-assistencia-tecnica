@@ -14,6 +14,7 @@
 </div>
 
 <div class="container">
+    {% if pode('atendente', 'tecnico') %}
     <h2>Cadastrar novo orçamento</h2>
 
     <form action="/orcamentos/cadastrar" method="POST">
@@ -25,9 +26,7 @@
                     {% for ordem in ordens_servico %}
                     <option
                         value="{{ ordem['ordem_id'] }}"
-                        data-peca="{{ ordem['peca_nome'] or '' }}"
-                        data-funcionario="{{ ordem['funcionario_nome'] or 'Não atribuído' }}"
-                        data-valor-peca="{{ ordem['valor_peca'] or 0 }}">
+                        data-funcionario="{{ ordem['funcionario_nome'] or 'Não atribuído' }}">
                         Ordem #{{ ordem['ordem_id'] }} -
                         {{ ordem['cliente_nome'] }} -
                         {{ ordem['equipamento'] }}
@@ -42,18 +41,34 @@
             </div>
 
             <div class="campo">
-                <label for="peca_nome">Peças vinculadas</label>
-                <input type="text" id="peca_nome" readonly>
-            </div>
-
-            <div class="campo">
                 <label for="problema_analisado">Problema analisado pelo técnico <span class="obrigatorio" title="Campo obrigatório">*</span></label>
                 <textarea id="problema_analisado" name="problema_analisado" required></textarea>
             </div>
+        </div>
 
+        <div class="campo">
+            <label>Peças utilizadas</label>
+            <div id="lista-pecas">
+                <div class="linha-peca">
+                    <select name="peca_id">
+                        <option value="">Selecione uma peça (opcional)</option>
+                        {% for peca in pecas %}
+                        <option value="{{ peca['id'] }}" data-preco="{{ peca['preco_unitario'] or 0 }}">
+                            {{ peca["nome"] }} - {{ peca["preco_unitario"] | moeda }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="quantidade" min="1" value="1" aria-label="Quantidade da peça">
+                    <button type="button" class="btn-remover-peca" hidden>Remover</button>
+                </div>
+            </div>
+            <button type="button" id="adicionar-peca" class="btn--secondary">Adicionar outra peça</button>
+        </div>
+
+        <div class="form-grid">
             <div class="campo">
                 <label for="valor_peca">Valor das peças</label>
-                <input type="number" id="valor_peca" step="0.01" min="0" readonly>
+                <input type="number" id="valor_peca" step="0.01" min="0" value="0.00" readonly>
             </div>
 
             <div class="campo">
@@ -73,7 +88,7 @@
 
             <div class="campo">
                 <label for="valor_total">Valor total</label>
-                <input type="number" id="valor_total" step="0.01" min="0" readonly>
+                <input type="number" id="valor_total" step="0.01" min="0" value="0.00" readonly>
             </div>
         </div>
 
@@ -81,6 +96,7 @@
             <button type="submit" class="btn">Cadastrar orçamento</button>
         </div>
     </form>
+    {% endif %}
 
     <h2>Orçamentos cadastrados</h2>
 
@@ -122,7 +138,7 @@
                 <td>{{ orcamento['validade'] or "—" }}</td>
                 <td>
                     <div class="acoes-celula">
-                        {% if orcamento['status'] == 'Pendente' %}
+                        {% if orcamento['status'] == 'Pendente' and pode('admin', 'atendente') %}
                         <form action="/orcamentos/aprovar/{{ orcamento['id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="btn--sm"
                                     onclick="return confirm('Aprovar este orçamento? A ordem irá para Em andamento.')">
@@ -136,12 +152,14 @@
                             </button>
                         </form>
                         {% endif %}
+                        {% if pode('admin') %}
                         <form action="/orcamentos/excluir/{{ orcamento['id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="btn-danger btn--sm"
                                     onclick="return confirm('Deseja realmente excluir este orçamento?')">
                                 {{ icons.icon('trash', 15) }} Excluir
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
@@ -165,26 +183,79 @@
 <script>
     const ordemSelect = document.getElementById("ordem_id");
     const funcionarioNome = document.getElementById("funcionario_nome");
-    const pecaNome = document.getElementById("peca_nome");
     const valorPeca = document.getElementById("valor_peca");
     const valorMaoObra = document.getElementById("valor_mao_obra");
     const desconto = document.getElementById("desconto");
     const valorTotal = document.getElementById("valor_total");
+    const listaPecas = document.getElementById("lista-pecas");
+    const botaoAdicionar = document.getElementById("adicionar-peca");
 
-    function atualizarValores() {
-        const option = ordemSelect.options[ordemSelect.selectedIndex];
-        const preco = Number(option.dataset.valorPeca || 0);
-        const maoObra = Number(valorMaoObra.value || 0);
-        const desc = Number(desconto.value || 0);
-
-        pecaNome.value = option.dataset.peca || "";
-        funcionarioNome.value = option.dataset.funcionario || "";
-        valorPeca.value = preco.toFixed(2);
-        valorTotal.value = Math.max(preco + maoObra - desc, 0).toFixed(2);
+    function atualizarFuncionario() {
+        const opt = ordemSelect.options[ordemSelect.selectedIndex];
+        funcionarioNome.value = opt && opt.dataset.funcionario ? opt.dataset.funcionario : "";
     }
 
-    ordemSelect.addEventListener("change", atualizarValores);
-    valorMaoObra.addEventListener("input", atualizarValores);
-    desconto.addEventListener("input", atualizarValores);
+    function calcularValores() {
+        let somaPecas = 0;
+        listaPecas.querySelectorAll(".linha-peca").forEach((linha) => {
+            const sel = linha.querySelector('select[name="peca_id"]');
+            if (!sel.value) return;
+            const preco = Number(sel.options[sel.selectedIndex].dataset.preco || 0);
+            const qtd = Number(linha.querySelector('input[name="quantidade"]').value || 0);
+            somaPecas += preco * qtd;
+        });
+        const maoObra = Number(valorMaoObra.value || 0);
+        const desc = Number(desconto.value || 0);
+        valorPeca.value = somaPecas.toFixed(2);
+        valorTotal.value = Math.max(somaPecas + maoObra - desc, 0).toFixed(2);
+    }
+
+    function atualizarOpcoesDisponiveis() {
+        const selects = Array.from(listaPecas.querySelectorAll('select[name="peca_id"]'));
+        const selecionadas = selects.map((s) => s.value).filter(Boolean);
+        selects.forEach((select) => {
+            Array.from(select.options).forEach((option) => {
+                option.disabled =
+                    option.value !== "" &&
+                    option.value !== select.value &&
+                    selecionadas.includes(option.value);
+            });
+        });
+    }
+
+    function atualizarBotoesRemover() {
+        const linhas = listaPecas.querySelectorAll(".linha-peca");
+        linhas.forEach((linha) => {
+            linha.querySelector(".btn-remover-peca").hidden = linhas.length === 1;
+        });
+    }
+
+    botaoAdicionar.addEventListener("click", () => {
+        const novaLinha = listaPecas.querySelector(".linha-peca").cloneNode(true);
+        novaLinha.querySelector("select").value = "";
+        novaLinha.querySelector('input[name="quantidade"]').value = "1";
+        listaPecas.appendChild(novaLinha);
+        atualizarBotoesRemover();
+        atualizarOpcoesDisponiveis();
+    });
+
+    listaPecas.addEventListener("click", (event) => {
+        if (event.target.classList.contains("btn-remover-peca")) {
+            event.target.closest(".linha-peca").remove();
+            atualizarBotoesRemover();
+            atualizarOpcoesDisponiveis();
+            calcularValores();
+        }
+    });
+
+    listaPecas.addEventListener("change", () => { atualizarOpcoesDisponiveis(); calcularValores(); });
+    listaPecas.addEventListener("input", calcularValores);
+    ordemSelect.addEventListener("change", atualizarFuncionario);
+    valorMaoObra.addEventListener("input", calcularValores);
+    desconto.addEventListener("input", calcularValores);
+
+    atualizarBotoesRemover();
+    atualizarOpcoesDisponiveis();
+    calcularValores();
 </script>
 {% endblock %}

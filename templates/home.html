@@ -11,12 +11,13 @@
 {% set total_ordens = indicadores.ordens_abertas + indicadores.ordens_finalizadas %}
 <div class="page-head">
     <h1>Painel de Controle</h1>
-    <p>Visão geral da operação da assistência técnica</p>
+    <p>Visão geral da operação —
+        {% if pode('admin') %}Administrador{% elif pode('atendente') %}Atendente{% elif pode('tecnico') %}Técnico{% endif %}</p>
 </div>
 
 {% if indicadores.estoque_baixo > 0 or indicadores.ordens_abertas > 0 %}
 <div class="alertas">
-    {% if indicadores.estoque_baixo > 0 %}
+    {% if indicadores.estoque_baixo > 0 and pode('admin') %}
     <a href="/estoque" class="alerta alerta--critico">
         <span class="alerta-icone">{{ icons.icon('alert-triangle', 20) }}</span>
         <span><strong>{{ indicadores.estoque_baixo }}</strong> peça(s) com estoque baixo — repor com prioridade</span>
@@ -34,6 +35,7 @@
 {% endif %}
 
 <section class="kpi-grid">
+    {% if pode('admin', 'atendente') %}
     <a href="/cadastro" class="kpi-card">
         <span class="kpi-topo">
             <span class="kpi-icone kpi-icone--azul">{{ icons.icon('users', 20) }}</span>
@@ -42,6 +44,7 @@
         <span class="kpi-valor">{{ indicadores.clientes }}</span>
         <span class="kpi-contexto">{{ icons.icon('users', 14) }} Total na base de clientes</span>
     </a>
+    {% endif %}
 
     <a href="/ordem-servico" class="kpi-card">
         <span class="kpi-topo">
@@ -70,6 +73,15 @@
         <span class="kpi-contexto">Emitidos no sistema</span>
     </a>
 
+    <a href="/orcamento" class="kpi-card">
+        <span class="kpi-topo">
+            <span class="kpi-icone kpi-icone--ambar">{{ icons.icon('clipboard', 20) }}</span>
+            <span class="kpi-rotulo">Orçamentos pendentes</span>
+        </span>
+        <span class="kpi-valor">{{ indicadores.orcamentos_pendentes }}</span>
+        <span class="kpi-contexto">Aguardando aprovação</span>
+    </a>
+
     <a href="/estoque" class="kpi-card">
         <span class="kpi-topo">
             <span class="kpi-icone kpi-icone--azul">{{ icons.icon('package', 20) }}</span>
@@ -79,6 +91,7 @@
         <span class="kpi-contexto">{{ indicadores.estoque_baixo }} com estoque baixo</span>
     </a>
 
+    {% if pode('admin') %}
     <a href="/estoque" class="kpi-card {{ 'kpi-card--alerta' if indicadores.estoque_baixo > 0 else '' }}">
         <span class="kpi-topo">
             <span class="kpi-icone kpi-icone--vermelho">{{ icons.icon('alert-triangle', 20) }}</span>
@@ -89,6 +102,7 @@
             {% if indicadores.estoque_baixo > 0 %}Requer reposição{% else %}Tudo em ordem{% endif %}
         </span>
     </a>
+    {% endif %}
 </section>
 
 <section class="graficos-grid">
@@ -110,6 +124,7 @@
         {% endif %}
     </div>
 
+    {% if pode('admin') %}
     <div class="container grafico-box">
         <h2>Top 5 peças mais movimentadas</h2>
         {% if top_pecas %}
@@ -126,8 +141,10 @@
             <p class="mensagem-vazia">Nenhuma movimentação registrada.</p>
         {% endif %}
     </div>
+    {% endif %}
 </section>
 
+{% if pode('admin') %}
 <section class="container grafico-box grafico-largo">
     <h2>Movimentações de estoque — últimos 14 dias</h2>
     {% if movimentacoes_periodo %}
@@ -153,6 +170,7 @@
         <p class="mensagem-vazia">Nenhuma movimentação nos últimos 14 dias.</p>
     {% endif %}
 </section>
+{% endif %}
 
 <section class="recentes-grid">
     <div class="container">
@@ -174,6 +192,7 @@
         {% endif %}
     </div>
 
+    {% if pode('admin') %}
     <div class="container">
         <h2>Últimas movimentações</h2>
         {% if ultimas_movimentacoes %}
@@ -194,6 +213,7 @@
         <p class="mensagem-vazia">Nenhuma movimentação registrada.</p>
         {% endif %}
     </div>
+    {% endif %}
 </section>
 
 <section class="acesso-rapido">
@@ -201,7 +221,9 @@
     <div class="atalhos">
         <a href="/ordem-servico" class="atalho">{{ icons.icon('wrench', 20) }} Ordens de Serviço</a>
         <a href="/estoque" class="atalho">{{ icons.icon('package', 20) }} Estoque</a>
+        {% if pode('admin', 'atendente') %}
         <a href="/cadastro" class="atalho">{{ icons.icon('users', 20) }} Clientes</a>
+        {% endif %}
         <a href="/orcamento" class="atalho">{{ icons.icon('file-text', 20) }} Orçamentos</a>
     </div>
 </section>

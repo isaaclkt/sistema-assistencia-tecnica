@@ -63,6 +63,67 @@ def _sem_funcionarios():
     return total == 0
 
 
+# ---------------------------------------------------------------------------
+# RBAC — permissões por endpoint (papéis: admin, atendente, tecnico).
+# Endpoints não listados exigem apenas estar autenticado (ex.: dashboard).
+# ---------------------------------------------------------------------------
+TODOS = {"admin", "atendente", "tecnico"}
+
+PERMISSOES = {
+    # Clientes
+    "cadastro.listar_cadastros": {"admin", "atendente"},
+    "cadastro.pagina_adicionar_cliente": {"atendente"},
+    "cadastro.cadastrar_cliente": {"atendente"},
+    "cadastro.pagina_atualizar_cliente": {"atendente"},
+    "cadastro.atualizar_cliente": {"atendente"},
+    "cadastro.deletar_cliente": {"admin"},
+    # Ordens de serviço
+    "ordem_servico.listar_ordens": TODOS,
+    "ordem_servico.visualizar_ordem": TODOS,
+    "ordem_servico.gerar_os_pdf": TODOS,
+    "ordem_servico.pagina_nova_ordem": {"atendente"},
+    "ordem_servico.cadastrar_ordem": {"atendente"},
+    "ordem_servico.pagina_editar_ordem": {"atendente", "tecnico"},
+    "ordem_servico.atualizar_ordem": {"atendente", "tecnico"},
+    "ordem_servico.excluir_ordem": {"admin"},
+    # Orçamentos
+    "orcamento.pagina_orcamento": TODOS,
+    "orcamento.criar_orcamento": {"atendente", "tecnico"},
+    "orcamento.aprovar_orcamento": {"admin", "atendente"},
+    "orcamento.recusar_orcamento": {"admin", "atendente"},
+    "orcamento.excluir_orcamento": {"admin"},
+    # Estoque
+    "estoque.listar_estoque": TODOS,
+    "estoque.historico_movimentacoes": TODOS,
+    "estoque.cadastrar_peca": {"admin"},
+    "estoque.editar_peca": {"admin"},
+    "estoque.atualizar_peca": {"admin"},
+    "estoque.excluir_peca": {"admin"},
+    "estoque.movimentar_peca": {"admin"},
+    "estoque.salvar_movimentacao": {"admin"},
+    "estoque.gerar_relatorio_pdf": {"admin"},
+    "estoque.gerar_relatorio_excel": {"admin"},
+    # Funcionários (administração)
+    "funcionarios.listar_funcionarios": {"admin"},
+    "funcionarios.pagina_editar_funcionario": {"admin"},
+    "funcionarios.atualizar_funcionario": {"admin"},
+    "funcionarios.alternar_status_funcionario": {"admin"},
+    "funcionarios.redefinir_senha": {"admin"},
+    "funcionarios.cadastrar_funcionario": {"admin"},
+    "funcionarios.configuracoes": {"admin"},
+}
+
+
+@app.context_processor
+def injetar_permissoes():
+    """Expõe o perfil atual e o helper pode(*perfis) para os templates."""
+    perfil = session.get("funcionario_perfil")
+    return {
+        "perfil_atual": perfil,
+        "pode": lambda *perfis: perfil in perfis,
+    }
+
+
 @app.before_request
 def proteger_rotas():
     rotas_livres = (
@@ -74,27 +135,18 @@ def proteger_rotas():
     if request.path.startswith(rotas_livres):
         return None
 
+    # Bootstrap: criar o primeiro funcionário (admin) é permitido sem login.
     if request.path == "/funcionarios/cadastrar" and _sem_funcionarios():
         return None
 
-    rotas_protegidas = (
-        "/cadastro",
-        "/clientes",
-        "/equipamentos",
-        "/ordem-servico",
-        "/estoque",
-        "/orcamento",
-        "/orcamentos",
-        "/relatorios",
-        "/configuracoes",
-        "/funcionarios",
-    )
-
-    if (request.path == "/" or request.path.startswith(rotas_protegidas)) and "funcionario_id" not in session:
+    # Tudo o que não é público exige autenticação.
+    if "funcionario_id" not in session:
         return redirect("/login")
 
-    if request.path.startswith("/funcionarios") and session.get("funcionario_perfil") != "admin":
-        flash("Acesso restrito a administradores.", "erro")
+    # RBAC por endpoint: quem não tem o papel exigido é barrado.
+    permitido = PERMISSOES.get(request.endpoint)
+    if permitido is not None and session.get("funcionario_perfil") not in permitido:
+        flash("Você não tem permissão para acessar esta área.", "erro")
         return redirect("/")
 
     return None

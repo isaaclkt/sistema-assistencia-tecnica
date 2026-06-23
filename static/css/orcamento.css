@@ -9,3 +9,32 @@ main {
     color: #842029;
     background-color: #f8d7da;
 }
+
+#lista-pecas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.linha-peca {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.linha-peca select {
+    flex: 1;
+    min-width: 0;
+}
+
+.linha-peca input[name="quantidade"] {
+    flex: 0 0 90px;
+    width: 90px;
+}
+
+@media (max-width: 560px) {
+    .linha-peca {
+        flex-wrap: wrap;
+    }
+}

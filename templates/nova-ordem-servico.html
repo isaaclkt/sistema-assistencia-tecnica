@@ -47,26 +47,6 @@
         </div>
 
         <div class="campo">
-            <label>Peças utilizadas <span class="obrigatorio" title="Campo obrigatório">*</span></label>
-
-            <div id="lista-pecas">
-                <div class="linha-peca">
-                    <select name="peca_id" required>
-                        <option value="">Selecione uma peça</option>
-                        {% for peca in pecas %}
-                        <option value="{{ peca['id'] }}">{{ peca["nome"] }} - R$ {{ peca["preco_unitario"] }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <input type="number" name="quantidade" min="1" value="1" required aria-label="Quantidade da peça">
-                    <button type="button" class="btn-remover-peca" hidden>Remover</button>
-                </div>
-            </div>
-
-            <button type="button" id="adicionar-peca" class="btn">Adicionar outra peça</button>
-        </div>
-
-        <div class="campo">
             <label for="status">Status</label>
             <select id="status" name="status" required>
                 <option value="Aberto">Aberto</option>
@@ -99,52 +79,4 @@
         </div>
     </form>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    const listaPecas = document.querySelector("#lista-pecas");
-    const botaoAdicionar = document.querySelector("#adicionar-peca");
-
-    function atualizarOpcoesDisponiveis() {
-        const selects = Array.from(listaPecas.querySelectorAll('select[name="peca_id"]'));
-        const selecionadas = selects.map((select) => select.value).filter(Boolean);
-
-        selects.forEach((select) => {
-            Array.from(select.options).forEach((option) => {
-                option.disabled =
-                    option.value !== "" &&
-                    option.value !== select.value &&
-                    selecionadas.includes(option.value);
-            });
-        });
-    }
-
-    function atualizarBotoesRemover() {
-        const linhas = listaPecas.querySelectorAll(".linha-peca");
-        linhas.forEach((linha) => {
-            linha.querySelector(".btn-remover-peca").hidden = linhas.length === 1;
-        });
-    }
-
-    botaoAdicionar.addEventListener("click", () => {
-        const novaLinha = listaPecas.querySelector(".linha-peca").cloneNode(true);
-        novaLinha.querySelector("select").value = "";
-        novaLinha.querySelector('input[name="quantidade"]').value = "1";
-        listaPecas.appendChild(novaLinha);
-        atualizarBotoesRemover();
-        atualizarOpcoesDisponiveis();
-    });
-
-    listaPecas.addEventListener("click", (event) => {
-        if (event.target.classList.contains("btn-remover-peca")) {
-            event.target.closest(".linha-peca").remove();
-            atualizarBotoesRemover();
-            atualizarOpcoesDisponiveis();
-        }
-    });
-
-    listaPecas.addEventListener("change", atualizarOpcoesDisponiveis);
-    atualizarOpcoesDisponiveis();
-</script>
 {% endblock %}

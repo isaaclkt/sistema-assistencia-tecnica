@@ -67,6 +67,18 @@ def cadastrar_funcionario():
 
         conexao.close()
 
+        rotulos = {
+            "admin": "Administrador",
+            "tecnico": "Técnico",
+            "atendente": "Atendente",
+            "funcionario": "Funcionário",
+        }
+        flash(f"{rotulos.get(perfil, 'Funcionário')} {nome} cadastrado(a) com sucesso.", "sucesso")
+
+        # Admin logado permanece na área administrativa; no cadastro do 1º
+        # funcionário (bootstrap, sem sessão) segue para o login.
+        if "funcionario_id" in session:
+            return redirect("/funcionarios")
         return redirect("/login")
 
     return render_template("funcionario_cadastro.html")

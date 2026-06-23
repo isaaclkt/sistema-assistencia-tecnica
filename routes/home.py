@@ -43,11 +43,16 @@ def home():
         "SELECT COUNT(*) AS total FROM pecas WHERE quantidade <= estoque_minimo"
     ).fetchone()["total"]
 
+    orcamentos_pendentes = db.execute(
+        "SELECT COUNT(*) AS total FROM orcamentos WHERE status = 'Pendente'"
+    ).fetchone()["total"]
+
     indicadores = {
         "clientes": total_clientes,
         "ordens_abertas": ordens_abertas,
         "ordens_finalizadas": ordens_finalizadas,
         "orcamentos": total_orcamentos,
+        "orcamentos_pendentes": orcamentos_pendentes,
         "pecas": total_pecas,
         "estoque_baixo": estoque_baixo,
     }
