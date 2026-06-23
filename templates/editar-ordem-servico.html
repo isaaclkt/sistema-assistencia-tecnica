@@ -18,7 +18,7 @@
     <form action="/ordem-servico/atualizar/{{ ordem['ordem_id'] }}" method="POST">
         <div class="campo">
             <label for="cliente_id">Cliente <span class="obrigatorio" title="Campo obrigatório">*</span></label>
-            <select id="cliente_id" name="cliente_id" required>
+            <select id="cliente_id" name="cliente_id" required {% if pode('tecnico') %}disabled{% endif %}>
                 <option value="">Selecione um cliente</option>
                 {% for cliente in clientes %}
                 <option value="{{ cliente['id'] }}" {% if cliente['id'] == ordem['cliente_id'] %}selected{% endif %}>
@@ -30,7 +30,7 @@
 
         <div class="campo">
             <label for="funcionario_id">Funcionário responsável <span class="obrigatorio" title="Campo obrigatório">*</span></label>
-            <select id="funcionario_id" name="funcionario_id" required>
+            <select id="funcionario_id" name="funcionario_id" required {% if pode('tecnico') %}disabled{% endif %}>
                 <option value="">Selecione um funcionário</option>
                 {% for funcionario in funcionarios %}
                 <option value="{{ funcionario['id'] }}" {% if funcionario['id'] == ordem['funcionario_id'] %}selected{% endif %}>
@@ -42,12 +42,12 @@
 
         <div class="campo">
             <label for="equipamento">Equipamento <span class="obrigatorio" title="Campo obrigatório">*</span></label>
-            <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required>
+            <input type="text" id="equipamento" name="equipamento" value="{{ ordem['equipamento'] }}" required {% if pode('tecnico') %}readonly{% endif %}>
         </div>
 
         <div class="campo">
             <label for="problema_relatado">Problema relatado <span class="obrigatorio" title="Campo obrigatório">*</span></label>
-            <textarea id="problema_relatado" name="problema_relatado" required>{{ ordem['problema_relatado'] }}</textarea>
+            <textarea id="problema_relatado" name="problema_relatado" required {% if pode('tecnico') %}readonly{% endif %}>{{ ordem['problema_relatado'] }}</textarea>
         </div>
 
         <div class="campo">
@@ -68,12 +68,12 @@
         <div class="form-grid">
             <div class="campo">
                 <label for="garantia">Garantia</label>
-                <input type="text" id="garantia" name="garantia" value="{{ ordem['garantia'] or '' }}" placeholder="Ex.: 90 dias">
+                <input type="text" id="garantia" name="garantia" value="{{ ordem['garantia'] or '' }}" placeholder="Ex.: 90 dias" {% if pode('tecnico') %}readonly{% endif %}>
             </div>
 
             <div class="campo">
                 <label for="prazo_entrega">Prazo de entrega</label>
-                <input type="date" id="prazo_entrega" name="prazo_entrega" value="{{ ordem['prazo_entrega'] or '' }}">
+                <input type="date" id="prazo_entrega" name="prazo_entrega" value="{{ ordem['prazo_entrega'] or '' }}" {% if pode('tecnico') %}readonly{% endif %}>
             </div>
         </div>
 

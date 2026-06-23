@@ -35,7 +35,7 @@
 {% endif %}
 
 <section class="kpi-grid">
-    {% if pode('admin', 'atendente') %}
+    {% if pode('admin', 'atendente', 'tecnico') %}
     <a href="/cadastro" class="kpi-card">
         <span class="kpi-topo">
             <span class="kpi-icone kpi-icone--azul">{{ icons.icon('users', 20) }}</span>
@@ -221,7 +221,7 @@
     <div class="atalhos">
         <a href="/ordem-servico" class="atalho">{{ icons.icon('wrench', 20) }} Ordens de Serviço</a>
         <a href="/estoque" class="atalho">{{ icons.icon('package', 20) }} Estoque</a>
-        {% if pode('admin', 'atendente') %}
+        {% if pode('admin', 'atendente', 'tecnico') %}
         <a href="/cadastro" class="atalho">{{ icons.icon('users', 20) }} Clientes</a>
         {% endif %}
         <a href="/orcamento" class="atalho">{{ icons.icon('file-text', 20) }} Orçamentos</a>

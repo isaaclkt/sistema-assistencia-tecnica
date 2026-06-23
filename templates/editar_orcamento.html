@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% import 'partials/_icons.html' as icons %}
+
+{% block titulo %}Editar Orcamento #{{ orcamento['id'] }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/orcamento.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-head">
+    <h1>Editar Orcamento #{{ orcamento['id'] }}</h1>
+    <p>Atualize valores e pecas do orcamento pendente</p>
+</div>
+
+<div class="container">
+    <form action="{{ url_for('orcamento.atualizar_orcamento', orcamento_id=orcamento['id']) }}" method="POST">
+        <div class="form-grid">
+            <div class="campo">
+                <label>Ordem de servico</label>
+                <input type="text" value="#{{ orcamento['ordem_id'] }} - {{ orcamento['nome_cliente'] }}" readonly>
+            </div>
+
+            <div class="campo">
+                <label>Funcionario responsavel</label>
+                <input type="text" value="{{ orcamento['funcionario_nome'] or 'Nao atribuido' }}" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="problema_analisado">Problema analisado pelo tecnico <span class="obrigatorio" title="Campo obrigatorio">*</span></label>
+                <textarea id="problema_analisado" name="problema_analisado" required>{{ orcamento['problema_analisado'] }}</textarea>
+            </div>
+        </div>
+
+        <div class="campo">
+            <label>Pecas utilizadas</label>
+            <div id="lista-pecas">
+                {% for item in pecas_orcamento %}
+                <div class="linha-peca">
+                    <select name="peca_id">
+                        <option value="">Selecione uma peca (opcional)</option>
+                        {% for peca in pecas %}
+                        <option value="{{ peca['id'] }}" data-preco="{{ peca['preco_unitario'] or 0 }}" {% if peca['id'] == item['peca_id'] %}selected{% endif %}>
+                            {{ peca["nome"] }} - {{ peca["preco_unitario"] | moeda }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="quantidade" min="1" value="{{ item['quantidade'] }}" aria-label="Quantidade da peca">
+                    <button type="button" class="btn-remover-peca" hidden>Remover</button>
+                </div>
+                {% else %}
+                <div class="linha-peca">
+                    <select name="peca_id">
+                        <option value="">Selecione uma peca (opcional)</option>
+                        {% for peca in pecas %}
+                        <option value="{{ peca['id'] }}" data-preco="{{ peca['preco_unitario'] or 0 }}">
+                            {{ peca["nome"] }} - {{ peca["preco_unitario"] | moeda }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="quantidade" min="1" value="1" aria-label="Quantidade da peca">
+                    <button type="button" class="btn-remover-peca" hidden>Remover</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="adicionar-peca" class="btn--secondary">Adicionar outra peca</button>
+        </div>
+
+        <div class="form-grid">
+            <div class="campo">
+                <label for="valor_peca">Valor das pecas</label>
+                <input type="number" id="valor_peca" step="0.01" min="0" value="{{ '%.2f'|format(orcamento['valor_peca'] or 0) }}" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="valor_mao_obra">Valor da mao de obra <span class="obrigatorio" title="Campo obrigatorio">*</span></label>
+                <input type="number" id="valor_mao_obra" name="valor_mao_obra" step="0.01" min="0" value="{{ '%.2f'|format(orcamento['valor_mao_obra'] or 0) }}" required>
+            </div>
+
+            <div class="campo">
+                <label for="desconto">Desconto</label>
+                <div class="form-grid">
+                    <select id="desconto_tipo" name="desconto_tipo">
+                        <option value="valor">R$</option>
+                        <option value="percentual">%</option>
+                    </select>
+                    <input type="number" id="desconto" name="desconto" step="0.01" min="0" value="{{ '%.2f'|format(orcamento['desconto'] or 0) }}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="validade">Validade do orcamento</label>
+                <input type="date" id="validade" name="validade" value="{{ orcamento['validade'] or '' }}">
+            </div>
+
+            <div class="campo">
+                <label for="subtotal">Subtotal</label>
+                <input type="number" id="subtotal" step="0.01" min="0" value="{{ '%.2f'|format(orcamento['subtotal'] or 0) }}" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="valor_total">Valor total final</label>
+                <input type="number" id="valor_total" step="0.01" min="0" value="{{ '%.2f'|format(orcamento['valor_total'] or 0) }}" readonly>
+            </div>
+        </div>
+
+        <div class="form-botao">
+            <button type="submit" class="btn">{{ icons.icon('check-circle', 17) }} Salvar orcamento</button>
+            <a href="{{ url_for('orcamento.pagina_orcamento') }}" class="btn--secondary">{{ icons.icon('arrow-left', 16) }} Voltar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const valorPeca = document.getElementById("valor_peca");
+    const valorMaoObra = document.getElementById("valor_mao_obra");
+    const desconto = document.getElementById("desconto");
+    const descontoTipo = document.getElementById("desconto_tipo");
+    const subtotalCampo = document.getElementById("subtotal");
+    const valorTotal = document.getElementById("valor_total");
+    const listaPecas = document.getElementById("lista-pecas");
+    const botaoAdicionar = document.getElementById("adicionar-peca");
+
+    function calcularValores() {
+        let somaPecas = 0;
+        listaPecas.querySelectorAll(".linha-peca").forEach((linha) => {
+            const sel = linha.querySelector('select[name="peca_id"]');
+            if (!sel.value) return;
+            const preco = Number(sel.options[sel.selectedIndex].dataset.preco || 0);
+            const qtd = Number(linha.querySelector('input[name="quantidade"]').value || 0);
+            somaPecas += preco * qtd;
+        });
+
+        const maoObra = Math.max(Number(valorMaoObra.value || 0), 0);
+        const descontoInformado = Math.max(Number(desconto.value || 0), 0);
+        const subtotal = somaPecas + maoObra;
+        const desc = descontoTipo.value === "percentual"
+            ? subtotal * descontoInformado / 100
+            : descontoInformado;
+
+        valorPeca.value = somaPecas.toFixed(2);
+        subtotalCampo.value = subtotal.toFixed(2);
+        valorTotal.value = Math.max(subtotal - desc, 0).toFixed(2);
+    }
+
+    function atualizarOpcoesDisponiveis() {
+        const selects = Array.from(listaPecas.querySelectorAll('select[name="peca_id"]'));
+        const selecionadas = selects.map((s) => s.value).filter(Boolean);
+        selects.forEach((select) => {
+            Array.from(select.options).forEach((option) => {
+                option.disabled =
+                    option.value !== "" &&
+                    option.value !== select.value &&
+                    selecionadas.includes(option.value);
+            });
+        });
+    }
+
+    function atualizarBotoesRemover() {
+        const linhas = listaPecas.querySelectorAll(".linha-peca");
+        linhas.forEach((linha) => {
+            linha.querySelector(".btn-remover-peca").hidden = linhas.length === 1;
+        });
+    }
+
+    botaoAdicionar.addEventListener("click", () => {
+        const novaLinha = listaPecas.querySelector(".linha-peca").cloneNode(true);
+        novaLinha.querySelector("select").value = "";
+        novaLinha.querySelector('input[name="quantidade"]').value = "1";
+        listaPecas.appendChild(novaLinha);
+        atualizarBotoesRemover();
+        atualizarOpcoesDisponiveis();
+    });
+
+    listaPecas.addEventListener("click", (event) => {
+        if (event.target.classList.contains("btn-remover-peca")) {
+            event.target.closest(".linha-peca").remove();
+            atualizarBotoesRemover();
+            atualizarOpcoesDisponiveis();
+            calcularValores();
+        }
+    });
+
+    listaPecas.addEventListener("change", () => { atualizarOpcoesDisponiveis(); calcularValores(); });
+    listaPecas.addEventListener("input", calcularValores);
+    valorMaoObra.addEventListener("input", calcularValores);
+    desconto.addEventListener("input", calcularValores);
+    descontoTipo.addEventListener("change", calcularValores);
+
+    atualizarBotoesRemover();
+    atualizarOpcoesDisponiveis();
+    calcularValores();
+</script>
+{% endblock %}

@@ -49,6 +49,7 @@
         {% endfor %}
     {% else %}
         <p class="mensagem-vazia">Ordem não encontrada</p>
+        <a href="{{ url_for('acompanhamento.pagina_acompanhamento') }}" class="btn">Fazer nova pesquisa</a>
     {% endif %}
 </section>
 

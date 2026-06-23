@@ -77,8 +77,14 @@
             </div>
 
             <div class="campo">
-                <label for="desconto">Desconto (R$)</label>
-                <input type="number" id="desconto" name="desconto" step="0.01" min="0" value="0">
+                <label for="desconto">Desconto</label>
+                <div class="form-grid">
+                    <select id="desconto_tipo" name="desconto_tipo">
+                        <option value="valor">R$</option>
+                        <option value="percentual">%</option>
+                    </select>
+                    <input type="number" id="desconto" name="desconto" step="0.01" min="0" value="0">
+                </div>
             </div>
 
             <div class="campo">
@@ -112,8 +118,9 @@
                 <th>Peças</th>
                 <th class="num">Valor das peças</th>
                 <th class="num">Mão de obra</th>
+                <th class="num">Subtotal</th>
                 <th class="num">Desconto</th>
-                <th class="num">Total</th>
+                <th class="num">Total final</th>
                 <th>Status</th>
                 <th>Validade</th>
                 <th>Ações</th>
@@ -132,12 +139,17 @@
                 <td>{{ orcamento['peca_nome'] or "-" }}</td>
                 <td class="num">{{ orcamento['valor_peca'] | moeda }}</td>
                 <td class="num">{{ orcamento['valor_mao_obra'] | moeda }}</td>
+                <td class="num">{{ orcamento['subtotal'] | moeda }}</td>
                 <td class="num">{{ orcamento['desconto'] | moeda }}</td>
                 <td class="num">{{ orcamento['valor_total'] | moeda }}</td>
                 <td><span class="status {{ classe_status }}">{{ orcamento['status'] }}</span></td>
                 <td>{{ orcamento['validade'] or "—" }}</td>
                 <td>
                     <div class="acoes-celula">
+                        <a href="{{ url_for('orcamento.visualizar_orcamento', orcamento_id=orcamento['id']) }}" class="btn--secondary btn--sm">{{ icons.icon('file-text', 15) }} Visualizar</a>
+                        {% if orcamento['status'] == 'Pendente' and pode('atendente', 'tecnico') %}
+                        <a href="{{ url_for('orcamento.pagina_editar_orcamento', orcamento_id=orcamento['id']) }}" class="editar btn--sm">{{ icons.icon('pencil', 15) }} Editar</a>
+                        {% endif %}
                         {% if orcamento['status'] == 'Pendente' and pode('admin', 'atendente') %}
                         <form action="/orcamentos/aprovar/{{ orcamento['id'] }}" method="POST" class="acoes-form">
                             <button type="submit" class="btn--sm"
@@ -165,7 +177,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="13">
+                <td colspan="14">
                     <div class="empty-state">
                         <span class="empty-icone">{{ icons.icon('file-text', 26) }}</span>
                         <h3>Nenhum orçamento cadastrado</h3>
@@ -186,10 +198,12 @@
     const valorPeca = document.getElementById("valor_peca");
     const valorMaoObra = document.getElementById("valor_mao_obra");
     const desconto = document.getElementById("desconto");
+    const descontoTipo = document.getElementById("desconto_tipo");
     const valorTotal = document.getElementById("valor_total");
     const listaPecas = document.getElementById("lista-pecas");
     const botaoAdicionar = document.getElementById("adicionar-peca");
 
+if (ordemSelect) {
     function atualizarFuncionario() {
         const opt = ordemSelect.options[ordemSelect.selectedIndex];
         funcionarioNome.value = opt && opt.dataset.funcionario ? opt.dataset.funcionario : "";
@@ -205,9 +219,13 @@
             somaPecas += preco * qtd;
         });
         const maoObra = Number(valorMaoObra.value || 0);
-        const desc = Number(desconto.value || 0);
+        const descontoInformado = Math.max(Number(desconto.value || 0), 0);
+        const subtotal = somaPecas + maoObra;
+        const desc = descontoTipo.value === "percentual"
+            ? subtotal * descontoInformado / 100
+            : descontoInformado;
         valorPeca.value = somaPecas.toFixed(2);
-        valorTotal.value = Math.max(somaPecas + maoObra - desc, 0).toFixed(2);
+        valorTotal.value = Math.max(subtotal - desc, 0).toFixed(2);
     }
 
     function atualizarOpcoesDisponiveis() {
@@ -253,9 +271,11 @@
     ordemSelect.addEventListener("change", atualizarFuncionario);
     valorMaoObra.addEventListener("input", calcularValores);
     desconto.addEventListener("input", calcularValores);
+    descontoTipo.addEventListener("change", calcularValores);
 
     atualizarBotoesRemover();
     atualizarOpcoesDisponiveis();
     calcularValores();
+}
 </script>
 {% endblock %}

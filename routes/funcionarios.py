@@ -6,6 +6,8 @@ from database import conectar
 
 funcionarios_bp = Blueprint("funcionarios", __name__)
 
+PERFIS_EQUIPE = ("admin", "tecnico", "atendente")
+
 
 def criar_tabela_funcionarios():
     conexao = conectar()
@@ -42,15 +44,15 @@ def cadastrar_funcionario():
         email = request.form["email"]
         senha = generate_password_hash(request.form["senha"])
         cargo = request.form["cargo"]
-        perfil = request.form.get("perfil", "funcionario")
+        perfil = request.form.get("perfil", "atendente")
 
         conexao = conectar()
 
         total = conexao.execute("SELECT COUNT(*) FROM funcionarios").fetchone()[0]
         if total == 0:
             perfil = "admin"
-        elif perfil not in ("admin", "tecnico", "atendente", "funcionario"):
-            perfil = "funcionario"
+        elif perfil not in PERFIS_EQUIPE:
+            perfil = "atendente"
 
         try:
             conexao.execute("""
@@ -71,9 +73,8 @@ def cadastrar_funcionario():
             "admin": "Administrador",
             "tecnico": "Técnico",
             "atendente": "Atendente",
-            "funcionario": "Funcionário",
         }
-        flash(f"{rotulos.get(perfil, 'Funcionário')} {nome} cadastrado(a) com sucesso.", "sucesso")
+        flash(f"{rotulos.get(perfil, 'Atendente')} {nome} cadastrado(a) com sucesso.", "sucesso")
 
         # Admin logado permanece na área administrativa; no cadastro do 1º
         # funcionário (bootstrap, sem sessão) segue para o login.
@@ -174,9 +175,9 @@ def atualizar_funcionario(id):
     nome = request.form["nome"]
     email = request.form["email"]
     cargo = request.form["cargo"]
-    perfil = request.form.get("perfil", "funcionario")
-    if perfil not in ("admin", "tecnico", "atendente", "funcionario"):
-        perfil = "funcionario"
+    perfil = request.form.get("perfil", "atendente")
+    if perfil not in PERFIS_EQUIPE:
+        perfil = "atendente"
 
     conexao = conectar()
     try:

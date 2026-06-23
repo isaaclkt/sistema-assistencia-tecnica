@@ -28,7 +28,7 @@
             <div class="campo">
                 <label for="perfil">Perfil de acesso</label>
                 <select id="perfil" name="perfil">
-                    {% for valor, rotulo in [('funcionario','Funcionário'), ('tecnico','Técnico'), ('atendente','Atendente'), ('admin','Administrador')] %}
+                    {% for valor, rotulo in [('atendente','Atendente'), ('tecnico','Técnico'), ('admin','Administrador')] %}
                     <option value="{{ valor }}" {% if funcionario['perfil'] == valor %}selected{% endif %}>{{ rotulo }}</option>
                     {% endfor %}
                 </select>

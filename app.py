@@ -16,7 +16,6 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-inseguro-troque-em-producao")
 
 @app.template_filter("moeda")
 def formatar_moeda(valor):
-    """Formata um número no padrão monetário brasileiro: R$ 1.234,56."""
     try:
         numero = float(valor or 0)
     except (TypeError, ValueError):
@@ -27,7 +26,6 @@ def formatar_moeda(valor):
 
 @app.context_processor
 def injetar_alertas_estoque():
-    """Disponibiliza a contagem de peças com estoque baixo para a navbar."""
     if "funcionario_id" not in session:
         return {"alerta_estoque_baixo": 0}
     conexao = conectar()
@@ -62,16 +60,14 @@ def _sem_funcionarios():
     conexao.close()
     return total == 0
 
-
-# ---------------------------------------------------------------------------
-# RBAC — permissões por endpoint (papéis: admin, atendente, tecnico).
-# Endpoints não listados exigem apenas estar autenticado (ex.: dashboard).
-# ---------------------------------------------------------------------------
 TODOS = {"admin", "atendente", "tecnico"}
 
+
+def tem_permissao(perfil, *perfis):
+    return perfil in perfis
+
 PERMISSOES = {
-    # Clientes
-    "cadastro.listar_cadastros": {"admin", "atendente"},
+    "cadastro.listar_cadastros": TODOS,
     "cadastro.pagina_adicionar_cliente": {"atendente"},
     "cadastro.cadastrar_cliente": {"atendente"},
     "cadastro.pagina_atualizar_cliente": {"atendente"},
@@ -88,7 +84,10 @@ PERMISSOES = {
     "ordem_servico.excluir_ordem": {"admin"},
     # Orçamentos
     "orcamento.pagina_orcamento": TODOS,
+    "orcamento.visualizar_orcamento": TODOS,
+    "orcamento.pagina_editar_orcamento": {"atendente", "tecnico"},
     "orcamento.criar_orcamento": {"atendente", "tecnico"},
+    "orcamento.atualizar_orcamento": {"atendente", "tecnico"},
     "orcamento.aprovar_orcamento": {"admin", "atendente"},
     "orcamento.recusar_orcamento": {"admin", "atendente"},
     "orcamento.excluir_orcamento": {"admin"},
@@ -116,11 +115,10 @@ PERMISSOES = {
 
 @app.context_processor
 def injetar_permissoes():
-    """Expõe o perfil atual e o helper pode(*perfis) para os templates."""
     perfil = session.get("funcionario_perfil")
     return {
         "perfil_atual": perfil,
-        "pode": lambda *perfis: perfil in perfis,
+        "pode": lambda *perfis: tem_permissao(perfil, *perfis),
     }
 
 
@@ -144,8 +142,14 @@ def proteger_rotas():
         return redirect("/login")
 
     # RBAC por endpoint: quem não tem o papel exigido é barrado.
+    perfil_atual = session.get("funcionario_perfil")
+    if perfil_atual not in TODOS:
+        session.clear()
+        flash("Perfil de acesso invalido. Faca login com uma conta da equipe.", "erro")
+        return redirect("/login")
+
     permitido = PERMISSOES.get(request.endpoint)
-    if permitido is not None and session.get("funcionario_perfil") not in permitido:
+    if permitido is not None and perfil_atual not in permitido:
         flash("Você não tem permissão para acessar esta área.", "erro")
         return redirect("/")
 

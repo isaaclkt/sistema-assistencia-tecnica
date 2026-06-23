@@ -14,7 +14,7 @@
         </a>
 
         <div class="sidebar-grupo-titulo">Operação</div>
-        {% if pode('admin', 'atendente') %}
+        {% if pode('admin', 'atendente', 'tecnico') %}
         <a href="{{ url_for('cadastro.listar_cadastros') }}" class="{{ 'ativo' if request.path.startswith('/cadastro') or request.path.startswith('/clientes') else '' }}">
             {{ icons.icon('users', 18) }} Clientes
         </a>

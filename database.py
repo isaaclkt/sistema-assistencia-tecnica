@@ -8,8 +8,6 @@ def _coluna_existe(conexao, tabela, coluna):
 
 
 def registrar_movimentacao(conexao, peca_id, tipo, quantidade, observacao=""):
-    """Insere um registro no histórico de movimentações de estoque.
-    Centraliza a escrita para manter estoque e histórico sincronizados."""
     conexao.execute(
         """
         INSERT INTO movimentacoes_estoque
@@ -22,8 +20,6 @@ def registrar_movimentacao(conexao, peca_id, tipo, quantidade, observacao=""):
 
 
 class EstoqueInsuficiente(Exception):
-    """Saldo insuficiente de uma peça para atender o orçamento aprovado."""
-
     def __init__(self, nome, disponivel, solicitado):
         super().__init__(
             f'Estoque insuficiente para "{nome}": '
@@ -32,8 +28,6 @@ class EstoqueInsuficiente(Exception):
 
 
 def consumir_estoque(conexao, ordem_id):
-    """Baixa o estoque das peças vinculadas à ordem (registra saídas).
-    Valida tudo antes de debitar; levanta EstoqueInsuficiente se faltar saldo."""
     itens = conexao.execute("""
         SELECT op.peca_id, op.quantidade, p.nome AS nome, p.quantidade AS saldo
         FROM ordem_pecas op
@@ -57,7 +51,6 @@ def consumir_estoque(conexao, ordem_id):
 
 
 def estornar_estoque(conexao, ordem_id):
-    """Devolve ao estoque as peças vinculadas à ordem (registra entradas)."""
     itens = conexao.execute(
         "SELECT peca_id, quantidade FROM ordem_pecas WHERE ordem_id = ?",
         (ordem_id,),
@@ -126,15 +119,42 @@ def _garantir_schema(conexao):
 
     if not _coluna_existe(conexao, "funcionarios", "perfil"):
         conexao.execute(
-            "ALTER TABLE funcionarios ADD COLUMN perfil TEXT NOT NULL DEFAULT 'funcionario'"
+            "ALTER TABLE funcionarios ADD COLUMN perfil TEXT NOT NULL DEFAULT 'atendente'"
         )
         conexao.execute("UPDATE funcionarios SET perfil = 'admin'")
+
+    conexao.execute("""
+        UPDATE funcionarios
+        SET perfil = 'atendente'
+        WHERE perfil NOT IN ('admin', 'atendente', 'tecnico')
+    """)
 
     conexao.execute("""
         UPDATE orcamentos
         SET valor_total = valor_orcamento
         WHERE valor_total = 0
           AND valor_orcamento IS NOT NULL
+    """)
+    conexao.execute("""
+        UPDATE orcamentos
+        SET desconto = CASE
+                WHEN desconto < 0 THEN 0
+                WHEN desconto > (valor_peca + valor_mao_obra) THEN (valor_peca + valor_mao_obra)
+                ELSE desconto
+            END,
+            valor_orcamento = (valor_peca + valor_mao_obra),
+            valor_total = MAX(
+                (valor_peca + valor_mao_obra) -
+                CASE
+                    WHEN desconto < 0 THEN 0
+                    WHEN desconto > (valor_peca + valor_mao_obra) THEN (valor_peca + valor_mao_obra)
+                    ELSE desconto
+                END,
+                0
+            )
+        WHERE valor_peca > 0
+           OR valor_mao_obra > 0
+           OR desconto != 0
     """)
     conexao.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS idx_orcamentos_ordem_id

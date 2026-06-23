@@ -1,9 +1,24 @@
 from datetime import datetime
 
-from flask import Blueprint, flash, render_template, request, redirect, send_file
+from flask import Blueprint, flash, render_template, request, redirect, send_file, session
 from database import conectar, estornar_estoque
 
 ordem_servico_bp = Blueprint("ordem_servico", __name__)
+
+
+def _usuario_tecnico():
+    return session.get("funcionario_perfil") == "tecnico"
+
+
+def _ordem_atribuida_ao_tecnico(db, ordem_id):
+    if not _usuario_tecnico():
+        return True
+
+    ordem = db.execute(
+        "SELECT funcionario_id FROM ordens_servico WHERE ordem_id = ?",
+        (ordem_id,),
+    ).fetchone()
+    return ordem is not None and ordem["funcionario_id"] == session.get("funcionario_id")
 
 
 def _carregar_ordem_completa(db, ordem_id):
@@ -11,6 +26,7 @@ def _carregar_ordem_completa(db, ordem_id):
     ordem = db.execute("""
         SELECT
             os.ordem_id,
+            os.funcionario_id,
             os.equipamento,
             os.problema_relatado,
             os.status,
@@ -44,7 +60,13 @@ def _carregar_ordem_completa(db, ordem_id):
 def listar_ordens():
     db = conectar()
 
-    ordens = db.execute("""
+    filtro_tecnico = ""
+    parametros = ()
+    if _usuario_tecnico():
+        filtro_tecnico = "WHERE ordens_servico.funcionario_id = ?"
+        parametros = (session.get("funcionario_id"),)
+
+    ordens = db.execute(f"""
         SELECT
             ordens_servico.ordem_id,
             ordens_servico.equipamento,
@@ -65,6 +87,7 @@ def listar_ordens():
             ON ordem_pecas.ordem_id = ordens_servico.ordem_id
         LEFT JOIN pecas
             ON pecas.id = ordem_pecas.peca_id
+        {filtro_tecnico}
         GROUP BY
             ordens_servico.ordem_id,
             ordens_servico.equipamento,
@@ -73,7 +96,7 @@ def listar_ordens():
             clientes.nome,
             funcionarios.nome
         ORDER BY ordens_servico.ordem_id DESC
-    """).fetchall()
+    """, parametros).fetchall()
 
     db.close()
 
@@ -137,6 +160,10 @@ def cadastrar_ordem():
 @ordem_servico_bp.route("/ordem-servico/editar/<int:ordem_id>")
 def pagina_editar_ordem(ordem_id):
     db = conectar()
+    if not _ordem_atribuida_ao_tecnico(db, ordem_id):
+        db.close()
+        flash("Voce so pode acessar ordens atribuidas a voce.", "erro")
+        return redirect("/ordem-servico")
 
     ordem = db.execute("""
         SELECT
@@ -180,16 +207,25 @@ def pagina_editar_ordem(ordem_id):
 
 @ordem_servico_bp.route("/ordem-servico/atualizar/<int:ordem_id>", methods=["POST"])
 def atualizar_ordem(ordem_id):
-    cliente_id = request.form["cliente_id"]
-    funcionario_id = request.form["funcionario_id"]
-    equipamento = request.form["equipamento"]
-    problema_relatado = request.form["problema_relatado"]
-    status = request.form["status"]
+    db = conectar()
+    if not _ordem_atribuida_ao_tecnico(db, ordem_id):
+        db.close()
+        flash("Voce so pode atualizar ordens atribuidas a voce.", "erro")
+        return redirect("/ordem-servico")
+
+    status = request.form.get("status", "")
     laudo = request.form.get("laudo", "")
+    if status not in ("Aberto", "Em andamento", "Finalizado", "Cancelado"):
+        db.close()
+        flash("Status invalido.", "erro")
+        return redirect(f"/ordem-servico/editar/{ordem_id}")
+
+    cliente_id = request.form.get("cliente_id")
+    funcionario_id = request.form.get("funcionario_id")
+    equipamento = request.form.get("equipamento")
+    problema_relatado = request.form.get("problema_relatado")
     garantia = request.form.get("garantia", "")
     prazo_entrega = request.form.get("prazo_entrega", "")
-
-    db = conectar()
 
     atual = db.execute(
         "SELECT data_finalizacao FROM ordens_servico WHERE ordem_id = ?",
@@ -205,20 +241,29 @@ def atualizar_ordem(ordem_id):
     else:
         data_finalizacao = None
 
-    db.execute("""
-        UPDATE ordens_servico
-        SET cliente_id = ?,
-            funcionario_id = ?,
-            equipamento = ?,
-            problema_relatado = ?,
-            status = ?,
-            data_finalizacao = ?,
-            laudo = ?,
-            garantia = ?,
-            prazo_entrega = ?
-        WHERE ordem_id = ?
-    """, (cliente_id, funcionario_id, equipamento, problema_relatado, status,
-          data_finalizacao, laudo, garantia, prazo_entrega, ordem_id))
+    if _usuario_tecnico():
+        db.execute("""
+            UPDATE ordens_servico
+            SET status = ?,
+                data_finalizacao = ?,
+                laudo = ?
+            WHERE ordem_id = ?
+        """, (status, data_finalizacao, laudo, ordem_id))
+    else:
+        db.execute("""
+            UPDATE ordens_servico
+            SET cliente_id = ?,
+                funcionario_id = ?,
+                equipamento = ?,
+                problema_relatado = ?,
+                status = ?,
+                data_finalizacao = ?,
+                laudo = ?,
+                garantia = ?,
+                prazo_entrega = ?
+            WHERE ordem_id = ?
+        """, (cliente_id, funcionario_id, equipamento, problema_relatado, status,
+              data_finalizacao, laudo, garantia, prazo_entrega, ordem_id))
     db.commit()
     db.close()
 
@@ -251,6 +296,11 @@ def excluir_ordem(ordem_id):
 @ordem_servico_bp.route("/ordem-servico/visualizar/<int:ordem_id>")
 def visualizar_ordem(ordem_id):
     db = conectar()
+    if not _ordem_atribuida_ao_tecnico(db, ordem_id):
+        db.close()
+        flash("Voce so pode visualizar ordens atribuidas a voce.", "erro")
+        return redirect("/ordem-servico")
+
     ordem, pecas = _carregar_ordem_completa(db, ordem_id)
     db.close()
 
@@ -279,6 +329,11 @@ def gerar_os_pdf(ordem_id):
     )
 
     db = conectar()
+    if not _ordem_atribuida_ao_tecnico(db, ordem_id):
+        db.close()
+        flash("Voce so pode gerar PDF de ordens atribuidas a voce.", "erro")
+        return redirect("/ordem-servico")
+
     ordem, pecas = _carregar_ordem_completa(db, ordem_id)
     db.close()
 

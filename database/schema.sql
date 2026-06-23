@@ -97,5 +97,6 @@ CREATE TABLE funcionarios (
     email TEXT NOT NULL UNIQUE,
     senha TEXT NOT NULL,
     cargo TEXT,
-    ativo INTEGER NOT NULL DEFAULT 1
+    ativo INTEGER NOT NULL DEFAULT 1,
+    perfil TEXT NOT NULL DEFAULT 'atendente'
 );
